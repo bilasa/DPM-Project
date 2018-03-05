@@ -8,26 +8,26 @@ public class LightSensorController {
 
 	// Light sensor
 	private EV3ColorSensor colorSensor;
-	private SensorMode colorID;
-	private float[] colorIDSample;
+	private SensorMode color;
+	private float[] colorSample;
 
 	// Block colors enumeration
 	private enum BlockColors {
 		RED, BLUE, YELLOW, WHITE, UNKNOWN
 	}
 
-	public LightSensorController(EV3ColorSensor colorSensor, SensorMode colorID, float[] colorIDSample) {
+	public LightSensorController(EV3ColorSensor colorSensor, SensorMode color, float[] colorSample) {
 		this.colorSensor = colorSensor;
-		this.colorID = colorID;
-		this.colorIDSample = colorIDSample;
+		this.color = color;
+		this.colorSample = colorSample;
 	}
 
 	/**
 	 * @return the RGB of the color read by the light sensor
 	 */
-	public float[] getRGBSample() {
-		colorID.fetchSample(colorIDSample, 0);
-		return colorIDSample;
+	public float[] getColorSample() {
+		color.fetchSample(colorSample, 0);
+		return colorSample;
 	}
 
 	/**

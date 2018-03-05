@@ -36,20 +36,20 @@ public class CaptureTheFlag {
 
 	// Front light sensor
 	private final EV3ColorSensor frontColorSensor = new EV3ColorSensor(SensorPort.S4);
-	private SensorMode frontColorID = frontColorSensor.getColorIDMode();
-	private float[] frontColorIDSample = new float[frontColorSensor.sampleSize()];
+	private SensorMode frontRGBColor = frontColorSensor.getRGBMode();
+	private float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];
 
 	// Rear light sensor
 	private final EV3ColorSensor rearColorSensor = new EV3ColorSensor(SensorPort.S1);
 	private SensorMode rearColorID = rearColorSensor.getColorIDMode();
-	private float[] rearColorIDSample = new float[rearColorSensor.sampleSize()];
+	private float[] rearColorIDSample = new float[rearColorID.sampleSize()];
 
 	// LCD
 	private final TextLCD LCD = LocalEV3.get().getTextLCD();
 
 	// Constants
 	private final double WHEEL_RAD = 2.16;
-	private final double TRACK = 12.00;
+	private final double TRACK = 20.00;
 	private final int ROTATE_SPEED = 150;
 	private final int FORWARD_SPEED = 250;
 	private final double TILE_SIZE = 30.48;
@@ -61,7 +61,7 @@ public class CaptureTheFlag {
 	// Controllers
 	private RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, TILE_SIZE);
 	private UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, usDistance, average, usSample);
-	private LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontColorID, frontColorIDSample);
+	private LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontRGBColor, frontRGBColorSample);
 	private LightSensorController rearLsCont = new LightSensorController(rearColorSensor, rearColorID, rearColorIDSample);
 	
 	// Navigation classes
@@ -71,6 +71,5 @@ public class CaptureTheFlag {
 	private FlagSearcher flagSearcher = new FlagSearcher();
 
 	public static void main(String[] args) {
-
 	}
 }

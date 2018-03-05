@@ -54,7 +54,7 @@ public class LightLocalizer {
 
 		while (rc.isMoving()) {
 			// Reach a line, stop
-			if (lsCont.getRGBSample()[0] == 13.0) {
+			if (lsCont.getColorSample()[0] == 13.0) {
 				rc.setSpeeds(0, 0);
 				rc.stopMoving();
 				Sound.beep();
@@ -71,7 +71,7 @@ public class LightLocalizer {
 		double[] angles = new double[4];
 		int lineCount = 0;
 		while (rc.isMoving()) {
-			if (lsCont.getRGBSample()[0] == 13.0) {
+			if (lsCont.getColorSample()[0] == 13.0) {
 				angles[lineCount] = Math.toRadians(odo.getXYT()[2]);
 				Sound.beep();
 				lineCount++;
@@ -90,7 +90,7 @@ public class LightLocalizer {
 		while (rc.isMoving()) {
 			// The robot is in the third quadrant, if the robot turns counter clockwise
 			// the first line it will cross will be at angle 0
-			if (lsCont.getRGBSample()[0] == 13.0) {
+			if (lsCont.getColorSample()[0] == 13.0) {
 				rc.setSpeeds(0, 0);
 				rc.stopMoving();
 				odo.setTheta(0);
