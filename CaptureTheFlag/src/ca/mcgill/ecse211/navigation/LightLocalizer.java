@@ -44,7 +44,7 @@ public class LightLocalizer {
 		}
 	}
 
-	public void lightLocalize(Navigator nav, int startingCorner) {
+	public void lightLocalize() {
 
 		rc.setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 		rc.turnTo(45);
