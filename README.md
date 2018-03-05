@@ -15,6 +15,6 @@ By Guillaume Richard
 ### Adjust Wheel Radius and Track Width (18/03/05)
 * Changed the wheel radius to 1.67
 * Changed the track width to 20.9
-* Added `static` to every variable and class in the [CaptureTheFlag.java](../src/ca/mcgill/ecse211/main/CaptureTheFlag.java) class
+* Added `static` to every variable and class in the [CaptureTheFlag.java](https://github.com/BijanSadeghi/DPM-Project/CaptureTheFlag/src/ca/mcgill/ecse211/main/CaptureTheFlag.java) class
 
 By Guillaume Richard
