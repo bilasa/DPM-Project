@@ -19,16 +19,13 @@ public class LightLocalizer {
 
 	// Robot controller
 	private RobotController rc;
-	
+
 	// Light sensor controller
 	private LightSensorController lsCont;
-	
+
 	// Odometer
 	private Odometer odo;
 
-	// Corners of the field
-	//private static final int[][] playZoneCorners = Lab5.PLAY_ZONE;
-	
 	public LightLocalizer(int FORWARD_SPEED, int ROTATE_SPEED, double TILE_SIZE, double SENSOR_DIST, RobotController rc, LightSensorController lsCont) {
 		this.FORWARD_SPEED = FORWARD_SPEED;
 		this.ROTATE_SPEED = ROTATE_SPEED;
@@ -44,7 +41,13 @@ public class LightLocalizer {
 		}
 	}
 
-	public void lightLocalize() {
+	/**
+	 * Light localize the robot in its initial corner
+	 * 
+	 * @param startingCorner
+	 * @param playZoneCorners
+	 */
+	public void initialLightLocalize(int startingCorner, int[][] playZoneCorners) {
 
 		rc.setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 		rc.turnTo(45);
@@ -96,7 +99,7 @@ public class LightLocalizer {
 				odo.setTheta(0);
 			}
 		}
-		/*// Set the position and angle depending on starting corner
+		// Set the position and angle depending on starting corner
 		switch (startingCorner) {
 		case 0:	// Lower left
 			odo.setXYT(playZoneCorners[0][0] * TILE_SIZE, playZoneCorners[0][1] * TILE_SIZE, 0);
@@ -110,7 +113,48 @@ public class LightLocalizer {
 		case 3:	// Upper left
 			odo.setXYT(playZoneCorners[3][0] * TILE_SIZE, playZoneCorners[3][1] * TILE_SIZE, 90);
 			break;
-		}*/
+		}
+	}
+
+	public void generalLightLocalize() {
+		// Turn the robot to 45 degrees
+		rc.turnTo(45);
+
+		// Go back and left to enter the "bottom-left quadrant"
+		rc.travelDist(-5, true);
+
+		// Do a circle and check the lines
+		rc.setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
+		rc.turnBy(360, false);
+
+		double[] angles = new double[4];
+		int lineCount = 0;
+		while (rc.isMoving()) {
+			if (lsCont.getColorSample()[0] == 13.0) {
+				angles[lineCount] = Math.toRadians(odo.getXYT()[2]);
+				Sound.beep();
+				lineCount++;
+			}
+		}
+
+		// Compute the correction
+		odo.setX(-SENSOR_DIST * (Math.cos((angles[3] - angles[1]) / 2)));
+		odo.setY(-SENSOR_DIST * (Math.cos((angles[2] - angles[0]) / 2)));
+
+		// Move to the origin
+		rc.travelTo(0, 0, FORWARD_SPEED, true);
+		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
+
+		// Set the angle to perfect 0
+		while (rc.isMoving()) {
+			// The robot is in the third quadrant, if the robot turns counter clockwise
+			// the first line it will cross will be at angle 0
+			if (lsCont.getColorSample()[0] == 13.0) {
+				rc.setSpeeds(0, 0);
+				rc.stopMoving();
+				odo.setTheta(0);
+			}
+		}
 	}
 
 }
