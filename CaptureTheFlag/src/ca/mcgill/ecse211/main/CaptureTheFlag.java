@@ -78,8 +78,12 @@ public class CaptureTheFlag {
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(ROTATE_SPEED, rc, usCont);
 	private static LightLocalizer lightLocalizer = new LightLocalizer(FORWARD_SPEED, ROTATE_SPEED, TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
-	private Navigator navigator = new Navigator();
-	private FlagSearcher flagSearcher = new FlagSearcher();
+	private static Navigator navigator = new Navigator(FORWARD_SPEED, rc);
+	private static FlagSearcher flagSearcher = new FlagSearcher();
+
+	private enum Team {
+		RED, GREEN
+	}
 
 	public static void main(String[] args) {
 		int redTeam = 8; // Team starting out from red zone
@@ -113,7 +117,27 @@ public class CaptureTheFlag {
 		int sg_ur_x = 11; // upper right hand corner of search region in green player zone
 		int sg_ur_y = 2;
 
-		// Do initial light localization in corner
-		//lightLocalizer.initialLightLocalize(startingCorner, playZoneCorners);
+		// Hardcoded WiFi variables
+		int startingCorner = 1;
+		Team team = Team.GREEN;
+
+		// ====== Do initial light localization in corner ======  //
+		lightLocalizer.initialLightLocalize(startingCorner, PLAY_ZONE);
+
+		// ====== Select the team ====== //
+		switch (team) {
+		case GREEN:
+			// ====== Travel to the tunnel ====== //
+			navigator.travelToTunnel();
+
+			// ====== Localize at the tunnel's entrance ====== //
+			lightLocalizer.generalLightLocalize();
+
+			break;
+		case RED:
+			// ====== Travel to the bridge ====== //
+			navigator.travelToBridge();
+			break;
+		}
 	}
 }
