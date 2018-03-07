@@ -3,6 +3,8 @@ package ca.mcgill.ecse211.main;
 import ca.mcgill.ecse211.controller.LightSensorController;
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
+import ca.mcgill.ecse211.enumeration.Flag;
+import ca.mcgill.ecse211.enumeration.Team;
 import ca.mcgill.ecse211.navigation.FlagSearcher;
 import ca.mcgill.ecse211.navigation.LightLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
@@ -69,6 +71,9 @@ public class CaptureTheFlag {
 	// Odometer
 	private final static Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 
+	// WiFi class
+	private static WiFi wifi = new WiFi();
+
 	// Controllers
 	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, TILE_SIZE);
 	private static UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, usDistance, average, usSample);
@@ -76,68 +81,76 @@ public class CaptureTheFlag {
 	private static LightSensorController rearLsCont = new LightSensorController(rearColorSensor, rearColorID, rearColorIDSample);
 
 	// Navigation classes
-	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(ROTATE_SPEED, rc, usCont);
-	private static LightLocalizer lightLocalizer = new LightLocalizer(FORWARD_SPEED, ROTATE_SPEED, TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
-	private static Navigator navigator = new Navigator(FORWARD_SPEED, rc);
-	private static FlagSearcher flagSearcher = new FlagSearcher();
-
-	private enum Team {
-		RED, GREEN
-	}
+	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
+	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
+	private static Navigator navigator = new Navigator(rc, wifi);
+	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
 	public static void main(String[] args) {
-		int redTeam = 8; // Team starting out from red zone
-		int greenTeam = 10; // Team starting out from green zone
-		int redCorner = 3; // Starting corner for red team
-		int greenCorner = 1; // Starting corner for green team
-		int og = 2; // color of green opponent flag
-		int or = 3; // color of red opponent flag
-		int red_ll_x = 0; // lower left hand corner of Red Zone
-		int red_ll_y = 7; 
-		int red_ur_x = 8; // upper right hand corner of Red Zone
-		int red_ur_y = 12;
-		int green_ll_x = 4; // lower left hand corner of Green Zone
-		int green_ll_y = 0;
-		int green_ur_x = 12; // upper right hand corner of Green Zone
-		int green_ur_y = 5;
-		int tn_ll_x = 3; // lower left hand corner of the tunnel footprint
-		int tn_ll_y = 5;
-		int tn_ur_x = 4; // upper right hand corner of the tunnel footprint
-		int tn_ur_y = 7;
-		int br_ll_x = 7; // lower left hand corner of the bridge footprint
-		int br_ll_y = 5;
-		int br_ur_x = 8; // upper right hand corner of the bridge footprint
-		int br_ur_y = 7;
-		int sr_ll_x = 1; // lower left hand corner of search region in red player zone
-		int sr_ll_y = 9;
-		int sr_ur_x = 2; // upper right hand corner of search region in red player zone
-		int sr_ur_y = 11;
-		int sg_ll_x = 9; // lower left hand corner of search region in green player zone
-		int sg_ll_y = 1;
-		int sg_ur_x = 11; // upper right hand corner of search region in green player zone
-		int sg_ur_y = 2;
-
-		// Hardcoded WiFi variables
-		int startingCorner = 1;
-		Team team = Team.GREEN;
+		// ====== Get the robot's team ======  //
+		Team team = wifi.getTeam();
 
 		// ====== Do initial light localization in corner ======  //
-		lightLocalizer.initialLightLocalize(startingCorner, PLAY_ZONE);
+		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		// ====== Select the team ====== //
-		switch (team) {
-		case GREEN:
+		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();
-
-			// ====== Localize at the tunnel's entrance ====== //
-			lightLocalizer.generalLightLocalize();
-
-			break;
-		case RED:
+		} else if (team == Team.RED){
 			// ====== Travel to the bridge ====== //
 			navigator.travelToBridge();
-			break;
 		}
+
+		// ====== Localize at the tunnel/bridge entrance ====== //
+		lightLocalizer.generalLightLocalize();
+
+		if (team == Team.GREEN) {
+			// ====== Travel through the tunnel ====== //
+			navigator.travelThroughTunnel();
+		} else if (team == Team.RED){
+			// ====== Travel through the bridge ====== //
+			navigator.travelThroughBridge();
+		}
+
+		// ====== Localize at the tunnel/bridge end ====== //
+		lightLocalizer.generalLightLocalize();
+
+		// ====== Travel to the search zone ====== //
+		flagSearcher.travelToSearchZone();
+
+		// ====== Localize before starting search ====== //
+		lightLocalizer.generalLightLocalize();
+
+		// ====== Search for the flag ====== //
+		flagSearcher.searchFlag();
+
+		// ====== Localize after search ====== //
+		lightLocalizer.generalLightLocalize();
+
+		if (team == Team.GREEN) {
+			// ====== Travel to the bridge ====== //
+			navigator.travelToBridge();
+		} else if (team == Team.RED){
+			// ====== Travel to the tunnel ====== //
+			navigator.travelToTunnel();
+		}
+
+		// ====== Localize before crossing the bridge/tunnel ====== //
+		lightLocalizer.generalLightLocalize();
+
+		if (team == Team.GREEN) {
+			// ====== Travel through the bridge ====== //
+			navigator.travelThroughBridge();
+		} else if (team == Team.RED){
+			// ====== Travel through the tunnel ====== //
+			navigator.travelThroughTunnel();
+		}
+
+		// ====== Localize after crossing the bridge/tunnel ====== //
+		lightLocalizer.generalLightLocalize();
+
+		// ====== Returning to starting corner ====== //
+		navigator.returnToStart();
+
 	}
 }

@@ -39,8 +39,8 @@ public class UltrasonicLocalizer {
 	static double firstTheta = 0;
 	static double secondTheta = 0;
 
-	public UltrasonicLocalizer(int ROTATE_SPEED, RobotController rc, UltrasonicSensorController usCont) {
-		this.ROTATE_SPEED = ROTATE_SPEED;
+	public UltrasonicLocalizer(RobotController rc, UltrasonicSensorController usCont) {
+		this.ROTATE_SPEED = rc.ROTATE_SPEED;
 		this.rc = rc;
 		this.usCont = usCont;
 		try {

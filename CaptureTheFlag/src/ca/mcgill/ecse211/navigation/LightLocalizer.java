@@ -26,9 +26,9 @@ public class LightLocalizer {
 	// Odometer
 	private Odometer odo;
 
-	public LightLocalizer(int FORWARD_SPEED, int ROTATE_SPEED, double TILE_SIZE, double SENSOR_DIST, RobotController rc, LightSensorController lsCont) {
-		this.FORWARD_SPEED = FORWARD_SPEED;
-		this.ROTATE_SPEED = ROTATE_SPEED;
+	public LightLocalizer(double TILE_SIZE, double SENSOR_DIST, RobotController rc, LightSensorController lsCont) {
+		this.FORWARD_SPEED = rc.FORWARD_SPEED;
+		this.ROTATE_SPEED = rc.ROTATE_SPEED;
 		this.TILE_SIZE = TILE_SIZE;
 		this.SENSOR_DIST = SENSOR_DIST;
 		this.rc = rc;

@@ -21,11 +21,11 @@ public class RobotController {
 	private EV3LargeRegulatedMotor rightMotor;
 	
 	// Constants
-	private final double WHEEL_RAD;
-	private final double TRACK;
-	private final int FORWARD_SPEED;
-	private final int ROTATE_SPEED;
-	private final double TILE_SIZE;
+	public final double WHEEL_RAD;
+	public final double TRACK;
+	public final int FORWARD_SPEED; // made public due to frequent use
+	public final int ROTATE_SPEED; // made public due to frequent use
+	public final double TILE_SIZE;
 	
 	//Odometer
 	private Odometer odo;
