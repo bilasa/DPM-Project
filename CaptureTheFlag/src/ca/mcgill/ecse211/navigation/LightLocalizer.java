@@ -117,6 +117,10 @@ public class LightLocalizer {
 	}
 
 	public void generalLightLocalize() {
+		// Compute the nearest waypoint from the odometer reading
+		int corrX = (int)Math.round(odo.getXYT()[0] / TILE_SIZE);
+		int corrY = (int)Math.round(odo.getXYT()[1] / TILE_SIZE);
+		
 		// Turn the robot to 45 degrees
 		rc.turnTo(45);
 
@@ -137,13 +141,26 @@ public class LightLocalizer {
 			}
 		}
 
-		// Compute the correction
-		odo.setX(-SENSOR_DIST * (Math.cos((angles[3] - angles[1]) / 2)));
-		odo.setY(-SENSOR_DIST * (Math.cos((angles[2] - angles[0]) / 2)));
+		// Set the odometer to the original (actual) x and y
+		double origX = (TILE_SIZE * corrX) - SENSOR_DIST * (Math.cos((angles[3] - angles[1]) / 2));
+		double origY = (TILE_SIZE * corrY) - SENSOR_DIST * (Math.cos((angles[2] - angles[0]) / 2));
+		odo.setX(origX);
+		odo.setY(origY);
+
+		// Move to the waypoint
+		rc.travelTo(corrX, corrY, FORWARD_SPEED, true);
+		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
+
+		/*// Compute the correction
+		double dx = SENSOR_DIST * (Math.cos((angles[3] - angles[1]) / 2));
+		double dy = SENSOR_DIST * (Math.cos((angles[2] - angles[0]) / 2));
 
 		// Move to the origin
-		rc.travelTo(0, 0, FORWARD_SPEED, true);
-		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
+		double absTheta = Math.toDegrees(Math.atan(dx / dy));
+		double dist = Math.hypot(dx, dy);
+		rc.turnTo(absTheta);
+		rc.travelDist(dist, true);*/
+		//rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
 
 		// Set the angle to perfect 0
 		while (rc.isMoving()) {
@@ -155,6 +172,8 @@ public class LightLocalizer {
 				odo.setTheta(0);
 			}
 		}
+
+		System.out.println();
 	}
 
 }

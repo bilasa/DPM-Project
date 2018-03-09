@@ -5,6 +5,7 @@ import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
 import ca.mcgill.ecse211.enumeration.Flag;
 import ca.mcgill.ecse211.enumeration.Team;
+import ca.mcgill.ecse211.odometer.Display;
 import ca.mcgill.ecse211.navigation.FlagSearcher;
 import ca.mcgill.ecse211.navigation.LightLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
@@ -12,6 +13,7 @@ import ca.mcgill.ecse211.navigation.UltrasonicLocalizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import lejos.hardware.Button;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
@@ -47,13 +49,13 @@ public class CaptureTheFlag {
 	private static float[] rearColorIDSample = new float[rearColorID.sampleSize()];
 
 	// LCD
-	private final TextLCD LCD = LocalEV3.get().getTextLCD();
+	private final static TextLCD LCD = LocalEV3.get().getTextLCD();
 
 	// Constants
 	private final static double WHEEL_RAD = 1.67;
 	private final static double TRACK = 20.9;
-	private final static int ROTATE_SPEED = 150;
-	private final static int FORWARD_SPEED = 250;
+	private final static int ROTATE_SPEED = 200;
+	private final static int FORWARD_SPEED = 300;
 	private final static double TILE_SIZE = 30.48;
 	private final static double SENSOR_DIST = 12.5;
 
@@ -72,7 +74,7 @@ public class CaptureTheFlag {
 	private final static Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 
 	// WiFi class
-	private static WiFi wifi = new WiFi();
+	//private static WiFi wifi = new WiFi();
 
 	// Controllers
 	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, TILE_SIZE);
@@ -83,11 +85,76 @@ public class CaptureTheFlag {
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
 	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
-	private static Navigator navigator = new Navigator(rc, wifi);
-	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
+	//private static Navigator navigator = new Navigator(rc, wifi);
+	//private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
-	public static void main(String[] args) {
-		// ====== Get the robot's team ======  //
+	public static void main(String[] args) throws OdometerExceptions {
+		// Display
+		Display odometryDisplay = new Display(LCD);
+
+		// Odometer thread
+		Thread odoThread = new Thread(odometer);
+		odoThread.start();
+		
+		// Display thread
+		Thread odoDisplayThread = new Thread(odometryDisplay);
+		odoDisplayThread.start();
+
+		rc.travelTo(0, 3, FORWARD_SPEED, true);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.travelTo(2, 5, FORWARD_SPEED, true);
+		lightLocalizer.generalLightLocalize();
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.turnTo(180);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.turnTo(270);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.turnBy(90, true);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.turnBy(-90, true);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.travelDist(2 * TILE_SIZE, true);
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.turnTo(180);
+		lightLocalizer.generalLightLocalize();
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.moveForward();
+		if(rc.isMoving())
+			Sound.beep();
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		rc.stopMoving();
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+		rc.rotate(true, ROTATE_SPEED);
+		if(rc.isMoving())
+			Sound.beep();
+		try {
+			Thread.sleep(3000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		rc.stopMoving();
+		while (Button.waitForAnyPress() != Button.ID_ENTER);
+
+
+
+
+
+		/*// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
 		// ====== Do initial light localization in corner ======  //
@@ -151,6 +218,6 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
-
+		 */
 	}
 }
