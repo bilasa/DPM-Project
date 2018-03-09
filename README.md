@@ -18,3 +18,17 @@ By Guillaume Richard
 * Added `static` to every variable and class in the [CaptureTheFlag.java](https://github.com/BijanSadeghi/DPM-Project/tree/master/CaptureTheFlag/src/ca/mcgill/ecse211/main/CaptureTheFlag.java) class
 
 By Guillaume Richard
+
+## 1.3
+### Implemented Main Code Hierarchy and Initial FlagSearcher (18/03/07)
+* Implemented step by step method calls for the challenge in the main method
+* Implemented "getClosestSearchCorner()" in FlagSearcher to return the closest point in the search zone to the bridge/tunnel
+
+By Bijan Sadeghi & Esa Khan
+
+## 1.4
+### Updated Odometer Class and Localization Class (18/03/09)
+* Switched Odometer class to the class used in Lab5
+* Updated generalLightLocalize() to localize at any point instead of just the origin
+
+By Bijan Sadeghi & Esa Khan
