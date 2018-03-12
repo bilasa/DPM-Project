@@ -26,29 +26,32 @@ public class WiFi {
 		// Initialize WifiConnection class
 		WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT);
 
-		// Connect to server and get the data, catching any errors that might occur
+		// Connect to server and get the data, catching any errors that might
+		// occur
 		try {
 			/*
-			 * getData() will connect to the server and wait until the user/TA presses the
-			 * "Start" button in the GUI on their laptop with the data filled in. Once it's
-			 * waiting, you can kill it by pressing the upper left hand corner button
-			 * (back/escape) on the EV3. getData() will throw exceptions if it can't connect
-			 * to the server (e.g. wrong IP address, server not running on laptop, not
-			 * connected to WiFi router, etc.). It will also throw an exception if it
-			 * connects but receives corrupted data or a message from the server saying
-			 * something went wrong. For example, if TEAM_NUMBER is set to 1 above but the
-			 * server expects teams 17 and 5, this robot will receive a message saying an
-			 * invalid team number was specified and getData() will throw an exception
-			 * letting you know.
+			 * getData() will connect to the server and wait until the user/TA
+			 * presses the "Start" button in the GUI on their laptop with the
+			 * data filled in. Once it's waiting, you can kill it by pressing
+			 * the upper left hand corner button (back/escape) on the EV3.
+			 * getData() will throw exceptions if it can't connect to the server
+			 * (e.g. wrong IP address, server not running on laptop, not
+			 * connected to WiFi router, etc.). It will also throw an exception
+			 * if it connects but receives corrupted data or a message from the
+			 * server saying something went wrong. For example, if TEAM_NUMBER
+			 * is set to 1 above but the server expects teams 17 and 5, this
+			 * robot will receive a message saying an invalid team number was
+			 * specified and getData() will throw an exception letting you know.
 			 */
 			data = conn.getData();
 
 			/*
-			 * // Example 1: Print out all received data System.out.println("Map:\n" +
-			 * data);
+			 * // Example 1: Print out all received data
+			 * System.out.println("Map:\n" + data);
 			 * 
 			 * // Example 2 : Print out specific values int redTeam = ((Long)
-			 * data.get("RedTeam")).intValue(); System.out.println("Red Team: " + redTeam);
+			 * data.get("RedTeam")).intValue(); System.out.println("Red Team: "
+			 * + redTeam);
 			 * 
 			 * int og = ((Long) data.get("OG")).intValue();
 			 * System.out.println("Green opponent flag: " + og);
@@ -97,14 +100,28 @@ public class WiFi {
 		return -1;
 	}
 
-	/*public int[][] getStartingCornerCoords() {
-		switch (getStartingCorner()) {
+	public int[] getStartingCornerCoords() {
+		int[] coords = { 0, 0 };
+		switch (getStartingCorner(this.getTeam())) {
 		case 0:
+			coords[0] = 1;
+			coords[1] = 1;
+			break;
 		case 1:
+			coords[0] = 11;
+			coords[1] = 1;
+			break;
 		case 2:
-		case 3: 
+			coords[0] = 11;
+			coords[1] = 11;
+			break;
+		case 3:
+			coords[0] = 1;
+			coords[1] = 11;
+			break;
 		}
-	}*/
+		return coords;
+	}
 
 	/**
 	 * Get target flag color.
@@ -154,7 +171,6 @@ public class WiFi {
 				upperRightX = ((Long) data.get("Red_LL_x")).intValue(),
 				upperRightY = ((Long) data.get("Red_UR_y")).intValue();
 
-
 		// Corner convention:
 		// [0] = Lower Left
 		// [1] = Lower Right
@@ -189,7 +205,6 @@ public class WiFi {
 		return GreenZone;
 	}
 
-
 	/**
 	 * Get the tunnel zone.
 	 * 
@@ -197,8 +212,7 @@ public class WiFi {
 	 */
 	public int[][] getTunnelZone() {
 		// Get coords of tunnel zone
-		int lowerLeftX = ((Long) data.get("TN_LL_x")).intValue(),
-				lowerLeftY = ((Long) data.get("TN_LL_y")).intValue(),
+		int lowerLeftX = ((Long) data.get("TN_LL_x")).intValue(), lowerLeftY = ((Long) data.get("TN_LL_y")).intValue(),
 				upperRightX = ((Long) data.get("TN_LL_x")).intValue(),
 				upperRightY = ((Long) data.get("TN_UR_y")).intValue();
 
@@ -213,7 +227,6 @@ public class WiFi {
 		return TunnelZone;
 	}
 
-
 	/**
 	 * Get the bridge zone.
 	 * 
@@ -221,8 +234,7 @@ public class WiFi {
 	 */
 	public int[][] getBridgeZone() {
 		// Get coords of tunnel zone
-		int lowerLeftX = ((Long) data.get("BR_LL_x")).intValue(),
-				lowerLeftY = ((Long) data.get("BR_LL_y")).intValue(),
+		int lowerLeftX = ((Long) data.get("BR_LL_x")).intValue(), lowerLeftY = ((Long) data.get("BR_LL_y")).intValue(),
 				upperRightX = ((Long) data.get("BR_LL_x")).intValue(),
 				upperRightY = ((Long) data.get("BR_UR_y")).intValue();
 
@@ -240,7 +252,8 @@ public class WiFi {
 	/**
 	 * Get the search zone of the specified team
 	 * 
-	 * @param team: the team of the search zone wanted
+	 * @param team:
+	 *            the team of the search zone wanted
 	 * @return Search zone as an array of all four points
 	 */
 	public int[][] getSearchZone(Team team) {
@@ -259,8 +272,8 @@ public class WiFi {
 			// [1] = Lower Right
 			// [2] = Upper Right
 			// [3] = Upper Left
-			int[][] RedSearchZone = { { lowerLeftX, lowerLeftY }, { upperRightX, lowerLeftY }, { upperRightX, upperRightY },
-					{ lowerLeftX, upperRightY } };
+			int[][] RedSearchZone = { { lowerLeftX, lowerLeftY }, { upperRightX, lowerLeftY },
+					{ upperRightX, upperRightY }, { lowerLeftX, upperRightY } };
 
 			return RedSearchZone;
 		case GREEN:
@@ -275,13 +288,22 @@ public class WiFi {
 			// [1] = Lower Right
 			// [2] = Upper Right
 			// [3] = Upper Left
-			int[][] GreenSearchZone = { { lowerLeftX, lowerLeftY }, { upperRightX, lowerLeftY }, { upperRightX, upperRightY },
-					{ lowerLeftX, upperRightY } };
+			int[][] GreenSearchZone = { { lowerLeftX, lowerLeftY }, { upperRightX, lowerLeftY },
+					{ upperRightX, upperRightY }, { lowerLeftX, upperRightY } };
 
 			return GreenSearchZone;
 		default:
 			return null;
 		}
+	}
+
+	public boolean isCrossingVert() {
+		int[][] tunnelZone = getTunnelZone();
+		// Crossing is vertical if the difference between tunnel's lower-left x
+		// and lower-right x is 1
+		if (tunnelZone[1][0] - tunnelZone[0][0] == 1)
+			return true;
+		return false;
 	}
 
 }

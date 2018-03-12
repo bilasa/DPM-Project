@@ -25,18 +25,20 @@ public class RobotController {
 	public final double TRACK;
 	public final int FORWARD_SPEED; // made public due to frequent use
 	public final int ROTATE_SPEED; // made public due to frequent use
+	public final int ACCELERATION; // made public due to frequent use
 	public final double TILE_SIZE;
 	
 	//Odometer
 	private Odometer odo;
 	
-	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD, double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, double TILE_SIZE) {
+	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD, double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.WHEEL_RAD = WHEEL_RAD;
 		this.TRACK = TRACK;
 		this.FORWARD_SPEED = FORWARD_SPEED;
 		this.ROTATE_SPEED = ROTATE_SPEED;
+		this.ACCELERATION = ACCELERATION;
 		this.TILE_SIZE = TILE_SIZE;
 		try {
 			this.odo = Odometer.getOdometer();
@@ -44,6 +46,7 @@ public class RobotController {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.setAcceleration(this.ACCELERATION);
 	}
 
 	public int convertDistance(double radius, double distance) {
@@ -138,6 +141,16 @@ public class RobotController {
 	public void setSpeeds(int leftSpeed, int rightSpeed) {
 		leftMotor.setSpeed(leftSpeed);
 		rightMotor.setSpeed(rightSpeed);
+	}
+	
+	/**
+	 * Set the acceleration of the motors
+	 * 
+	 * @param acceleration
+	 */
+	public void setAcceleration(int acceleration) {
+		leftMotor.setAcceleration(acceleration);
+		rightMotor.setAcceleration(acceleration);
 	}
 
 	/**

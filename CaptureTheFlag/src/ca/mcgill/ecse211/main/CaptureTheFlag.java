@@ -56,6 +56,7 @@ public class CaptureTheFlag {
 	private final static double TRACK = 20.9;
 	private final static int ROTATE_SPEED = 200;
 	private final static int FORWARD_SPEED = 300;
+	private final static int ACCELERATION = 800;
 	private final static double TILE_SIZE = 30.48;
 	private final static double SENSOR_DIST = 12.5;
 
@@ -74,10 +75,10 @@ public class CaptureTheFlag {
 	private final static Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 
 	// WiFi class
-	//private static WiFi wifi = new WiFi();
+	private static WiFi wifi = new WiFi();
 
 	// Controllers
-	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, TILE_SIZE);
+	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE);
 	private static UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, usDistance, average, usSample);
 	private LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontRGBColor, frontRGBColorSample);
 	private static LightSensorController rearLsCont = new LightSensorController(rearColorSensor, rearColorID, rearColorIDSample);
@@ -85,8 +86,8 @@ public class CaptureTheFlag {
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
 	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
-	//private static Navigator navigator = new Navigator(rc, wifi);
-	//private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
+	private static Navigator navigator = new Navigator(rc, wifi);
+	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
 	public static void main(String[] args) throws OdometerExceptions {
 		// Display
@@ -95,66 +96,33 @@ public class CaptureTheFlag {
 		// Odometer thread
 		Thread odoThread = new Thread(odometer);
 		odoThread.start();
-		
+
+		// If escape button is pressed, exit program
+		ExitProgram exit = new ExitProgram();
+		Thread exitThread = new Thread(exit);
+		exit.start();
+
 		// Display thread
 		Thread odoDisplayThread = new Thread(odometryDisplay);
 		odoDisplayThread.start();
 
-		rc.travelTo(0, 3, FORWARD_SPEED, true);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.travelTo(2, 5, FORWARD_SPEED, true);
+		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.turnTo(180);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.turnTo(270);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.turnBy(90, true);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.turnBy(-90, true);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.travelDist(2 * TILE_SIZE, true);
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.turnTo(180);
+		rc.turnTo(90);
+		rc.travelDist(TILE_SIZE / 2, true);
+		rc.turnTo(0);
+		rc.travelDist(4 * TILE_SIZE, true);
+		rc.turnTo(90);
+		rc.travelDist(TILE_SIZE / 2, true);
 		lightLocalizer.generalLightLocalize();
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
+		rc.turnTo(180);
+		rc.travelDist(TILE_SIZE / 2, true);
+		rc.turnTo(90);
+		rc.travelDist(4 * TILE_SIZE, true);
+		rc.travelTo(7, 7, FORWARD_SPEED, true);
+		lightLocalizer.generalLightLocalize();*/
 
-		rc.moveForward();
-		if(rc.isMoving())
-			Sound.beep();
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		rc.stopMoving();
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-		rc.rotate(true, ROTATE_SPEED);
-		if(rc.isMoving())
-			Sound.beep();
-		try {
-			Thread.sleep(3000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-		rc.stopMoving();
-		while (Button.waitForAnyPress() != Button.ID_ENTER);
-
-
-
-
-
-		/*// ====== Get the robot's team ======  //
+		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
 		// ====== Do initial light localization in corner ======  //
@@ -218,6 +186,6 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
-		 */
+		 
 	}
 }
