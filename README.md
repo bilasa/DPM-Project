@@ -32,3 +32,16 @@ By Bijan Sadeghi & Esa Khan
 * Updated generalLightLocalize() to localize at any point instead of just the origin
 
 By Bijan Sadeghi & Esa Khan
+
+## 1.5
+### Finished travelToTunnel() (18/03/12)
+* Implemented all switch cases for travelToTunnel()
+
+By Bijan Sadeghi & Esa Khan
+
+## 1.6
+### Finished travelToBridge() and Started travelThrough (18/03/12)
+* Used same logic as travelToTunnel() for travelToBridge()
+* Started travelThrough() using turnToCrossing() method
+
+By Bijan Sadeghi & Esa Khan
