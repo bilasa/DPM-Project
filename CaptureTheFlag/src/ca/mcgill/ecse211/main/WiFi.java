@@ -7,11 +7,12 @@ import ca.mcgill.ecse211.WiFiClient.WifiConnection;
 import ca.mcgill.ecse211.enumeration.Flag;
 import ca.mcgill.ecse211.enumeration.Team;
 import lejos.hardware.Button;
+import lejos.hardware.lcd.LCD;
 
 public class WiFi {
 
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.6";
+	private static final String SERVER_IP = "192.168.2.9";
 	private static final int TEAM_NUMBER = 8;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -22,6 +23,14 @@ public class WiFi {
 
 	@SuppressWarnings("rawtypes")
 	public WiFi() {
+		// Store the data
+		this.getData();
+		
+		// Clear the console
+		System.out.flush();
+	}
+
+	public void getData() {
 		System.out.println("Running..");
 		// Initialize WifiConnection class
 		WifiConnection conn = new WifiConnection(SERVER_IP, TEAM_NUMBER, ENABLE_DEBUG_WIFI_PRINT);
@@ -45,26 +54,9 @@ public class WiFi {
 			 */
 			data = conn.getData();
 
-			/*
-			 * // Example 1: Print out all received data
-			 * System.out.println("Map:\n" + data);
-			 * 
-			 * // Example 2 : Print out specific values int redTeam = ((Long)
-			 * data.get("RedTeam")).intValue(); System.out.println("Red Team: "
-			 * + redTeam);
-			 * 
-			 * int og = ((Long) data.get("OG")).intValue();
-			 * System.out.println("Green opponent flag: " + og);
-			 * 
-			 * // Example 3: Compare value int tn_ll_x = ((Long)
-			 * data.get("TN_LL_x")).intValue(); if (tn_ll_x < 5) {
-			 * System.out.println("Tunnel LL corner X < 5"); } else {
-			 * System.out.println("Tunnel LL corner X >= 5"); }
-			 */
 		} catch (Exception e) {
 			System.err.println("Error: " + e.getMessage());
 		}
-
 	}
 
 	/**
@@ -108,16 +100,20 @@ public class WiFi {
 			coords[1] = 1;
 			break;
 		case 1:
-			coords[0] = 11;
+			//coords[0] = 11;
+			coords[0] = 7;
 			coords[1] = 1;
 			break;
 		case 2:
-			coords[0] = 11;
-			coords[1] = 11;
+			//coords[0] = 11;
+			coords[0] = 7;
+			//coords[1] = 11;
+			coords[1] = 7;
 			break;
 		case 3:
 			coords[0] = 1;
-			coords[1] = 11;
+			//coords[1] = 11;
+			coords[1] = 7;
 			break;
 		}
 		return coords;
@@ -213,7 +209,7 @@ public class WiFi {
 	public int[][] getTunnelZone() {
 		// Get coords of tunnel zone
 		int lowerLeftX = ((Long) data.get("TN_LL_x")).intValue(), lowerLeftY = ((Long) data.get("TN_LL_y")).intValue(),
-				upperRightX = ((Long) data.get("TN_LL_x")).intValue(),
+				upperRightX = ((Long) data.get("TN_UR_x")).intValue(),
 				upperRightY = ((Long) data.get("TN_UR_y")).intValue();
 
 		// Corner convention:
@@ -235,7 +231,7 @@ public class WiFi {
 	public int[][] getBridgeZone() {
 		// Get coords of tunnel zone
 		int lowerLeftX = ((Long) data.get("BR_LL_x")).intValue(), lowerLeftY = ((Long) data.get("BR_LL_y")).intValue(),
-				upperRightX = ((Long) data.get("BR_LL_x")).intValue(),
+				upperRightX = ((Long) data.get("BR_UR_x")).intValue(),
 				upperRightY = ((Long) data.get("BR_UR_y")).intValue();
 
 		// Corner convention:

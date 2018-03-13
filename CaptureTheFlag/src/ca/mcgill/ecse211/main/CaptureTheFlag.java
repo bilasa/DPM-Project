@@ -56,7 +56,7 @@ public class CaptureTheFlag {
 	private final static double TRACK = 20.9;
 	private final static int ROTATE_SPEED = 200;
 	private final static int FORWARD_SPEED = 300;
-	private final static int ACCELERATION = 800;
+	private final static int ACCELERATION = 2000;
 	private final static double TILE_SIZE = 30.48;
 	private final static double SENSOR_DIST = 12.5;
 
@@ -125,8 +125,15 @@ public class CaptureTheFlag {
 		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
+		// ====== Do ultrasonic localization in corner ======  //
+		//usLocalizer.usLocalize();
+		
 		// ====== Do initial light localization in corner ======  //
-		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		
+		odometer.setXYT(7 * TILE_SIZE, 7 * TILE_SIZE, 180);
+		
+		
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //

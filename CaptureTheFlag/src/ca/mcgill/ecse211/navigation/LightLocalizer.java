@@ -94,9 +94,14 @@ public class LightLocalizer {
 			// The robot is in the third quadrant, if the robot turns counter clockwise
 			// the first line it will cross will be at angle 0
 			if (lsCont.getColorSample()[0] == 13.0) {
-				rc.setSpeeds(0, 0);
 				rc.stopMoving();
 				odo.setTheta(0);
+				break;
+			}
+
+			// Change the robot's direction if it "missed the line"
+			if (odo.getXYT()[2] > 280 && odo.getXYT()[2] < 300) {
+				rc.rotate(true, ROTATE_SPEED); // rotate the robot clockwise
 			}
 		}
 		// Set the position and angle depending on starting corner
@@ -114,18 +119,28 @@ public class LightLocalizer {
 			odo.setXYT(playZoneCorners[3][0] * TILE_SIZE, playZoneCorners[3][1] * TILE_SIZE, 90);
 			break;
 		}
+		
+		rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+		
+		// Sleep for 1 second after localization
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 	}
 
 	public void generalLightLocalize() {
 		// Compute the nearest waypoint from the odometer reading
 		int corrX = (int)Math.round(odo.getXYT()[0] / TILE_SIZE);
 		int corrY = (int)Math.round(odo.getXYT()[1] / TILE_SIZE);
-		
+
 		// Turn the robot to 45 degrees
 		rc.turnTo(45);
 
 		// Go back and left to enter the "bottom-left quadrant"
-		//rc.travelDist(-3, true);
+		rc.travelDist(-3, true);
 
 		// Do a circle and check the lines
 		rc.setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
@@ -161,8 +176,8 @@ public class LightLocalizer {
 		rc.turnTo(absTheta);
 		rc.travelDist(dist, true);*/
 		//rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
-		
-		
+
+
 		// Set the angle to perfect 0
 		while (rc.isMoving()) {
 			// The robot is in the third quadrant, if the robot turns counter clockwise
@@ -172,16 +187,16 @@ public class LightLocalizer {
 				odo.setTheta(0);
 				break;
 			}
-			
+
 			// Change the robot's direction if it "missed the line"
 			if (odo.getXYT()[2] > 300 && odo.getXYT()[2] < 320) {
 				rc.rotate(true, ROTATE_SPEED); // rotate the robot clockwise
 			}
 		}
-		
+
 
 		rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-		
+
 		// Sleep for 1 second after localization
 		try {
 			Thread.sleep(1000);
