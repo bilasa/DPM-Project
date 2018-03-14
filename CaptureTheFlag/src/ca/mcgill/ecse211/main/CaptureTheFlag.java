@@ -53,7 +53,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private final static double WHEEL_RAD = 1.66;
-	private final static double TRACK = 20.9;
+	private final static double TRACK = 17.8;
 	private final static int ROTATE_SPEED = 200;
 	private final static int FORWARD_SPEED = 300;
 	private final static int ACCELERATION = 2000;
@@ -75,7 +75,7 @@ public class CaptureTheFlag {
 	private final static Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 
 	// WiFi class
-	//private static WiFi wifi = new WiFi();
+	private static WiFi wifi = new WiFi();
 
 	// Controllers
 	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE);
@@ -86,8 +86,8 @@ public class CaptureTheFlag {
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
 	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
-	//private static Navigator navigator = new Navigator(rc, wifi);
-	//private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
+	private static Navigator navigator = new Navigator(rc, wifi);
+	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
 	public static void main(String[] args) throws OdometerExceptions {
 		// Display
@@ -122,7 +122,7 @@ public class CaptureTheFlag {
 		rc.travelTo(7, 7, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();*/
 
-		/*
+		
 		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
@@ -194,8 +194,5 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
-		*/
-		
-		rc.travelDist(3*TILE_SIZE, true);
 	}
 }
