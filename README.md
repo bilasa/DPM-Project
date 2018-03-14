@@ -44,4 +44,9 @@ By Bijan Sadeghi & Esa Khan
 * Used same logic as travelToTunnel() for travelToBridge()
 * Started travelThrough() using turnToCrossing() method
 
+## 1.7
+### Adjust Wheel Radius and Track Width (18/03/14)
+* Changed the wheel radius to 1.66
+* Changed the track width to 17.8
+
 By Bijan Sadeghi & Esa Khan
