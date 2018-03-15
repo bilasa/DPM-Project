@@ -20,27 +20,27 @@ By Guillaume Richard
 By Guillaume Richard
 
 ## 1.3
-### Implemented Main Code Hierarchy and Initial FlagSearcher (18/03/07)
+### Implement Main Code Hierarchy and Initial FlagSearcher (18/03/07)
 * Implemented step by step method calls for the challenge in the main method
 * Implemented "getClosestSearchCorner()" in FlagSearcher to return the closest point in the search zone to the bridge/tunnel
 
 By Bijan Sadeghi & Esa Khan
 
 ## 1.4
-### Updated Odometer Class and Localization Class (18/03/09)
+### Update Odometer Class and Localization Class (18/03/09)
 * Switched Odometer class to the class used in Lab5
 * Updated generalLightLocalize() to localize at any point instead of just the origin
 
 By Bijan Sadeghi & Esa Khan
 
 ## 1.5
-### Finished travelToTunnel() (18/03/12)
+### Finish travelToTunnel() (18/03/12)
 * Implemented all switch cases for travelToTunnel()
 
 By Bijan Sadeghi & Esa Khan
 
 ## 1.6
-### Finished travelToBridge() and Started travelThrough (18/03/12)
+### Finish travelToBridge() and Start travelThrough (18/03/12)
 * Used same logic as travelToTunnel() for travelToBridge()
 * Started travelThrough() using turnToCrossing() method
 
