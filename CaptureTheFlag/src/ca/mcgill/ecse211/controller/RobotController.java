@@ -11,7 +11,7 @@ import lejos.robotics.RegulatedMotor;
 /**
  * Controls the low-level operations of the robot's motors
  * 
- * @author bijansadeghi
+ * @author Bijan Sadeghi
  *
  */
 public class RobotController {
@@ -49,10 +49,21 @@ public class RobotController {
 		this.setAcceleration(this.ACCELERATION);
 	}
 
+	/**
+	 * @param radius
+	 * @param distance
+	 * @return the angle the robot needs to rotate its wheels to travel forward by distance
+	 */
 	public int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
 	}
 
+	/**
+	 * @param radius
+	 * @param width
+	 * @param angle
+	 * @return the angle the robot needs to turn each wheel to rotate by angle
+	 */
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}

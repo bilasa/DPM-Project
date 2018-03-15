@@ -15,7 +15,7 @@ import lejos.robotics.filter.MeanFilter;
  * Localizes the robot using the ultrasonic sensor,
  * setting the robot's absolute heading to 0 degrees.
  * 
- * @author bijansadeghi
+ * @author Bijan Sadeghi & Esa Khan
  *
  */
 public class UltrasonicLocalizer {

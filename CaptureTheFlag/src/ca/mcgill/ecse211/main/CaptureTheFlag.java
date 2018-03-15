@@ -25,6 +25,11 @@ import lejos.hardware.sensor.SensorMode;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
+/**
+ * Main class to be run
+ * 
+ * @author Bijan Sadeghi & Esa Khan
+ */
 public class CaptureTheFlag {
 
 	// Motors
@@ -89,6 +94,16 @@ public class CaptureTheFlag {
 	private static Navigator navigator = new Navigator(rc, wifi);
 	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
+	/**
+	 * Localizes the robot at its corner.
+	 * Navigates the robot through the tunnel/bridge.
+	 * Searches for the flag in the opponent's search zone.
+	 * Navigates the robot through the bridge/tunnel.
+	 * Returns the robot to its starting corner.
+	 * 
+	 * @param args
+	 * @throws OdometerExceptions
+	 */
 	public static void main(String[] args) throws OdometerExceptions {
 		// Display
 		Display odometryDisplay = new Display(LCD);
@@ -122,19 +137,19 @@ public class CaptureTheFlag {
 		rc.travelTo(7, 7, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();*/
 
-		
+
 		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
 		//usLocalizer.usLocalize();
-		
+
 		// ====== Do initial light localization in corner ======  //
 		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
-		
+
 		odometer.setXYT(7 * TILE_SIZE, 7 * TILE_SIZE, 180);
-		
-		
+
+
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //

@@ -7,6 +7,11 @@ import ca.mcgill.ecse211.main.WiFi;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 
+/**
+ * Allows the navigation of the robot through various parts of the playzone
+ * 
+ * @author Bijan Sadeghi & Esa Khan
+ */
 public class Navigator {
 
 	// *** Hardcoded Wifi variables (to remove) ***
@@ -52,11 +57,11 @@ public class Navigator {
 	}
 
 	/**
-	 * Travel to the entrance of the tunnel
+	 * Travel to the entrance of the tunnel.
 	 * 
 	 * Assumptions before calling:
-	 * 		If robot is on green team, robot is localized at its starting corner
-	 * 		If robot is on red team, robot is at the search zone point closest to the tunnel's entrance
+	 * (1) If robot is on green team, robot is localized at its starting corner,
+	 * (2) If robot is on red team, robot is at the search zone point closest to the tunnel's entrance.
 	 * 		
 	 */
 	public void travelToTunnel() {
@@ -290,6 +295,7 @@ public class Navigator {
 
 	/**
 	 * Turns the robot towards the crossing's lower-left coordinate
+	 * in order to prepare to travel through the crossing
 	 */
 	private void turnToCrossing(int[][] crossingZone) {
 		// Compute the nearest waypoint from the odometer reading

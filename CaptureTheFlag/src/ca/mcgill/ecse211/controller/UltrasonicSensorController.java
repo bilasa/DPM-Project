@@ -4,6 +4,11 @@ import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
+/**
+ * Controls all aspects of an ultrasonic sensor
+ * 
+ * @author Bijan Sadeghi
+ */
 public class UltrasonicSensorController {
 
 	// Ultrasonic sensor

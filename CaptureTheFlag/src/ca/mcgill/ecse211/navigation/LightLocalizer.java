@@ -9,6 +9,11 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
+/**
+ * Localizes the robot at a waypoint using the light sensor
+ * 
+ * @author Bijan Sadeghi & Esa Khan
+ */
 public class LightLocalizer {
 
 	// Constants
@@ -131,6 +136,9 @@ public class LightLocalizer {
 				}
 	}
 
+	/**
+	 * Light localize the robot at a general waypoint (not in the initial corner)
+	 */
 	public void generalLightLocalize() {
 		// Compute the nearest waypoint from the odometer reading
 		int corrX = (int)Math.round(odo.getXYT()[0] / TILE_SIZE);

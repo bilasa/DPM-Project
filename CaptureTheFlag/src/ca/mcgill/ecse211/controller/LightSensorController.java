@@ -4,6 +4,11 @@ import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
+/**
+ * Controls all aspects of a light sensor
+ * 
+ * @author Bijan Sadeghi
+ */
 public class LightSensorController {
 
 	// Light sensor
@@ -33,8 +38,7 @@ public class LightSensorController {
 	/**
 	 * Calculates the color of the block based on red proportion
 	 * 
-	 * @param RGBSample
-	 *            Sample of the block in front of the color sensor
+	 * @param RGBSample: Sample of the block in front of the color sensor
 	 * @return The color of the detected block
 	 */
 	static BlockColors getBlockColor(float[] RGBSample) {

@@ -9,6 +9,11 @@ import ca.mcgill.ecse211.enumeration.Team;
 import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
 
+/**
+ * Collects all data about the challenge from the server jar file
+ * 
+ * @author Esa Khan
+ */
 public class WiFi {
 
 	// ** Set these as appropriate for your team and current situation **
@@ -30,6 +35,9 @@ public class WiFi {
 		System.out.flush();
 	}
 
+	/**
+	 * Stores all the data from the server jar file
+	 */
 	public void getData() {
 		System.out.println("Running..");
 		// Initialize WifiConnection class
@@ -293,6 +301,9 @@ public class WiFi {
 		}
 	}
 
+	/**
+	 * @return whether or not the bridge/tunnel are placed vertically in the playzone
+	 */
 	public boolean isCrossingVert() {
 		int[][] tunnelZone = getTunnelZone();
 		// Crossing is vertical if the difference between tunnel's lower-left x

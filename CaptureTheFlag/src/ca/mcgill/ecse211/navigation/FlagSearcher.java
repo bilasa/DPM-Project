@@ -5,6 +5,11 @@ import ca.mcgill.ecse211.enumeration.Team;
 import ca.mcgill.ecse211.main.WiFi;
 import lejos.hardware.Wifi;
 
+/**
+ * Includes all flag searching tasks of the robot
+ * 
+ * @author Bijan Sadeghi & Esa Khan
+ */
 public class FlagSearcher {
 	// WiFi class
 	private WiFi wifi;

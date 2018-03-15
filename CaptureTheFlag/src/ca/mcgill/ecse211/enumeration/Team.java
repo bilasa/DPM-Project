@@ -3,7 +3,7 @@ package ca.mcgill.ecse211.enumeration;
 /**
  * Enumeration for the Team's color
  * 
- * @author bijansadeghi
+ * @author Bijan Sadeghi
  *
  */
 public enum Team {

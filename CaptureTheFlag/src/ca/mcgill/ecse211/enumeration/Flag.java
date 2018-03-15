@@ -3,7 +3,7 @@ package ca.mcgill.ecse211.enumeration;
 /**
  * Enumeration for the opponent's flag's color
  * 
- * @author bijansadeghi
+ * @author Bijan Sadeghi
  *
  */
 public enum Flag {
