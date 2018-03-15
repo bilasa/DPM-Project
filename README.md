@@ -52,3 +52,11 @@ By Bijan Sadeghi & Esa Khan
 * Changed the track width to 17.8
 
 By Guillaume Richard
+
+## 1.8
+### Complete javadoc and create class diagram (18/03/15)
+* Wrote all javadoc comments
+* Generated javadoc API
+* Created class diagram file
+
+By Bijan Sadeghi
