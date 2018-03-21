@@ -60,3 +60,11 @@ By Guillaume Richard
 * Created class diagram file
 
 By Bijan Sadeghi
+
+## 1.8
+### Fix travelTo and Implement returnToStart (21/03/15)
+* Fixed flawed switch cases in travelTo methods
+* Implemented returnToStart
+* Regerated javadoc API
+
+By Bijan Sadeghi
