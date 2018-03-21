@@ -53,7 +53,7 @@ By Bijan Sadeghi & Esa Khan
 
 By Guillaume Richard
 
-## 1.8
+## 1.7.1
 ### Complete javadoc and create class diagram (18/03/15)
 * Wrote all javadoc comments
 * Generated javadoc API
@@ -62,7 +62,7 @@ By Guillaume Richard
 By Bijan Sadeghi
 
 ## 1.8
-### Fix travelTo and Implement returnToStart (21/03/15)
+### Fix travelTo and Implement returnToStart (18/03/21)
 * Fixed flawed switch cases in travelTo methods
 * Implemented returnToStart
 * Regerated javadoc API
