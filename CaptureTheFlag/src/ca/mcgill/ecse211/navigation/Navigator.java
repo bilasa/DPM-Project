@@ -68,9 +68,12 @@ public class Navigator {
 		// Extract the tunnel coordinates
 		int[] tunnelLL = tunnelZone[0];
 		int[] tunnelUR = tunnelZone[2];
+		
+		// Get the team
+		Team team = wifi.getTeam();
 
 		// ====== Select the team ====== //
-		switch (wifi.getTeam()) {
+		switch (team) {
 		case GREEN:
 			// ===============================================================// 
 			// Check if the tunnel has a horizontal or vertical orientation   // 
@@ -80,7 +83,7 @@ public class Navigator {
 				// Select the starting corner of the green zone  				  // 
 				// Then travel to closest point next to the tunnel in an L-shape  //
 				// ===============================================================// 
-				switch(wifi.getStartingCorner(Team.GREEN)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 1:
 					rc.travelTo(startingCornerCoords[0], tunnelLL[1] - 1, FORWARD_SPEED, true);
@@ -97,7 +100,7 @@ public class Navigator {
 				// Select the starting corner of the green zone  				  // 
 				// Then travel to closest point next to the tunnel in an L-shape  //
 				// ===============================================================// 
-				switch(wifi.getStartingCorner(Team.GREEN)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 3:
 					rc.travelTo(tunnelLL[0] - 1, startingCornerCoords[1], FORWARD_SPEED, true);
@@ -120,14 +123,14 @@ public class Navigator {
 				// Select the starting corner   						     // 
 				// Then directly travel to closest point next to the tunnel  //
 				// ==========================================================// 
-				switch(wifi.getStartingCorner(Team.GREEN)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 1:
-					rc.travelTo(tunnelLL[0], tunnelLL[1] - 1, FORWARD_SPEED, true);
+					rc.travelTo(tunnelUR[0], tunnelUR[1] + 1, FORWARD_SPEED, true);
 					break;
 				case 2:
 				case 3:
-					rc.travelTo(tunnelUR[0], tunnelUR[1] + 1, FORWARD_SPEED, true);
+					rc.travelTo(tunnelLL[0], tunnelLL[1] - 1, FORWARD_SPEED, true);
 					break;
 				}
 			} else {
@@ -135,14 +138,14 @@ public class Navigator {
 				// Select the starting corner   						     // 
 				// Then directly travel to closest point next to the tunnel  //
 				// ==========================================================// 
-				switch(wifi.getStartingCorner(Team.GREEN)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
-				case 1:
-					rc.travelTo(tunnelLL[0] - 1, tunnelLL[1] + 1, FORWARD_SPEED, true);
-					break;
-				case 2:
 				case 3:
 					rc.travelTo(tunnelUR[0] + 1, tunnelUR[1] - 1, FORWARD_SPEED, true);
+					break;
+				case 1:
+				case 2:
+					rc.travelTo(tunnelLL[0] - 1, tunnelLL[1] + 1, FORWARD_SPEED, true);
 					break;
 				}
 			}
@@ -157,9 +160,12 @@ public class Navigator {
 		// Extract the bridge coordinates
 		int[] bridgeLL = bridgeZone[0];
 		int[] bridgeUR = bridgeZone[2];
+		
+		// Get the team
+		Team team = wifi.getTeam();
 
 		// ====== Select the team ====== //
-		switch (wifi.getTeam()) {
+		switch (team) {
 		case RED:
 			// ===============================================================// 
 			// Check if the bridge has a horizontal or vertical orientation   // 
@@ -169,7 +175,7 @@ public class Navigator {
 				// Select the starting corner of the red zone  		   		      // 
 				// Then travel to closest point next to the bridge in an L-shape  //
 				// ===============================================================// 
-				switch(wifi.getStartingCorner(Team.RED)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 1:
 					rc.travelTo(startingCornerCoords[0], bridgeLL[1] - 1, FORWARD_SPEED, true);
@@ -186,7 +192,7 @@ public class Navigator {
 				// Select the starting corner of the red zone  				      // 
 				// Then travel to closest point next to the bridge in an L-shape  //
 				// ===============================================================// 
-				switch(wifi.getStartingCorner(Team.RED)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 3:
 					rc.travelTo(bridgeLL[0] - 1, startingCornerCoords[1], FORWARD_SPEED, true);
@@ -209,14 +215,14 @@ public class Navigator {
 				// Select the starting corner   						     // 
 				// Then directly travel to closest point next to the bridge  //
 				// ==========================================================// 
-				switch(wifi.getStartingCorner(Team.GREEN)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 1:
-					rc.travelTo(bridgeLL[0], bridgeLL[1] - 1, FORWARD_SPEED, true);
+					rc.travelTo(bridgeUR[0], bridgeUR[1] + 1, FORWARD_SPEED, true);
 					break;
 				case 2:
 				case 3:
-					rc.travelTo(bridgeUR[0], bridgeUR[1] + 1, FORWARD_SPEED, true);
+					rc.travelTo(bridgeLL[0], bridgeLL[1] - 1, FORWARD_SPEED, true);
 					break;
 				}
 			} else {
@@ -224,14 +230,14 @@ public class Navigator {
 				// Select the starting corner   						     // 
 				// Then directly travel to closest point next to the tunnel  //
 				// ==========================================================// 
-				switch(wifi.getStartingCorner(Team.GREEN)) {
+				switch(wifi.getStartingCorner(team)) {
 				case 0:
 				case 1:
-					rc.travelTo(bridgeLL[0] - 1, bridgeLL[1] + 1, FORWARD_SPEED, true);
+					rc.travelTo(bridgeUR[0] + 1, bridgeUR[1] - 1, FORWARD_SPEED, true);
 					break;
 				case 2:
 				case 3:
-					rc.travelTo(bridgeUR[0] + 1, bridgeUR[1] - 1, FORWARD_SPEED, true);
+					rc.travelTo(bridgeLL[0] - 1, bridgeLL[1] + 1, FORWARD_SPEED, true);
 					break;
 				}
 			}
@@ -338,9 +344,55 @@ public class Navigator {
 	 * Return to the starting corner
 	 */
 	public void returnToStart() {
-		// TODO Auto-generated method stub
+		int[] crossingLL = {0, 0};
+		int[] crossingUR = {0, 0};
 
+		// Extract the correct crossing coordinates
+		if (wifi.getTeam() == Team.GREEN) {
+			crossingLL = bridgeZone[0];
+			crossingUR = bridgeZone[2];
+		} else if (wifi.getTeam() == Team.RED){
+			crossingLL = tunnelZone[0];
+			crossingUR = tunnelZone[2];
+		}
+
+		// ===============================================================// 
+		// Check if the bridge has a horizontal or vertical orientation   // 
+		// ===============================================================// 
+		if (wifi.isCrossingVert()) {
+			// ===============================================================// 
+			// Select the starting corner of the red zone  		   		      // 
+			// Then travel to closest point next to the bridge in an L-shape  //
+			// ===============================================================// 
+			switch(wifi.getStartingCorner(wifi.getTeam())) {
+			case 0:
+			case 1:
+				rc.travelTo(startingCornerCoords[0], crossingLL[1] - 1, FORWARD_SPEED, true);
+				rc.travelTo(startingCornerCoords[0], startingCornerCoords[1], FORWARD_SPEED, true);
+				break;
+			case 2:
+			case 3:
+				rc.travelTo(startingCornerCoords[0], crossingUR[1] + 1, FORWARD_SPEED, true);
+				rc.travelTo(startingCornerCoords[0], startingCornerCoords[1], FORWARD_SPEED, true);
+				break;
+			}
+		} else {
+			// ===============================================================// 
+			// Select the starting corner of the red zone  				      // 
+			// Then travel to closest point next to the bridge in an L-shape  //
+			// ===============================================================// 
+			switch(wifi.getStartingCorner(wifi.getTeam())) {
+			case 0:
+			case 3:
+				rc.travelTo(crossingLL[0] - 1, startingCornerCoords[1], FORWARD_SPEED, true);
+				rc.travelTo(startingCornerCoords[0], startingCornerCoords[1], FORWARD_SPEED, true);
+				break;
+			case 1:
+			case 2:
+				rc.travelTo(crossingUR[0] + 1, startingCornerCoords[1], FORWARD_SPEED, true);
+				rc.travelTo(startingCornerCoords[0], startingCornerCoords[1], FORWARD_SPEED, true);
+				break;
+			}
+		}
 	}
-
-
 }

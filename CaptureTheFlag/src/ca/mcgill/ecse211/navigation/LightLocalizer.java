@@ -63,7 +63,6 @@ public class LightLocalizer {
 		while (rc.isMoving()) {
 			// Reach a line, stop
 			if (lsCont.getColorSample()[0] == 13.0) {
-				rc.setSpeeds(0, 0);
 				rc.stopMoving();
 				Sound.beep();
 			}
@@ -147,9 +146,29 @@ public class LightLocalizer {
 		// Turn the robot to 45 degrees
 		rc.turnTo(45);
 
+		// Start moving forward
+		rc.moveForward();
+		
+		// Store the initial odometer reading
+		double[] position = odo.getXYT();
+		double distMoved = 0.0;
+		
+		// Keep moving until black line is detected or robot has moved 15 cm
+		while(rc.isMoving()) {
+			if (lsCont.getColorSample()[0] == 13.0) {
+				rc.stopMoving();
+				break;
+			}
+			distMoved = Math.hypot(position[0] - odo.getXYT()[0], position[1] - odo.getXYT()[1]);
+			
+			if (distMoved >= 15.0) {
+				rc.moveBackward();
+			}
+		}
+		
 		// Go back and left to enter the "bottom-left quadrant"
-		rc.travelDist(-3, true);
-
+		rc.travelDist(-17, true);
+		
 		// Do a circle and check the lines
 		rc.setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 		rc.turnBy(360, false);

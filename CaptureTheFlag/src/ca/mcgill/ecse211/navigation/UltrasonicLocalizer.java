@@ -86,6 +86,14 @@ public class UltrasonicLocalizer {
 
 		// Turn the other way (counterclockwise)
 		rc.rotate(false, ROTATE_SPEED);
+		
+		// Sleep for 2 seconds
+		try {
+			Thread.sleep(2000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 		while(usCont.getAvgUSDistance() < DISTANCE_TO_WALL) {
 			// Keep moving

@@ -185,6 +185,17 @@ public class RobotController {
 		leftMotor.endSynchronization();
 	}
 	
+	/**
+	 * Starts moving the robot backward with motor synchronization
+	 */
+	public void moveBackward(){
+		leftMotor.synchronizeWith(new RegulatedMotor[]{rightMotor});
+		leftMotor.startSynchronization();
+		leftMotor.backward();
+		rightMotor.backward();
+		leftMotor.endSynchronization();
+	}
+	
 	
 	/**
 	 * Starts rotating the robot clockwise or counterclockwise

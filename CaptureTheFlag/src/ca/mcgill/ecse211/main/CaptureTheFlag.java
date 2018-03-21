@@ -35,10 +35,10 @@ public class CaptureTheFlag {
 	// Motors
 	private final static EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
 	private final static EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-	private final static EV3MediumRegulatedMotor sensorMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("C"));
+	private final static EV3MediumRegulatedMotor sensorMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
 
 	// Ultrasonic sensor
-	private final static EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(SensorPort.S2);
+	private final static EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(SensorPort.S1);
 	private static SampleProvider usDistance = usSensor.getMode("Distance");
 	private static SampleProvider average = new MeanFilter(usDistance, 8);
 	private static float[] usSample = new float[average.sampleSize()];
@@ -49,7 +49,7 @@ public class CaptureTheFlag {
 	private float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];
 
 	// Rear light sensor
-	private final static EV3ColorSensor rearColorSensor = new EV3ColorSensor(SensorPort.S1);
+	private final static EV3ColorSensor rearColorSensor = new EV3ColorSensor(SensorPort.S2);
 	private static SensorMode rearColorID = rearColorSensor.getColorIDMode();
 	private static float[] rearColorIDSample = new float[rearColorID.sampleSize()];
 
@@ -58,7 +58,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private final static double WHEEL_RAD = 1.66;
-	private final static double TRACK = 17.8;
+	private final static double TRACK = 18.72;//17.8;
 	private final static int ROTATE_SPEED = 200;
 	private final static int FORWARD_SPEED = 300;
 	private final static int ACCELERATION = 2000;
@@ -105,6 +105,9 @@ public class CaptureTheFlag {
 	 * @throws OdometerExceptions
 	 */
 	public static void main(String[] args) throws OdometerExceptions {
+		//rc.setSpeeds(200, 200);
+		//rc.turnBy(720, true);
+		
 		// Display
 		Display odometryDisplay = new Display(LCD);
 
@@ -147,7 +150,7 @@ public class CaptureTheFlag {
 		// ====== Do initial light localization in corner ======  //
 		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		odometer.setXYT(7 * TILE_SIZE, 7 * TILE_SIZE, 180);
+		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 
 
@@ -174,16 +177,16 @@ public class CaptureTheFlag {
 		lightLocalizer.generalLightLocalize();
 
 		// ====== Travel to the search zone ====== //
-		flagSearcher.travelToSearchZone();
+		//flagSearcher.travelToSearchZone();
 
 		// ====== Localize before starting search ====== //
-		lightLocalizer.generalLightLocalize();
+		//lightLocalizer.generalLightLocalize();
 
 		// ====== Search for the flag ====== //
-		flagSearcher.searchFlag();
+		//flagSearcher.searchFlag();
 
 		// ====== Localize after search ====== //
-		lightLocalizer.generalLightLocalize();
+		//lightLocalizer.generalLightLocalize();
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //
