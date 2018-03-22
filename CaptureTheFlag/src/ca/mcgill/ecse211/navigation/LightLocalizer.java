@@ -96,10 +96,10 @@ public class LightLocalizer {
 		// Set the angle to perfect 0
 		while (rc.isMoving()) {
 			// The robot is in the third quadrant, if the robot turns counter clockwise
-			// the first line it will cross will be at angle 0
+			// the first line it will cross will be at angle -24 based on experimental results
 			if (lsCont.getColorSample()[0] == 13.0) {
 				rc.stopMoving();
-				odo.setTheta(0);
+				rc.turnBy(24, true);
 				break;
 			}
 
