@@ -65,6 +65,11 @@ By Bijan Sadeghi
 ### Fix travelTo and Implement returnToStart (18/03/21)
 * Fixed flawed switch cases in travelTo methods
 * Implemented returnToStart
-* Regerated javadoc API
+* Regenerated javadoc API
 
 By Bijan Sadeghi
+
+## 1.9
+### Adjust Initial Localization Correction Factor (18/03/22)
+* Correction factor set in `initialLightLocalize` to 24 degrees
+* `ROTATE_SPEED` set to 250
