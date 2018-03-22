@@ -75,3 +75,12 @@ By Bijan Sadeghi
 * `ROTATE_SPEED` set to 250
 
 By Guillaume Richard
+
+## 2.0
+### Add Timer class, OdometryCorrection class (18/03/22)
+* Added Timer thread class in order to cancel flagSearch if necessary
+* Added OdometryCorrection class to keep the robot straight and correct the odometer
+* Regenerated javadoc
+
+By Bijan Sadeghi
+
