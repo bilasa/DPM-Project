@@ -73,3 +73,5 @@ By Bijan Sadeghi
 ### Adjust Initial Localization Correction Factor (18/03/22)
 * Correction factor set in `initialLightLocalize` to 24 degrees
 * `ROTATE_SPEED` set to 250
+
+By Guillaume Richard
