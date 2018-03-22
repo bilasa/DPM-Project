@@ -12,6 +12,7 @@ import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.navigation.UltrasonicLocalizer;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
@@ -94,6 +95,13 @@ public class CaptureTheFlag {
 	private static Navigator navigator = new Navigator(rc, wifi);
 	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
+	// Threads
+	private static ExitProgram exit = new ExitProgram();
+	private static Timer timer = new Timer();
+
+	// Odometry correction
+	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
+
 	/**
 	 * Localizes the robot at its corner.
 	 * Navigates the robot through the tunnel/bridge.
@@ -107,7 +115,7 @@ public class CaptureTheFlag {
 	public static void main(String[] args) throws OdometerExceptions {
 		//rc.setSpeeds(200, 200);
 		//rc.turnBy(720, true);
-		
+
 		// Display
 		Display odometryDisplay = new Display(LCD);
 
@@ -116,13 +124,20 @@ public class CaptureTheFlag {
 		odoThread.start();
 
 		// If escape button is pressed, exit program
-		ExitProgram exit = new ExitProgram();
 		Thread exitThread = new Thread(exit);
 		exit.start();
 
 		// Display thread
 		Thread odoDisplayThread = new Thread(odometryDisplay);
 		odoDisplayThread.start();
+
+		// Timer thread
+		Thread timerThread = new Thread(timer);
+		timer.start();
+
+		// Odometry correction thread
+		Thread odoCorrectionThread = new Thread(odoCorrection);
+		odoCorrectionThread.start();
 
 		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();
