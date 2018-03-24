@@ -89,6 +89,7 @@ By Bijan Sadeghi
 * Added code to create distinct left and right rear light sensors
 * Added "paused" field in [OdometryCorrection.java](https://github.com/BijanSadeghi/DPM-Project/tree/master/CaptureTheFlag/src/ca/mcgill/ecse211/odometer/OdometryCorrection.java) that blocks the run method's code from being executed
 * Modified constructor of [RobotController.java](https://github.com/BijanSadeghi/DPM-Project/tree/master/CaptureTheFlag/src/ca/mcgill/ecse211/controller/RobotController.java) to include OdometryCorrection object
+* Added `setOdoCorrection` method in [RobotController.java](https://github.com/BijanSadeghi/DPM-Project/tree/master/CaptureTheFlag/src/ca/mcgill/ecse211/controller/RobotController.java) to set the OdometryCorrection object
 * Modified `travelTo` to pause & unpause OdometryCorrection
 
 By Bijan Sadeghi
