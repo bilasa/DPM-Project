@@ -10,7 +10,7 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
 /**
- * Localizes the robot at a waypoint using the light sensor
+ * Localizes the robot at a waypoint using the left rear light sensor
  * 
  * @author Bijan Sadeghi & Esa Khan
  */

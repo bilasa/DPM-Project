@@ -24,25 +24,40 @@ public class OdometryCorrection implements Runnable {
 	// Robot controller
 	private RobotController rc;
 
-	// Light sensor controller
-	private LightSensorController lsCont;
+	// Left and right rear sensor controllers
+	private LightSensorController leftLsCont;
+	private LightSensorController rightLsCont;
 
 	// Odometer
 	private Odometer odo;
+	
+	// Paused variable to tell pause/unpause the OdometryCorrection
+	private boolean paused;
 
-	public OdometryCorrection(double TILE_SIZE, double SENSOR_DIST, RobotController rc, LightSensorController lsCont) {
+	public OdometryCorrection(double TILE_SIZE, double SENSOR_DIST, RobotController rc, LightSensorController leftLsCont, LightSensorController rightLsCont) {
 		this.FORWARD_SPEED = rc.FORWARD_SPEED;
 		this.ROTATE_SPEED = rc.ROTATE_SPEED;
 		this.TILE_SIZE = TILE_SIZE;
 		this.SENSOR_DIST = SENSOR_DIST;
 		this.rc = rc;
-		this.lsCont = lsCont;
+		this.leftLsCont = leftLsCont;
+		this.rightLsCont = rightLsCont;
 		try {
 			this.odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.paused = true;
+	}
+	
+	/**
+	 * Pause the OdometryCorrection
+	 * 
+	 * @param paused
+	 */
+	public void setPaused(boolean paused) {
+		this.paused = paused;
 	}
 
 	/**
@@ -52,6 +67,11 @@ public class OdometryCorrection implements Runnable {
 	 */
 	// run method (required for Thread)
 	public void run() {
-
+		
+		// Apply the correction if not paused
+		if (!paused) {
+			
+		}
+		
 	}
 }

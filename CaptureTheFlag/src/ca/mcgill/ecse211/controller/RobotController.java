@@ -4,6 +4,7 @@ import ca.mcgill.ecse211.main.CaptureTheFlag;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
@@ -15,11 +16,11 @@ import lejos.robotics.RegulatedMotor;
  *
  */
 public class RobotController {
-	
+
 	// Motors
 	private EV3LargeRegulatedMotor leftMotor;
 	private EV3LargeRegulatedMotor rightMotor;
-	
+
 	// Constants
 	public final double WHEEL_RAD;
 	public final double TRACK;
@@ -27,10 +28,13 @@ public class RobotController {
 	public final int ROTATE_SPEED; // made public due to frequent use
 	public final int ACCELERATION; // made public due to frequent use
 	public final double TILE_SIZE;
-	
+
+	// OdometryCorrection
+	private OdometryCorrection odoCorrection;
+
 	//Odometer
 	private Odometer odo;
-	
+
 	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD, double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
@@ -77,6 +81,8 @@ public class RobotController {
 	 * @param lock
 	 */
 	public void travelTo(double x, double y, int speed, boolean lock) {
+		// Unpause the OdometryCorrection
+		odoCorrection.setPaused(false);
 
 		double lastX = odo.getXYT()[0];
 		double lastY = odo.getXYT()[1];
@@ -100,6 +106,9 @@ public class RobotController {
 		rightMotor.setSpeed(speed);
 		leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
 		rightMotor.rotate(convertDistance(WHEEL_RAD, distance), !lock);
+
+		// Pause the OdometryCorrection
+		odoCorrection.setPaused(true);
 	}
 
 	/**
@@ -132,7 +141,7 @@ public class RobotController {
 		leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, dTheta), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, dTheta), false);
 	}
-	
+
 	/**
 	 * Turns the robot by an angle "dTheta" with an optional lock
 	 * 
@@ -153,7 +162,7 @@ public class RobotController {
 		leftMotor.setSpeed(leftSpeed);
 		rightMotor.setSpeed(rightSpeed);
 	}
-	
+
 	/**
 	 * Set the acceleration of the motors
 	 * 
@@ -173,7 +182,7 @@ public class RobotController {
 		leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
 		rightMotor.rotate(convertDistance(WHEEL_RAD, dist), !lock);
 	}
-	
+
 	/**
 	 * Starts moving the robot forward with motor synchronization
 	 */
@@ -184,7 +193,7 @@ public class RobotController {
 		rightMotor.forward();
 		leftMotor.endSynchronization();
 	}
-	
+
 	/**
 	 * Starts moving the robot backward with motor synchronization
 	 */
@@ -195,8 +204,8 @@ public class RobotController {
 		rightMotor.backward();
 		leftMotor.endSynchronization();
 	}
-	
-	
+
+
 	/**
 	 * Starts rotating the robot clockwise or counterclockwise
 	 * 
@@ -213,7 +222,7 @@ public class RobotController {
 			rightMotor.forward();
 		}
 	}
-	
+
 	/**
 	 * @return true if either of the robot's motors are moving
 	 */
@@ -222,7 +231,7 @@ public class RobotController {
 			return true;
 		return false;
 	}
-	
+
 	/**
 	 * Stops the robot with motor synchronization
 	 */
@@ -232,6 +241,15 @@ public class RobotController {
 		leftMotor.stop();
 		rightMotor.stop();
 		leftMotor.endSynchronization();
+	}
+
+	/**
+	 * Set the OdometryCorrection to be used by the robot controller
+	 * 
+	 * @param odoCorrection
+	 */
+	public void setOdoCorrection(OdometryCorrection odoCorrection) {
+		this.odoCorrection = odoCorrection;
 	}
 
 }

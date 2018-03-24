@@ -49,10 +49,15 @@ public class CaptureTheFlag {
 	private SensorMode frontRGBColor = frontColorSensor.getRGBMode();
 	private float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];
 
-	// Rear light sensor
-	private final static EV3ColorSensor rearColorSensor = new EV3ColorSensor(SensorPort.S2);
-	private static SensorMode rearColorID = rearColorSensor.getColorIDMode();
-	private static float[] rearColorIDSample = new float[rearColorID.sampleSize()];
+	// Left rear light sensor
+	private final static EV3ColorSensor leftRearColorSensor = new EV3ColorSensor(SensorPort.S2);
+	private static SensorMode leftRearColorID = leftRearColorSensor.getColorIDMode();
+	private static float[] leftRearColorIDSample = new float[leftRearColorID.sampleSize()];
+
+	// Right rear light sensor
+	private final static EV3ColorSensor rightRearColorSensor = new EV3ColorSensor(SensorPort.S3);
+	private static SensorMode rightRearColorID = rightRearColorSensor.getColorIDMode();
+	private static float[] rightRearColorIDSample = new float[rightRearColorID.sampleSize()];
 
 	// LCD
 	private final static TextLCD LCD = LocalEV3.get().getTextLCD();
@@ -87,11 +92,12 @@ public class CaptureTheFlag {
 	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE);
 	private static UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, usDistance, average, usSample);
 	private LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontRGBColor, frontRGBColorSample);
-	private static LightSensorController rearLsCont = new LightSensorController(rearColorSensor, rearColorID, rearColorIDSample);
+	private static LightSensorController leftRearLsCont = new LightSensorController(leftRearColorSensor, leftRearColorID, leftRearColorIDSample);
+	private static LightSensorController rightRearLsCont = new LightSensorController(rightRearColorSensor, rightRearColorID, rightRearColorIDSample);
 
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
-	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
+	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, leftRearLsCont);
 	private static Navigator navigator = new Navigator(rc, wifi);
 	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
 
@@ -100,7 +106,7 @@ public class CaptureTheFlag {
 	private static Timer timer = new Timer();
 
 	// Odometry correction
-	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, SENSOR_DIST, rc, rearLsCont);
+	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
 
 	/**
 	 * Localizes the robot at its corner.
@@ -135,9 +141,8 @@ public class CaptureTheFlag {
 		Thread timerThread = new Thread(timer);
 		timer.start();
 
-		// Odometry correction thread
-		Thread odoCorrectionThread = new Thread(odoCorrection);
-		odoCorrectionThread.start();
+		// Set odometry correction for the RobotController
+		rc.setOdoCorrection(odoCorrection);
 
 		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();
@@ -160,12 +165,12 @@ public class CaptureTheFlag {
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
-		//usLocalizer.usLocalize();
+		usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 
 
