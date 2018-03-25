@@ -15,7 +15,7 @@ import lejos.hardware.lcd.LCD;
  * @author Bijan Sadeghi
  *
  */
-public class OdometryCorrection implements Runnable {
+public class OdometryCorrection {
 
 	// Constants
 	private final int FORWARD_SPEED;
@@ -84,8 +84,8 @@ public class OdometryCorrection implements Runnable {
 	 * @throws OdometerExceptions
 	 */
 	// run method (required for Thread)
-	public void run() {
-		
+	/*public void run() {
+
 		while(true) {
 			// Apply the correction if not paused
 			if(!paused) {
@@ -117,7 +117,7 @@ public class OdometryCorrection implements Runnable {
 						//Sound.beep();
 						LCD.drawString("Right: " + rightLineDetected, 0, 5);
 						LCD.drawString("Left: " + leftLineDetected, 0, 6);
-						
+
 						// Set the state to correcting
 						corrState = CorrState.CORRECTING;
 
@@ -147,5 +147,87 @@ public class OdometryCorrection implements Runnable {
 				}
 			}
 		}
+	}*/
+
+
+	/**
+	 * Moves the robot forward until a perpendicular line is detected by one of the sensors.
+	 * Re-aligns the robot so that both sensors are on the line.
+	 * Corrects the Odometer based on its new position.
+	 *
+	 * @param correctingX is the robot being corrected on the X-axis
+	 * @param corrTheta the angle we must correct the odometer to be
+	 */
+	public void correct(boolean correctingX, double corrTheta) {
+		// Booleans for whether the line has been detected by the right sensor or left sensor
+		boolean rightLineDetected = false;
+		boolean leftLineDetected = false;
+
+		// Start moving the robot forward
+		rc.moveForward();
+
+		// Move the robot until one of the sensors detects a line
+		while (!leftLineDetected && !rightLineDetected) {
+			if (rightLsCont.getColorSample()[0] == 13.0) {
+				rightLineDetected = true;
+
+				// Stop the right motor
+				rc.stopMoving(false, true);
+			} else if (leftLsCont.getColorSample()[0] == 13.0) {
+				leftLineDetected = true;
+
+				// Stop the left motor
+				rc.stopMoving(true, false);
+			}
+		}
+
+		// Keep moving the left/right motor until both lines have been detected
+		while(!leftLineDetected || !rightLineDetected) {
+			// If the other line detected, stop the motors
+			if (rightLineDetected && leftLsCont.getColorSample()[0] == 13.0) {
+				leftLineDetected = true;
+				rc.stopMoving();
+			} else if (leftLineDetected && rightLsCont.getColorSample()[0] == 13.0) {
+				rightLineDetected = true;
+				rc.stopMoving();
+			}
+		}
+
+		// The robot is now aligned. Correct the odometer.
+
+		// Check if we are correcting X or Y
+		if (correctingX) {
+
+			// Compute the sensors' X position in cm's
+			double sensorX = odo.getXYT()[0] - SENSOR_DIST;
+
+			// Find the X-coordinate of the nearest waypoint to sensorX.
+			int corrSensorX = (int)Math.round(sensorX / TILE_SIZE);
+
+			// Compute the robot's X-coordinate in cm's by adding sensor offset to the sensor's X-coordinate (in cm's)
+			double corrX = TILE_SIZE * corrSensorX + SENSOR_DIST;
+
+			// Correct the odometer's X
+			odo.setX(corrX);
+
+		} else {
+
+			// Compute the sensors' Y position in cm's
+			double sensorY = odo.getXYT()[1] - SENSOR_DIST;
+
+			// Find the X-coordinate of the nearest waypoint to sensorX.
+			int corrSensorY = (int)Math.round(sensorY / TILE_SIZE);
+
+			// Compute the robot's X-coordinate in cm's by adding sensor offset to the sensor's X-coordinate (in cm's)
+			double corrY = TILE_SIZE * corrSensorY + SENSOR_DIST;
+
+			// Correct the odometer's X
+			odo.setY(corrY);
+
+		}
+		
+		// Correct the odometers' angle
+		odo.setTheta(corrTheta);
+
 	}
 }

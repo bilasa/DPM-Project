@@ -89,7 +89,7 @@ public class CaptureTheFlag {
 	private static WiFi wifi = new WiFi();
 
 	// Controllers
-	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE);
+	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE, SENSOR_DIST);
 	private static UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, usDistance, average, usSample);
 	private LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontRGBColor, frontRGBColorSample);
 	private static LightSensorController leftRearLsCont = new LightSensorController(leftRearColorSensor, leftRearColorID, leftRearColorIDSample);
@@ -142,8 +142,8 @@ public class CaptureTheFlag {
 		//timer.start();
 
 		// Set odometry correction for the RobotController
-		Thread odoCorrectionThread = new Thread(odoCorrection);
-		odoCorrectionThread.start();
+		//Thread odoCorrectionThread = new Thread(odoCorrection);
+		//odoCorrectionThread.start();
 		rc.setOdoCorrection(odoCorrection);
 
 		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
@@ -167,14 +167,14 @@ public class CaptureTheFlag {
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
-		//usLocalizer.usLocalize();
+		usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
-		rc.travelTo(1, 7, FORWARD_SPEED, true);
+		//rc.travelTo(1, 7, FORWARD_SPEED, true);
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
