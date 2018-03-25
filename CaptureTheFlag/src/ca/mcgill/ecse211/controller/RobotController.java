@@ -80,9 +80,11 @@ public class RobotController {
 	 * @param speed
 	 * @param lock
 	 */
-	public void travelTo(double x, double y, int speed, boolean lock) {
-		// Unpause the OdometryCorrection
+	public void travelTo(int x, int y, int speed, boolean lock) {
+		// Unpause the OdometryCorrection, set the target destination
+		odoCorrection.setTargetXY(x, y);
 		odoCorrection.setPaused(false);
+		
 
 		double lastX = odo.getXYT()[0];
 		double lastY = odo.getXYT()[1];
@@ -240,6 +242,22 @@ public class RobotController {
 		leftMotor.startSynchronization();
 		leftMotor.stop();
 		rightMotor.stop();
+		leftMotor.endSynchronization();
+	}
+
+	/**
+	 * Stop the robot, choosing which motors to stop
+	 * 
+	 * @param stopLeft
+	 * @param stopRight
+	 */
+	public void stopMoving(boolean stopLeft, boolean stopRight){
+		leftMotor.synchronizeWith(new RegulatedMotor[]{rightMotor});
+		leftMotor.startSynchronization();
+		if(stopLeft)
+			leftMotor.stop();
+		if(stopRight)
+			rightMotor.stop();
 		leftMotor.endSynchronization();
 	}
 

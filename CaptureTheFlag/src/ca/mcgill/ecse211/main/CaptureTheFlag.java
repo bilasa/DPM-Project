@@ -66,7 +66,7 @@ public class CaptureTheFlag {
 	private final static double WHEEL_RAD = 1.66;
 	private final static double TRACK = 17.7;
 	private final static int ROTATE_SPEED = 250;
-	private final static int FORWARD_SPEED = 300;
+	private final static int FORWARD_SPEED = 200;
 	private final static int ACCELERATION = 2000;
 	private final static double TILE_SIZE = 30.48;
 	private final static double SENSOR_DIST = 12.5;
@@ -138,10 +138,12 @@ public class CaptureTheFlag {
 		odoDisplayThread.start();
 
 		// Timer thread
-		Thread timerThread = new Thread(timer);
-		timer.start();
+		//Thread timerThread = new Thread(timer);
+		//timer.start();
 
 		// Set odometry correction for the RobotController
+		Thread odoCorrectionThread = new Thread(odoCorrection);
+		odoCorrectionThread.start();
 		rc.setOdoCorrection(odoCorrection);
 
 		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
@@ -165,14 +167,14 @@ public class CaptureTheFlag {
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
-		usLocalizer.usLocalize();
+		//usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
-
+		rc.travelTo(1, 7, FORWARD_SPEED, true);
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
@@ -183,7 +185,7 @@ public class CaptureTheFlag {
 		}
 
 		// ====== Localize at the tunnel/bridge entrance ====== //
-		lightLocalizer.generalLightLocalize();
+		//lightLocalizer.generalLightLocalize();
 
 		if (team == Team.GREEN) {
 			// ====== Travel through the tunnel ====== //
@@ -194,7 +196,7 @@ public class CaptureTheFlag {
 		}
 
 		// ====== Localize at the tunnel/bridge end ====== //
-		lightLocalizer.generalLightLocalize();
+		//lightLocalizer.generalLightLocalize();
 
 		// ====== Travel to the search zone ====== //
 		//flagSearcher.travelToSearchZone();
@@ -217,7 +219,7 @@ public class CaptureTheFlag {
 		}
 
 		// ====== Localize before crossing the bridge/tunnel ====== //
-		lightLocalizer.generalLightLocalize();
+		//lightLocalizer.generalLightLocalize();
 
 		if (team == Team.GREEN) {
 			// ====== Travel through the bridge ====== //
@@ -228,7 +230,7 @@ public class CaptureTheFlag {
 		}
 
 		// ====== Localize after crossing the bridge/tunnel ====== //
-		lightLocalizer.generalLightLocalize();
+		//lightLocalizer.generalLightLocalize();
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
