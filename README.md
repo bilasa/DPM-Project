@@ -94,3 +94,9 @@ By Bijan Sadeghi
 
 By Bijan Sadeghi
 
+## 2.1.1
+### Tentatively Implement Run Method of OdometryCorrection (18/03/24)
+* Added code to stop the motor on the side of the first line detected until the other side catches up
+
+By Bijan Sadeghi & Esa Khan
+
