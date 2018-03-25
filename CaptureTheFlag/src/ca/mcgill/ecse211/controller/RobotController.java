@@ -32,10 +32,11 @@ public class RobotController {
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
 
-	//Odometer
+	// Odometer
 	private Odometer odo;
 
-	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD, double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE) {
+	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD,
+			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.WHEEL_RAD = WHEEL_RAD;
@@ -56,7 +57,8 @@ public class RobotController {
 	/**
 	 * @param radius
 	 * @param distance
-	 * @return the angle the robot needs to rotate its wheels to travel forward by distance
+	 * @return the angle the robot needs to rotate its wheels to travel forward by
+	 *         distance
 	 */
 	public int convertDistance(double radius, double distance) {
 		return (int) ((180.0 * distance) / (Math.PI * radius));
@@ -84,30 +86,62 @@ public class RobotController {
 		// Unpause the OdometryCorrection, set the target destination
 		odoCorrection.setTargetXY(x, y);
 		odoCorrection.setPaused(false);
-		
 
 		double lastX = odo.getXYT()[0];
 		double lastY = odo.getXYT()[1];
 		double theta; // Angle to next point
 
-		// Distance to travel in x and y
-		double xDist = TILE_SIZE * x - lastX;
-		double yDist = TILE_SIZE * y - lastY;
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
 
-		// Absolute angle to next point
-		theta = Math.toDegrees(Math.atan2(xDist, yDist));
+		// Rotate to proper angle
+		if (lastX < x) {
+			turnTo(90);
+		} else {
+			turnTo(270);
+		}
 
-		// Distance the robot has to travel
-		double distance = Math.sqrt(xDist * xDist + yDist * yDist);
 
-		// Rotate robot towards next point
-		turnTo(theta);
-
-		// Advance towards next point
 		leftMotor.setSpeed(speed);
 		rightMotor.setSpeed(speed);
-		leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
-		rightMotor.rotate(convertDistance(WHEEL_RAD, distance), !lock);
+
+		// Advance towards next point's x coordinate
+		for (int i = 0; i < x; i++) {
+			leftMotor.rotate(convertDistance(WHEEL_RAD, TILE_SIZE), true);
+			rightMotor.rotate(convertDistance(WHEEL_RAD, TILE_SIZE), false);
+			// *********TODO: 	CALL TO ODOMETRY CORRECTION TO MOVE FORWARD UNTIL YOU FIND A BLACK LINE,
+			// *********		FIX YOURSELF, THEN UPDATE ODOMETER READING BASED ON APPROXIMATING 
+			// ********* 		CURRENT READINGS ON ODOMETER AND THEN EXIT
+		}
+		
+		
+		
+		leftMotor.setSpeed(ROTATE_SPEED);
+		rightMotor.setSpeed(ROTATE_SPEED);
+
+		// Rotate to proper angle
+		if (lastY < y) {
+			turnTo(0);
+		} else {
+			turnTo(180);
+		}
+
+		
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
+
+		// Advance towards next point's y coordinate
+		for (int i = 0; i < y; i++) {
+			leftMotor.rotate(convertDistance(WHEEL_RAD, TILE_SIZE), true);
+			rightMotor.rotate(convertDistance(WHEEL_RAD, TILE_SIZE), false);
+			// *********TODO: 	CALL TO ODOMETRY CORRECTION TO MOVE FORWARD UNTIL YOU FIND A BLACK LINE,
+			// *********		FIX YOURSELF, THEN UPDATE ODOMETER READING BASED ON APPROXIMATING 
+			// ********* 		CURRENT READINGS ON ODOMETER AND THEN EXIT
+		}
+		
+		
+		
+	
 
 		// Pause the OdometryCorrection
 		odoCorrection.setPaused(true);
@@ -149,7 +183,7 @@ public class RobotController {
 	 * 
 	 * @param dTheta
 	 */
-	public void turnBy(double dTheta, boolean lock){
+	public void turnBy(double dTheta, boolean lock) {
 		leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, dTheta), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, dTheta), !lock);
 	}
@@ -188,8 +222,8 @@ public class RobotController {
 	/**
 	 * Starts moving the robot forward with motor synchronization
 	 */
-	public void moveForward(){
-		leftMotor.synchronizeWith(new RegulatedMotor[]{rightMotor});
+	public void moveForward() {
+		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
 		leftMotor.startSynchronization();
 		leftMotor.forward();
 		rightMotor.forward();
@@ -199,14 +233,13 @@ public class RobotController {
 	/**
 	 * Starts moving the robot backward with motor synchronization
 	 */
-	public void moveBackward(){
-		leftMotor.synchronizeWith(new RegulatedMotor[]{rightMotor});
+	public void moveBackward() {
+		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
 		leftMotor.startSynchronization();
 		leftMotor.backward();
 		rightMotor.backward();
 		leftMotor.endSynchronization();
 	}
-
 
 	/**
 	 * Starts rotating the robot clockwise or counterclockwise
@@ -214,7 +247,7 @@ public class RobotController {
 	 * @param rotateClockwise
 	 * @param speed
 	 */
-	public void rotate(boolean rotateClockwise, int speed){
+	public void rotate(boolean rotateClockwise, int speed) {
 		setSpeeds(speed, speed);
 		if (rotateClockwise) {
 			leftMotor.forward();
@@ -228,8 +261,8 @@ public class RobotController {
 	/**
 	 * @return true if either of the robot's motors are moving
 	 */
-	public boolean isMoving(){
-		if(leftMotor.isMoving() || rightMotor.isMoving())
+	public boolean isMoving() {
+		if (leftMotor.isMoving() || rightMotor.isMoving())
 			return true;
 		return false;
 	}
@@ -237,8 +270,8 @@ public class RobotController {
 	/**
 	 * Stops the robot with motor synchronization
 	 */
-	public void stopMoving(){
-		leftMotor.synchronizeWith(new RegulatedMotor[]{rightMotor});
+	public void stopMoving() {
+		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
 		leftMotor.startSynchronization();
 		leftMotor.stop();
 		rightMotor.stop();
@@ -251,12 +284,12 @@ public class RobotController {
 	 * @param stopLeft
 	 * @param stopRight
 	 */
-	public void stopMoving(boolean stopLeft, boolean stopRight){
-		leftMotor.synchronizeWith(new RegulatedMotor[]{rightMotor});
+	public void stopMoving(boolean stopLeft, boolean stopRight) {
+		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
 		leftMotor.startSynchronization();
-		if(stopLeft)
+		if (stopLeft)
 			leftMotor.stop();
-		if(stopRight)
+		if (stopRight)
 			rightMotor.stop();
 		leftMotor.endSynchronization();
 	}
