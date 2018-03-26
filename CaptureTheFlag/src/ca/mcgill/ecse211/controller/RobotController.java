@@ -75,9 +75,44 @@ public class RobotController {
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
-
+	
 	/**
 	 * Travels to (x, y) with speed "speed" and an optional lock for the motors.
+	 * 
+	 * @param x
+	 * @param y
+	 * @param speed
+	 * @param lock
+	 */
+	public void directTravelTo(double x, double y, int speed, boolean lock) {
+
+		double lastX = odo.getXYT()[0];
+		double lastY = odo.getXYT()[1];
+		double theta; // Angle to next point
+
+		// Distance to travel in x and y
+		double xDist = TILE_SIZE * x - lastX;
+		double yDist = TILE_SIZE * y - lastY;
+
+		// Absolute angle to next point
+		theta = Math.toDegrees(Math.atan2(xDist, yDist));
+
+		// Distance the robot has to travel
+		double distance = Math.sqrt(xDist * xDist + yDist * yDist);
+
+		// Rotate robot towards next point
+		turnTo(theta);
+
+		// Advance towards next point
+		leftMotor.setSpeed(speed);
+		rightMotor.setSpeed(speed);
+		leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
+		rightMotor.rotate(convertDistance(WHEEL_RAD, distance), !lock);
+	}
+
+	/**
+	 * Travels to (x, y) with speed "speed" and an optional lock for the motors by rolling 
+	 * horizontally and vertically only.
 	 * 
 	 * @param x
 	 * @param y
@@ -94,7 +129,7 @@ public class RobotController {
 		int lastY = (int)Math.round(odo.getXYT()[1] / TILE_SIZE);
 
 		// Angle to turn to to go to the next point. In OdometryCorrection, use this angle to correct the Odometer's theta.
-		double corrTheta = odo.getXYT()[2]; 
+		double corrTheta = odo.getXYT()[2];
 
 		leftMotor.setSpeed(ROTATE_SPEED);
 		rightMotor.setSpeed(ROTATE_SPEED);
