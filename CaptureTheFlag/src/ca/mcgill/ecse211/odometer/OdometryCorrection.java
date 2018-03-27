@@ -135,7 +135,15 @@ public class OdometryCorrection {
 	 * @param corrTheta
 	 *            the angle we must correct the odometer to be
 	 */
-	public void correct(boolean correctingX, boolean negXorY, double corrTheta) {
+	public void correct(double corrTheta) {
+		// Sleep for 250 ms
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
 		// Booleans for whether the line has been detected by the right sensor or left
 		// sensor
 		boolean rightLineDetected = false;
@@ -147,12 +155,14 @@ public class OdometryCorrection {
 
 		// Move the robot until one of the sensors detects a line
 		while (!leftLineDetected && !rightLineDetected) {
-			if (rightLsCont.getColorSample()[0] == 13.0 && rightLsCont.getColorSample()[0] == 13.0) {
+			/*if (rightLsCont.getColorSample()[0] == 13.0 && rightLsCont.getColorSample()[0] == 13.0) {
 				rightLineDetected = true;
+				leftLineDetected = true;
 				// Stop the both motors
-				rc.stopMoving(false, false);
+				rc.stopMoving(true, true);
 
-			} else if (rightLsCont.getColorSample()[0] == 13.0) {
+			}*/
+			if (rightLsCont.getColorSample()[0] == 13.0) {
 				rightLineDetected = true;
 				// Stop the right motor
 				rc.stopMoving(false, true);
@@ -180,41 +190,57 @@ public class OdometryCorrection {
 		// The robot is now aligned. Correct the odometer.
 
 		// Check if we are correcting X or Y
-		if (correctingX) {
-
-			// Compute the sensors' X position in cm's
-			double sensorX = odo.getXYT()[0] - SENSOR_DIST;
-
-			// Find the X-coordinate of the nearest waypoint to sensorX.
-			int corrSensorX = (int) Math.round(sensorX / TILE_SIZE);
+		if (corrTheta == 90 || corrTheta == 270) {
 
 			double corrX = 0;
+
 			// Compute the robot's X-coordinate in cm's by adding/subtracting sensor offset
 			// to the sensor's X-coordinate (in cm's)
-			if (negXorY) {
-				corrX = TILE_SIZE * corrSensorX - SENSOR_DIST;
-			} else {
+			if (corrTheta == 90) {
+				// Compute the sensors' X position in cm's
+				double sensorX = odo.getXYT()[0] - SENSOR_DIST;
+
+				// Find the X-coordinate of the nearest waypoint to sensorX.
+				int corrSensorX = (int) Math.round(sensorX / TILE_SIZE);
+
 				corrX = TILE_SIZE * corrSensorX + SENSOR_DIST;
+			} else {
+				// Compute the sensors' X position in cm's
+				double sensorX = odo.getXYT()[0] + SENSOR_DIST;
+
+				// Find the X-coordinate of the nearest waypoint to sensorX.
+				int corrSensorX = (int) Math.round(sensorX / TILE_SIZE);
+
+				corrX = TILE_SIZE * corrSensorX - SENSOR_DIST;
 			}
+
 			// Correct the odometer's X
 			odo.setX(corrX);
 
 		} else {
 
-			// Compute the sensors' Y position in cm's
-			double sensorY = odo.getXYT()[1] - SENSOR_DIST;
-
-			// Find the X-coordinate of the nearest waypoint to sensorX.
-			int corrSensorY = (int) Math.round(sensorY / TILE_SIZE);
-
 			double corrY = 0;
+
 			// Compute the robot's X-coordinate in cm's by adding/subtracting sensor offset
 			// to the sensor's X-coordinate (in cm's)
-			if (negXorY) {
-				corrY = TILE_SIZE * corrSensorY - SENSOR_DIST;
-			} else {
+			if (corrTheta == 0) {
+				// Compute the sensors' Y position in cm's
+				double sensorY = odo.getXYT()[1] - SENSOR_DIST;
+
+				// Find the X-coordinate of the nearest waypoint to sensorX.
+				int corrSensorY = (int) Math.round(sensorY / TILE_SIZE);
+
 				corrY = TILE_SIZE * corrSensorY + SENSOR_DIST;
+			} else {
+				// Compute the sensors' Y position in cm's
+				double sensorY = odo.getXYT()[1] + SENSOR_DIST;
+
+				// Find the X-coordinate of the nearest waypoint to sensorX.
+				int corrSensorY = (int) Math.round(sensorY / TILE_SIZE);
+
+				corrY = TILE_SIZE * corrSensorY - SENSOR_DIST;
 			}
+
 			// Correct the odometer's X
 			odo.setY(corrY);
 		}
@@ -222,5 +248,13 @@ public class OdometryCorrection {
 		// Correct the odometers' angle
 		odo.setTheta(corrTheta);
 		rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+
+		// Sleep for 250 ms
+		try {
+			Thread.sleep(250);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 	}
 }

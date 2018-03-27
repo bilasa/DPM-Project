@@ -29,7 +29,7 @@ public class RobotController {
 	public final int ROTATE_SPEED; // made public due to frequent use
 	public final int ACCELERATION; // made public due to frequent use
 	public final double TILE_SIZE;
-	private final double SENSOR_DIST;
+	public final double SENSOR_DIST;
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
@@ -166,7 +166,7 @@ public class RobotController {
 
 			// Immediate correction for the first tile moved
 			if (i == 1) {
-				odoCorrection.correct(true, negX, corrTheta);
+				odoCorrection.correct(corrTheta);
 			}
 
 			// travelToDirect() to the next closest point
@@ -175,7 +175,7 @@ public class RobotController {
 			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
 
 			// Correct the robot in the X-direction with correct theta corrTheta
-			odoCorrection.correct(true, negX, corrTheta);
+			odoCorrection.correct(corrTheta);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesX)) {
@@ -207,7 +207,7 @@ public class RobotController {
 
 			// Immediate correction for the first tile moved
 			if (i == 1) {
-				odoCorrection.correct(false, negY, corrTheta);
+				odoCorrection.correct(corrTheta);
 			}
 
 			// travelToDirect() to the next closest point
@@ -217,7 +217,7 @@ public class RobotController {
 			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
 
 			// Correct the robot in the Y-direction with correct theta corrTheta
-			odoCorrection.correct(false, negY, corrTheta);
+			odoCorrection.correct(corrTheta);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesY)) {

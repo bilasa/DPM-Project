@@ -62,7 +62,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private final static double WHEEL_RAD = 1.66;
-	private final static double TRACK = 17.7;
+	private final static double TRACK = 17.95; // original 17.7
 	private final static int ROTATE_SPEED = 250;
 	private final static int FORWARD_SPEED = 250;
 	private final static int ACCELERATION = 2000;
@@ -143,6 +143,7 @@ public class CaptureTheFlag {
 		//Thread odoCorrectionThread = new Thread(odoCorrection);
 		//odoCorrectionThread.start();
 		rc.setOdoCorrection(odoCorrection);
+		navigator.setOdoCorrection(odoCorrection);
 
 		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();
@@ -165,12 +166,12 @@ public class CaptureTheFlag {
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
-//		usLocalizer.usLocalize();
+		usLocalizer.usLocalize();
 //
 //		// ====== Do initial light localization in corner ======  //
-//		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
 
 //		rc.travelTo(3, 1, FORWARD_SPEED, true);
 //		Sound.beepSequence();
