@@ -3,17 +3,15 @@ package ca.mcgill.ecse211.main;
 import ca.mcgill.ecse211.controller.LightSensorController;
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
-import ca.mcgill.ecse211.enumeration.Flag;
 import ca.mcgill.ecse211.enumeration.Team;
-import ca.mcgill.ecse211.odometer.Display;
 import ca.mcgill.ecse211.navigation.FlagSearcher;
 import ca.mcgill.ecse211.navigation.LightLocalizer;
 import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.navigation.UltrasonicLocalizer;
+import ca.mcgill.ecse211.odometer.Display;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import lejos.hardware.Button;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -64,9 +62,9 @@ public class CaptureTheFlag {
 
 	// Constants
 	private final static double WHEEL_RAD = 1.66;
-	private final static double TRACK = 17.7;
+	private final static double TRACK = 17.95; // original 17.7
 	private final static int ROTATE_SPEED = 250;
-	private final static int FORWARD_SPEED = 200;
+	private final static int FORWARD_SPEED = 250;
 	private final static int ACCELERATION = 2000;
 	private final static double TILE_SIZE = 30.48;
 	private final static double SENSOR_DIST = 12.5;
@@ -145,6 +143,7 @@ public class CaptureTheFlag {
 		//Thread odoCorrectionThread = new Thread(odoCorrection);
 		//odoCorrectionThread.start();
 		rc.setOdoCorrection(odoCorrection);
+		navigator.setOdoCorrection(odoCorrection);
 
 		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
 		lightLocalizer.generalLightLocalize();
@@ -168,14 +167,17 @@ public class CaptureTheFlag {
 
 		// ====== Do ultrasonic localization in corner ======  //
 		usLocalizer.usLocalize();
-
-		// ====== Do initial light localization in corner ======  //
+//
+//		// ====== Do initial light localization in corner ======  //
 		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
 
-		//rc.travelTo(1, 7, FORWARD_SPEED, true);
-
+//		rc.travelTo(3, 1, FORWARD_SPEED, true);
+//		Sound.beepSequence();
+//		rc.travelTo(1, 1, FORWARD_SPEED, true);
+		
+		
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();

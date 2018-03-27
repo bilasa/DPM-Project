@@ -17,7 +17,14 @@ import lejos.hardware.lcd.LCD;
 public class WiFi {
 
 	// ** Set these as appropriate for your team and current situation **
-	private static final String SERVER_IP = "192.168.2.10";
+	
+	// ***Bijan's***
+	//private static final String SERVER_IP = "192.168.2.10";
+	// ***Esa's***
+	private static final String SERVER_IP = "192.168.2.40";
+	// ***TA's***
+	//private static final String SERVER_IP = "192.168.2.3";
+		
 	private static final int TEAM_NUMBER = 8;
 
 	// Enable/disable printing of debug info from the WiFi class
