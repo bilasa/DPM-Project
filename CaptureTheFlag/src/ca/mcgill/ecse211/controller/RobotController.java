@@ -5,6 +5,7 @@ import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
+import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
@@ -75,7 +76,7 @@ public class RobotController {
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
 	}
-	
+
 	/**
 	 * Travels to (x, y) with speed "speed" and an optional lock for the motors.
 	 * 
@@ -111,8 +112,8 @@ public class RobotController {
 	}
 
 	/**
-	 * Travels to (x, y) with speed "speed" and an optional lock for the motors by rolling 
-	 * horizontally and vertically only.
+	 * Travels to (x, y) with speed "speed" and an optional lock for the motors by
+	 * rolling horizontally and vertically only.
 	 * 
 	 * @param x
 	 * @param y
@@ -121,111 +122,111 @@ public class RobotController {
 	 */
 	public void travelTo(int x, int y, int speed, boolean lock) {
 		// Unpause the OdometryCorrection, set the target destination
-		//odoCorrection.setTargetXY(x, y);
-		//odoCorrection.setPaused(false);
+		// odoCorrection.setTargetXY(x, y);
+		// odoCorrection.setPaused(false);
 
 		// Compute the nearest waypoint from the odometer reading
-		int lastX = (int)Math.round(odo.getXYT()[0] / TILE_SIZE);
-		int lastY = (int)Math.round(odo.getXYT()[1] / TILE_SIZE);
+		int lastX = (int) Math.round(odo.getXYT()[0] / TILE_SIZE);
+		int lastY = (int) Math.round(odo.getXYT()[1] / TILE_SIZE);
 
-		// Angle to turn to to go to the next point. In OdometryCorrection, use this angle to correct the Odometer's theta.
+		boolean negX = false;
+		boolean negY = false;
+
+		// Check if the target point is below the current X and current Y
+		if (lastX > x) {
+			negX = true;
+		}
+		if (lastY > y) {
+			negY = true;
+		}
+		// Angle to turn to to go to the next point. In OdometryCorrection, use this
+		// angle to correct the Odometer's theta.
 		double corrTheta = odo.getXYT()[2];
 
-		leftMotor.setSpeed(ROTATE_SPEED);
-		rightMotor.setSpeed(ROTATE_SPEED);
+		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 
 		// Find the proper angle to rotate to (if lastX == x, not needed)
-		if (lastX < x) {
-			corrTheta = 90;
-		} else if (lastX > x) {
+		if (negX) {
 			corrTheta = 270;
+		} else {
+			corrTheta = 90;
 		}
 
 		// Rotate to the proper angle
-		turnTo(corrTheta);
+		if (lastX != x)
+			turnTo(corrTheta);
 
 		// Calculate the number of tiles the robot needs to move in the X direction
-		int tilesX = Math.abs(x - lastX);
+		int tilesX = x - lastX;
 
-		leftMotor.setSpeed(speed);
-		rightMotor.setSpeed(speed);
+		setSpeeds(speed, speed);
 
 		// Advance towards next point's x coordinate
-		for (int i = 0; i < tilesX; i++) {
+		for (int i = 1; i <= Math.abs(tilesX); i++) {
 
 			// Immediate correction for the first tile moved
-			if (i == 0) {
-				odoCorrection.correct(true, corrTheta);
+			if (i == 1) {
+				odoCorrection.correct(true, negX, corrTheta);
 			}
 
-			// Move forward by 2/3 of a tile so that the sensors are behind the perpendicular line we will correct at
-			leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
-			rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
-
-			// *********TODO: 	CALL TO ODOMETRY CORRECTION TO MOVE FORWARD UNTIL YOU FIND A BLACK LINE,
-			// *********		FIX YOURSELF, THEN UPDATE ODOMETER READING BASED ON APPROXIMATING 
-			// ********* 		CURRENT READINGS ON ODOMETER AND THEN EXIT
+			// travelToDirect() to the next closest point
+			directTravelTo(lastX + (tilesX / Math.abs(tilesX)) * i, lastY, FORWARD_SPEED, lock);
+			// leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
+			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
 
 			// Correct the robot in the X-direction with correct theta corrTheta
-			odoCorrection.correct(true, corrTheta);
+			odoCorrection.correct(true, negX, corrTheta);
 
 			// Move back by sensor offset at the last tile
-			if (i == (tilesX - 1)) {
+			if (i == Math.abs(tilesX)) {
 				this.travelDist(-SENSOR_DIST, true);
 			}
 
 		}
 
-
-
-		leftMotor.setSpeed(ROTATE_SPEED);
-		rightMotor.setSpeed(ROTATE_SPEED);
+		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 
 		// Find the proper angle to rotate to (if lastX == x, not needed)
-		if (lastX < x) {
-			corrTheta = 0;
-		} else if (lastX > x) {
+		if (negY) {
 			corrTheta = 180;
+		} else {
+			corrTheta = 0;
 		}
 
 		// Rotate to the proper angle
-		turnTo(corrTheta);
+		if (lastY != y)
+			turnTo(corrTheta);
 
 		// Calculate the number of tiles the robot needs to move in the Y direction
-		int tilesY = Math.abs(y - lastY);
+		int tilesY = y - lastY;
 
-		leftMotor.setSpeed(speed);
-		rightMotor.setSpeed(speed);
+		setSpeeds(speed, speed);
 
 		// Advance towards next point's y coordinate
-		for (int i = 0; i < tilesY; i++) {
-			
+		for (int i = 1; i <= Math.abs(tilesY); i++) {
+
 			// Immediate correction for the first tile moved
-			if (i == 0) {
-				odoCorrection.correct(false, corrTheta);
+			if (i == 1) {
+				odoCorrection.correct(false, negY, corrTheta);
 			}
 
-			leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
-			rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
-			// *********TODO: 	CALL TO ODOMETRY CORRECTION TO MOVE FORWARD UNTIL YOU FIND A BLACK LINE,
-			// *********		FIX YOURSELF, THEN UPDATE ODOMETER READING BASED ON APPROXIMATING 
-			// ********* 		CURRENT READINGS ON ODOMETER AND THEN EXIT
+			// travelToDirect() to the next closest point
+			directTravelTo(lastX, lastY + (tilesY / Math.abs(tilesY)) * i, FORWARD_SPEED, lock);
+
+			// leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
+			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
 
 			// Correct the robot in the Y-direction with correct theta corrTheta
-			odoCorrection.correct(false, corrTheta);
+			odoCorrection.correct(false, negY, corrTheta);
 
 			// Move back by sensor offset at the last tile
-			if (i == (tilesY - 1)) {
+			if (i == Math.abs(tilesY)) {
 				this.travelDist(-SENSOR_DIST, true);
 			}
 		}
 
-
-
-
-
 		// Pause the OdometryCorrection
-		//odoCorrection.setPaused(true);
+		// odoCorrection.setPaused(true);
 	}
 
 	/**

@@ -99,7 +99,7 @@ public class LightLocalizer {
 			// the first line it will cross will be at angle -24 based on experimental results
 			if (lsCont.getColorSample()[0] == 13.0) {
 				rc.stopMoving();
-				rc.turnBy(24, true);
+				rc.turnBy(29, true);
 				break;
 			}
 
