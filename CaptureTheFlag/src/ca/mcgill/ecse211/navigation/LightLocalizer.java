@@ -90,7 +90,7 @@ public class LightLocalizer {
 		odo.setY(-SENSOR_DIST * (Math.cos((angles[2] - angles[0]) / 2)));
 
 		// Move to the origin
-		rc.travelTo(0, 0, FORWARD_SPEED, true);
+		rc.directTravelTo(0, 0, FORWARD_SPEED, true);
 		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
 
 		// Set the angle to perfect 0
@@ -190,7 +190,7 @@ public class LightLocalizer {
 		odo.setY(origY);
 
 		// Move to the waypoint
-		rc.travelTo(corrX, corrY, FORWARD_SPEED, true);
+		rc.directTravelTo(corrX, corrY, FORWARD_SPEED, true);
 		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
 
 		/*// Compute the correction
