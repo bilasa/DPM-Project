@@ -100,3 +100,14 @@ By Bijan Sadeghi
 
 By Bijan Sadeghi & Esa Khan
 
+## 2.2
+### Fix OdometryCorrection (18/03/27)
+* Fixed calculations involving sensor offset
+* Removed two of the parameters in `correct`
+* Introduced 250 ms sleep at beginning and end of `correct`
+* Removed case for both sensors detecting the line in `correct`
+* Set track to 17.95
+* Modified `travelThrough` to correct twice at the entrance of the crossing and twice at the exit of the crossing
+
+By Bijan Sadeghi, Esa Khan & Guillaume Richard
+
