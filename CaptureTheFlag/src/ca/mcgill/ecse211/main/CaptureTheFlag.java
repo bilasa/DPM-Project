@@ -62,7 +62,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private final static double WHEEL_RAD = 1.66;
-	private final static double TRACK = 17.95; // original 17.7
+	private final static double TRACK = 18.0; // original 17.7
 	private final static int ROTATE_SPEED = 250;
 	private final static int FORWARD_SPEED = 250;
 	private final static int ACCELERATION = 2000;
@@ -173,8 +173,9 @@ public class CaptureTheFlag {
 
 		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
 
-//		rc.travelTo(3, 1, FORWARD_SPEED, true);
-//		Sound.beepSequence();
+		//rc.travelTo(1, 1, FORWARD_SPEED, true);
+		
+		Sound.beepSequence();
 //		rc.travelTo(1, 1, FORWARD_SPEED, true);
 		
 		

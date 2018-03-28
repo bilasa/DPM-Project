@@ -17,14 +17,14 @@ import lejos.hardware.lcd.LCD;
 public class WiFi {
 
 	// ** Set these as appropriate for your team and current situation **
-	
+
 	// ***Bijan's***
 	//private static final String SERVER_IP = "192.168.2.10";
 	// ***Esa's***
-	private static final String SERVER_IP = "192.168.2.40";
+	//private static final String SERVER_IP = "192.168.2.18";
 	// ***TA's***
-	//private static final String SERVER_IP = "192.168.2.3";
-		
+	private static final String SERVER_IP = "192.168.2.3";
+
 	private static final int TEAM_NUMBER = 8;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -37,7 +37,7 @@ public class WiFi {
 	public WiFi() {
 		// Store the data
 		this.getData();
-		
+
 		// Clear the console
 		System.out.flush();
 	}
@@ -179,7 +179,7 @@ public class WiFi {
 		// Get coords of red zone
 		int lowerLeftX = ((Long) data.get("Red_LL_x")).intValue(),
 				lowerLeftY = ((Long) data.get("Red_LL_y")).intValue(),
-				upperRightX = ((Long) data.get("Red_LL_x")).intValue(),
+				upperRightX = ((Long) data.get("Red_UR_x")).intValue(),
 				upperRightY = ((Long) data.get("Red_UR_y")).intValue();
 
 		// Corner convention:
@@ -202,7 +202,7 @@ public class WiFi {
 		// Get coords of green zone
 		int lowerLeftX = ((Long) data.get("Green_LL_x")).intValue(),
 				lowerLeftY = ((Long) data.get("Green_LL_y")).intValue(),
-				upperRightX = ((Long) data.get("Green_LL_x")).intValue(),
+				upperRightX = ((Long) data.get("Green_UR_x")).intValue(),
 				upperRightY = ((Long) data.get("Green_UR_y")).intValue();
 
 		// Corner convention:
@@ -309,15 +309,57 @@ public class WiFi {
 	}
 
 	/**
+	 * Determines the orientation of the crossings by checking
+	 * which side of the tunnel intersects with the greenzone (both point of the side).
+	 * 
 	 * @return whether or not the bridge/tunnel are placed vertically in the playzone
 	 */
 	public boolean isCrossingVert() {
 		int[][] tunnelZone = getTunnelZone();
+		int[][] greenZone = getGreenZone();
 		// Crossing is vertical if the difference between tunnel's lower-left x
 		// and lower-right x is 1
-		if (tunnelZone[1][0] - tunnelZone[0][0] == 1)
+		/*if (tunnelZone[1][0] - tunnelZone[0][0] == 1)
 			return true;
-		return false;
+		return false;*/
+		
+		boolean bottomLeft = false;
+		boolean bottomRight = false;
+		boolean upperRight = false;
+		boolean upperLeft = false;
+		
+		// Check if the bottom side of the tunnel touches the green zone
+		if(tunnelZone[0][0] >= greenZone[0][0] && tunnelZone[0][0] <= greenZone[2][0] && tunnelZone[0][1] >= greenZone[0][1] && tunnelZone[0][1] <= greenZone[2][1])
+			bottomLeft = true;
+
+		// Check if the right side of the tunnel touches the green zone
+		if(tunnelZone[1][0] >= greenZone[0][0] && tunnelZone[1][0] <= greenZone[2][0] && tunnelZone[1][1] >= greenZone[0][1] && tunnelZone[1][1] <= greenZone[2][1])
+			bottomRight = true;
+
+		// Check if the bottom side of the tunnel touches the green zone
+		if(tunnelZone[2][0] >= greenZone[0][0] && tunnelZone[2][0] <= greenZone[2][0] && tunnelZone[2][1] >= greenZone[0][1] && tunnelZone[2][1] <= greenZone[2][1])
+			upperRight = true;
+
+		// Check if the bottom side of the tunnel touches the green zone
+		if(tunnelZone[3][0] >= greenZone[0][0] && tunnelZone[3][0] <= greenZone[2][0] && tunnelZone[3][1] >= greenZone[0][1] && tunnelZone[3][1] <= greenZone[2][1])
+			upperLeft = true;
+		
+		// If the bottom or top side of the tunnel touches the greenzone, the crossings must be vertical
+		if((bottomLeft && bottomRight) || (upperLeft && upperRight)) {
+			return true;
+		} else {
+			return false;
+		}
 	}
+
+	/**
+	 * @return the length of the bridge/tunnel
+	 */
+	public int getCrossingLength() {
+		int[][] tunnelZone = getTunnelZone();
+
+		return Math.max(Math.abs(tunnelZone[0][0] - tunnelZone[2][0]), Math.abs(tunnelZone[0][1] - tunnelZone[2][1]));
+	}
+
 
 }
