@@ -135,7 +135,10 @@ public class OdometryCorrection {
 	 * @param corrTheta
 	 *            the angle we must correct the odometer to be
 	 */
-	public void correct(double corrTheta) {
+	public void correct(double corrTheta, double[] initialOdo) {
+		// Intermediate odometer reading: odometer's reading after detecting the first line
+		double[] intermediateOdo = new double[3];
+
 		// Sleep for 250 ms
 		try {
 			Thread.sleep(250);
@@ -155,25 +158,22 @@ public class OdometryCorrection {
 
 		// Move the robot until one of the sensors detects a line
 		while (!leftLineDetected && !rightLineDetected) {
-			/*if (rightLsCont.getColorSample()[0] == 13.0 && rightLsCont.getColorSample()[0] == 13.0) {
-				rightLineDetected = true;
-				leftLineDetected = true;
-				// Stop the both motors
-				rc.stopMoving(true, true);
-
-			}*/
 			if (rightLsCont.getColorSample()[0] == 13.0) {
 				rightLineDetected = true;
 				// Stop the right motor
 				rc.stopMoving(false, true);
+				intermediateOdo = odo.getXYT();
 
 			} else if (leftLsCont.getColorSample()[0] == 13.0) {
 				leftLineDetected = true;
 
 				// Stop the left motor
 				rc.stopMoving(true, false);
+				intermediateOdo = odo.getXYT();
 			}
 		}
+
+		// Get the odometer's reading 
 
 		// Keep moving the left/right motor until both lines have been detected
 		while (!leftLineDetected || !rightLineDetected) {
@@ -189,10 +189,27 @@ public class OdometryCorrection {
 
 		// The robot is now aligned. Correct the odometer.
 
-		// Check if we are correcting X or Y
-		if (corrTheta == 90 || corrTheta == 270) {
+		// Get the final odometer reading: reading after both lines are detected
+		double[] finalOdo = odo.getXYT();
 
-			double corrX = 0;
+		// Compute the angle the robot rotated by to correct itself
+		double dTheta = finalOdo[2] - intermediateOdo[2];
+
+		// Compute the distance traveled from initial to intermediate
+		double dist = Math.hypot(intermediateOdo[0] - initialOdo[0], intermediateOdo[1] - initialOdo[1]);
+
+		// Compute the offset of the sensor's from the line
+		double c = rc.TRACK / 2 * Math.tan(Math.toRadians(Math.abs(dTheta)));
+
+		// Compute the robot's offset from its intended traveling axis
+		double offset = (dist - SENSOR_DIST + c) * Math.sin(Math.abs(dTheta));
+
+		// Variables to store the final correct odometer values
+		double corrX = 0;
+		double corrY = 0;
+
+		// Check if we are correcting along X or Y axis
+		if (corrTheta == 90 || corrTheta == 270) {
 
 			// Compute the robot's X-coordinate in cm's by adding/subtracting sensor offset
 			// to the sensor's X-coordinate (in cm's)
@@ -203,7 +220,13 @@ public class OdometryCorrection {
 				// Find the X-coordinate of the nearest waypoint to sensorX.
 				int corrSensorX = (int) Math.round(sensorX / TILE_SIZE);
 
+				// Get the correct X
 				corrX = TILE_SIZE * corrSensorX + SENSOR_DIST;
+
+				// Get the correct Y
+				corrY = intermediateOdo[1] + (dTheta / Math.abs(dTheta) * offset);
+
+
 			} else {
 				// Compute the sensors' X position in cm's
 				double sensorX = odo.getXYT()[0] + SENSOR_DIST;
@@ -211,15 +234,14 @@ public class OdometryCorrection {
 				// Find the X-coordinate of the nearest waypoint to sensorX.
 				int corrSensorX = (int) Math.round(sensorX / TILE_SIZE);
 
+				// Get the correct X
 				corrX = TILE_SIZE * corrSensorX - SENSOR_DIST;
+
+				// Get the correct Y
+				corrY = intermediateOdo[1] - (dTheta / Math.abs(dTheta) * offset);
 			}
 
-			// Correct the odometer's X
-			odo.setX(corrX);
-
 		} else {
-
-			double corrY = 0;
 
 			// Compute the robot's X-coordinate in cm's by adding/subtracting sensor offset
 			// to the sensor's X-coordinate (in cm's)
@@ -230,7 +252,12 @@ public class OdometryCorrection {
 				// Find the X-coordinate of the nearest waypoint to sensorX.
 				int corrSensorY = (int) Math.round(sensorY / TILE_SIZE);
 
+				// Get the correct Y
 				corrY = TILE_SIZE * corrSensorY + SENSOR_DIST;
+
+				// Get the correct X
+				corrX = intermediateOdo[0] - (dTheta / Math.abs(dTheta) * offset);
+
 			} else {
 				// Compute the sensors' Y position in cm's
 				double sensorY = odo.getXYT()[1] + SENSOR_DIST;
@@ -238,15 +265,18 @@ public class OdometryCorrection {
 				// Find the X-coordinate of the nearest waypoint to sensorX.
 				int corrSensorY = (int) Math.round(sensorY / TILE_SIZE);
 
+				// Get the correct Y
 				corrY = TILE_SIZE * corrSensorY - SENSOR_DIST;
+
+				// Get the correct X
+				corrX = intermediateOdo[0] + (dTheta / Math.abs(dTheta) * offset);
 			}
 
-			// Correct the odometer's X
-			odo.setY(corrY);
 		}
 
-		// Correct the odometers' angle
-		odo.setTheta(corrTheta);
+		// Correct the odometer
+		odo.setXYT(corrX, corrY, corrTheta);
+
 		rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
 
 		// Sleep for 250 ms

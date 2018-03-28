@@ -166,8 +166,10 @@ public class RobotController {
 
 			// Immediate correction for the first tile moved
 			if (i == 1) {
-				odoCorrection.correct(corrTheta);
+				odoCorrection.correct(corrTheta, odo.getXYT());
 			}
+			
+			double[] initialOdo = odo.getXYT();
 
 			// travelToDirect() to the next closest point
 			directTravelTo(lastX + (tilesX / Math.abs(tilesX)) * i, lastY, FORWARD_SPEED, lock);
@@ -175,7 +177,7 @@ public class RobotController {
 			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
 
 			// Correct the robot in the X-direction with correct theta corrTheta
-			odoCorrection.correct(corrTheta);
+			odoCorrection.correct(corrTheta, initialOdo);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesX)) {
@@ -207,17 +209,16 @@ public class RobotController {
 
 			// Immediate correction for the first tile moved
 			if (i == 1) {
-				odoCorrection.correct(corrTheta);
+				odoCorrection.correct(corrTheta, odo.getXYT());
 			}
+			
+			double[] initialOdo = odo.getXYT();
 
 			// travelToDirect() to the next closest point
 			directTravelTo(lastX, lastY + (tilesY / Math.abs(tilesY)) * i, FORWARD_SPEED, lock);
 
-			// leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
-			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
-
 			// Correct the robot in the Y-direction with correct theta corrTheta
-			odoCorrection.correct(corrTheta);
+			odoCorrection.correct(corrTheta, initialOdo);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesY)) {

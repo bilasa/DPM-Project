@@ -257,13 +257,15 @@ public class Navigator {
 		turnToCrossing(tunnelZone);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta());
+		odoCorrection.correct(getCorrTheta(), odo.getXYT());
+		
+		double[] odoBeforeCrossing = odo.getXYT();
 
-		// Travel through the tunnel/bridge by moving forward by 4 tiles
-		rc.travelDist(3.5 * rc.TILE_SIZE, true);
+		// Travel through the tunnel/bridge by moving forward by the (length of the crossing + 1.5)
+		rc.travelDist((wifi.getCrossingLength() + 1.5) * rc.TILE_SIZE, true);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta());
+		odoCorrection.correct(getCorrTheta(), odoBeforeCrossing);
 
 		// Move back so the robot is on the line
 		rc.travelDist(-rc.SENSOR_DIST, true);
@@ -275,7 +277,7 @@ public class Navigator {
 		rc.travelDist(rc.TILE_SIZE / 2, true);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta());
+		odoCorrection.correct(getCorrTheta(), odo.getXYT());
 
 	}
 
@@ -287,14 +289,16 @@ public class Navigator {
 		turnToCrossing(bridgeZone);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta());
-
-		// Travel through the tunnel/bridge by moving forward by 4 tiles
-		rc.travelDist(3.5 * rc.TILE_SIZE, true);
+		odoCorrection.correct(getCorrTheta(), odo.getXYT());
+		
+		double[] odoBeforeCrossing = odo.getXYT();
+		
+		// Travel through the tunnel/bridge by moving forward by the (length of the crossing + 1.5)
+		rc.travelDist((wifi.getCrossingLength() + 1.5) * rc.TILE_SIZE, true);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta());
-
+		odoCorrection.correct(getCorrTheta(), odoBeforeCrossing);
+		
 		// Move back so the robot is on the line
 		rc.travelDist(-rc.SENSOR_DIST, true);
 
@@ -305,8 +309,7 @@ public class Navigator {
 		rc.travelDist(rc.TILE_SIZE / 2, true);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta());
-
+		odoCorrection.correct(getCorrTheta(), odo.getXYT());
 
 	}
 
@@ -355,7 +358,7 @@ public class Navigator {
 		double corrTheta = getCorrTheta();
 
 		// Correct until the line
-		odoCorrection.correct(corrTheta);
+		odoCorrection.correct(corrTheta, odo.getXYT());
 
 		// Travel forward by half a tile
 		rc.travelDist(rc.TILE_SIZE / 2 - rc.SENSOR_DIST, true);
