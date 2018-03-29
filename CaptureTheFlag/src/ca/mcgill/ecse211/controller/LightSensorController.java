@@ -5,7 +5,12 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
 /**
- * Controls all aspects of a light sensor
+ * This class allows the control of a given EV3ColorSensor.
+ * This class is used by any class that needs access to
+ * data read by a light sensor. In particular, it is used
+ * by LightLocalizer, OdometryCorrection, and FlagSearcher.
+ * The class can fetch the color sample of the light sensor
+ * as well as provide the color of a block.
  * 
  * @author Bijan Sadeghi
  */
@@ -21,6 +26,11 @@ public class LightSensorController {
 		RED, BLUE, YELLOW, WHITE, UNKNOWN
 	}
 
+	/**
+	 * @param colorSensor the color sensor to use
+	 * @param color the sensor mode
+	 * @param colorSample the array to fetch the samples into
+	 */
 	public LightSensorController(EV3ColorSensor colorSensor, SensorMode color, float[] colorSample) {
 		this.colorSensor = colorSensor;
 		this.color = color;
@@ -36,9 +46,9 @@ public class LightSensorController {
 	}
 
 	/**
-	 * Calculates the color of the block based on red proportion
+	 * Calculates the color of the block based on red proportion.
 	 * 
-	 * @param RGBSample: Sample of the block in front of the color sensor
+	 * @param RGBSample The RGB sample of the block in front of the color sensor
 	 * @return The color of the detected block
 	 */
 	static BlockColors getBlockColor(float[] RGBSample) {

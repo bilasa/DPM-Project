@@ -25,9 +25,15 @@ import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
 /**
- * Main class to be run
+ * This class is the main class of the project. This class is 
+ * at the top layer of the layered hierarchy and calls methods
+ * from classes in the middle layer (navigation layer). The main 
+ * method of the class sequentially calls methods in the navigation
+ * layer in order to execute the different high level tasks of the 
+ * challenge.
  * 
- * @author Bijan Sadeghi & Esa Khan
+ * @author Bijan Sadeghi
+ * @author Esa Khan
  */
 public class CaptureTheFlag {
 
@@ -107,19 +113,17 @@ public class CaptureTheFlag {
 	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
 
 	/**
-	 * Localizes the robot at its corner.
-	 * Navigates the robot through the tunnel/bridge.
-	 * Searches for the flag in the opponent's search zone.
-	 * Navigates the robot through the bridge/tunnel.
-	 * Returns the robot to its starting corner.
+	 * First localizes the robot at its starting corner.
+	 * Then navigates the robot through the tunnel/bridge.
+	 * Then searches for the flag in the opponent's search zone.
+	 * Then navigates the robot through the bridge/tunnel.
+	 * Finally Returns the robot to its starting corner.
 	 * 
 	 * @param args
 	 * @throws OdometerExceptions
 	 */
 	public static void main(String[] args) throws OdometerExceptions {
-		//rc.setSpeeds(200, 200);
-		//rc.turnBy(720, true);
-
+		
 		// Display
 		Display odometryDisplay = new Display(LCD);
 
@@ -139,27 +143,9 @@ public class CaptureTheFlag {
 		//Thread timerThread = new Thread(timer);
 		//timer.start();
 
-		// Set odometry correction for the RobotController
-		//Thread odoCorrectionThread = new Thread(odoCorrection);
-		//odoCorrectionThread.start();
+		// Add odoCorrection to the robot controller and navigator
 		rc.setOdoCorrection(odoCorrection);
 		navigator.setOdoCorrection(odoCorrection);
-
-		/*rc.travelTo(1, 2, FORWARD_SPEED, true);
-		lightLocalizer.generalLightLocalize();
-		rc.turnTo(90);
-		rc.travelDist(TILE_SIZE / 2, true);
-		rc.turnTo(0);
-		rc.travelDist(4 * TILE_SIZE, true);
-		rc.turnTo(90);
-		rc.travelDist(TILE_SIZE / 2, true);
-		lightLocalizer.generalLightLocalize();
-		rc.turnTo(180);
-		rc.travelDist(TILE_SIZE / 2, true);
-		rc.turnTo(90);
-		rc.travelDist(4 * TILE_SIZE, true);
-		rc.travelTo(7, 7, FORWARD_SPEED, true);
-		lightLocalizer.generalLightLocalize();*/
 
 
 		// ====== Get the robot's team ======  //
@@ -167,8 +153,8 @@ public class CaptureTheFlag {
 
 		// ====== Do ultrasonic localization in corner ======  //
 		usLocalizer.usLocalize();
-//
-//		// ====== Do initial light localization in corner ======  //
+
+		// ====== Do initial light localization in corner ======  //
 		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
 		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
@@ -176,8 +162,6 @@ public class CaptureTheFlag {
 		//rc.travelTo(1, 1, FORWARD_SPEED, true);
 		
 		Sound.beepSequence();
-//		rc.travelTo(1, 1, FORWARD_SPEED, true);
-		
 		
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
@@ -187,9 +171,6 @@ public class CaptureTheFlag {
 			navigator.travelToBridge();
 		}
 
-		// ====== Localize at the tunnel/bridge entrance ====== //
-		//lightLocalizer.generalLightLocalize();
-
 		if (team == Team.GREEN) {
 			// ====== Travel through the tunnel ====== //
 			navigator.travelThroughTunnel();
@@ -198,20 +179,11 @@ public class CaptureTheFlag {
 			navigator.travelThroughBridge();
 		}
 
-		// ====== Localize at the tunnel/bridge end ====== //
-		//lightLocalizer.generalLightLocalize();
-
 		// ====== Travel to the search zone ====== //
 		//flagSearcher.travelToSearchZone();
 
-		// ====== Localize before starting search ====== //
-		//lightLocalizer.generalLightLocalize();
-
 		// ====== Search for the flag ====== //
 		//flagSearcher.searchFlag();
-
-		// ====== Localize after search ====== //
-		//lightLocalizer.generalLightLocalize();
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //
@@ -231,9 +203,6 @@ public class CaptureTheFlag {
 			// ====== Travel through the tunnel ====== //
 			navigator.travelThroughTunnel();
 		}
-
-		// ====== Localize after crossing the bridge/tunnel ====== //
-		//lightLocalizer.generalLightLocalize();
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();

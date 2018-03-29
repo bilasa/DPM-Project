@@ -3,7 +3,8 @@ package ca.mcgill.ecse211.main;
 import lejos.hardware.Button;
 
 /**
- * Allows the program to be stopped upon pressing the escape button on the robot
+ * This class allows the program to be stopped at any time
+ * by pressing the escape button on the robot.
  * 
  * @author Esa Khan
  */

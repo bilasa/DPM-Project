@@ -12,11 +12,12 @@ import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
 
 /**
- * Localizes the robot using the ultrasonic sensor,
- * setting the robot's absolute heading to 0 degrees.
+ * This class allows the robot to be localized using the ultrasonic sensor. 
+ * The class localizes the robot's angle by rotating and detecting 
+ * both walls, and averaging the angle at which both walls were detected.
  * 
- * @author Bijan Sadeghi & Esa Khan
- *
+ * @author Bijan Sadeghi
+ * @author Esa Khan
  */
 public class UltrasonicLocalizer {
 
@@ -39,6 +40,10 @@ public class UltrasonicLocalizer {
 	static double firstTheta = 0;
 	static double secondTheta = 0;
 
+	/**
+	 * @param rc the robot controller to use
+	 * @param usCont the ultrasonic sensor controller to use
+	 */
 	public UltrasonicLocalizer(RobotController rc, UltrasonicSensorController usCont) {
 		this.ROTATE_SPEED = rc.ROTATE_SPEED;
 		this.rc = rc;
@@ -52,8 +57,13 @@ public class UltrasonicLocalizer {
 	}
 
 	/**
-	 * Localizes the robot with the ultrasonic sensor and sets
-	 * the robot's absolute heading to 0 degrees.
+	 * Localizes the robot with the ultrasonic sensor using falling edge
+	 * wall detection. Rotates the robot until the difference in distance is
+	 * negative (representing a falling edge) and the distance equals a threshold, 
+	 * and stops, recording the angle. Then rotates the robot in the opposite 
+	 * direction until the falling edge is detected on the other side, recording that 
+	 * angle. Uses the two angles to fix the odometer's theta and set the robot's 
+	 * theta to 0 degrees.
 	 */
 	public void usLocalize() {
 

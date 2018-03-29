@@ -9,9 +9,13 @@ import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 
 /**
- * Allows the navigation of the robot through various parts of the playzone
+ * This class allows the navigation of the robot through various parts of 
+ * the playzone during the challenge. The Navigator includes methods to 
+ * navigate to the tunnel/bridge, travel through the tunnel/bridge, and
+ * travel back to the starting corner.
  * 
- * @author Bijan Sadeghi & Esa Khan
+ * @author Bijan Sadeghi
+ * @author Esa Khan
  */
 public class Navigator {
 
@@ -45,6 +49,10 @@ public class Navigator {
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
 
+	/**
+	 * @param rc the robot controller to use
+	 * @param wifi the wifi object to get the challenge data from
+	 */
 	public Navigator(RobotController rc, WiFi wifi) {
 		this.FORWARD_SPEED = rc.FORWARD_SPEED;
 		this.rc = rc;
@@ -61,11 +69,12 @@ public class Navigator {
 	}
 
 	/**
-	 * Travel to the entrance of the tunnel.
-	 * 
-	 * Assumptions before calling: (1) If robot is on green team, robot is localized
-	 * at its starting corner, (2) If robot is on red team, robot is at the search
-	 * zone point closest to the tunnel's entrance.
+	 * Moves the robot to the entrance of the tunnel, taking account which
+	 * team the robot is in, as well as the robot's starting corner and the
+	 * orientation of the tunnel. The point the robot travels to is always
+	 * the "lower-left" point relative to the tunnel. Uses an L-shape 
+	 * to travel on the edges of the zone as to avoid colliding with blocks 
+	 * in the search zone.
 	 * 
 	 */
 	public void travelToTunnel() {
@@ -158,7 +167,13 @@ public class Navigator {
 	}
 
 	/**
-	 * Travel to the entrance of the bridge
+	 * Moves the robot to the entrance of the bridge, taking account which
+	 * team the robot is in, as well as the robot's starting corner and the
+	 * orientation of the bridge. The point the robot travels to is always
+	 * the "lower-left" point relative to the bridge. Uses an L-shape 
+	 * to travel on the edges of the zone as to avoid colliding with blocks 
+	 * in the search zone.
+	 * 
 	 */
 	public void travelToBridge() {
 		// Extract the bridge coordinates
@@ -250,7 +265,10 @@ public class Navigator {
 	}
 
 	/**
-	 * Travel through the tunnel
+	 * Moves the robot through the tunnel by traveling until the robot is on the tile
+	 * at the exit of the tunnel, taking into account the length of the tunnel. 
+	 * It then corrects the robot using odometry correction and the robot ends up 
+	 * at the relative upper-right/lower-left point with respect to the tunnel.
 	 */
 	public void travelThroughTunnel() {
 		// Turn towards the tunnel
@@ -282,7 +300,10 @@ public class Navigator {
 	}
 
 	/**
-	 * Travel through the bridge
+	 * Moves the robot through the bridge by traveling until the robot is on the tile
+	 * at the exit of the bridge, taking into account the length of the bridge. 
+	 * It then corrects the robot using odometry correction and the robot ends up 
+	 * at the relative upper-right/lower-left point with respect to the bridge.
 	 */
 	public void travelThroughBridge() {
 		// Turn towards the bridge
@@ -314,10 +335,10 @@ public class Navigator {
 	}
 
 	/**
-	 * Turns the robot towards the crossing's lower-left coordinate in order to
-	 * prepare to travel through the crossing
+	 * Positions the robot so that it is facing the entrance of the tunnel/bridge
+	 * and is ready to travel through it.
 	 * 
-	 * @return the angle the robot must face when crossing the tunnel/bridge
+	 * @return the angle the robot is facing when it will cross the tunnel/bridge
 	 */
 	private void turnToCrossing(int[][] crossingZone) {
 		// Compute the nearest waypoint from the odometer reading
@@ -368,7 +389,8 @@ public class Navigator {
 	}
 
 	/**
-	 * Return to the starting corner
+	 * Returns the robot to its starting corner by doing the reverse of the L-shape
+	 * path done in travelToTunnel() or travelToBridge()
 	 */
 	public void returnToStart() {
 		int[] crossingLL = { 0, 0 };
@@ -424,16 +446,19 @@ public class Navigator {
 	}
 
 	/**
-	 * Set the OdometryCorrection to be used by the robot controller
+	 * Set the OdometryCorrection object to be used by the robot controller
 	 * 
-	 * @param odoCorrection
+	 * @param odoCorrection the OdometryCorrection object to be used
 	 */
 	public void setOdoCorrection(OdometryCorrection odoCorrection) {
 		this.odoCorrection = odoCorrection;
 	}
 
 	/**
-	 * @return the correct theta the robot's odometer must use to correct itself
+	 * Gets the corrected angle of the robot given the odometer's theta reading
+	 * when the robot's intended path is vertical or horizontal.
+	 * 
+	 * @return the correct angle the robot's odometer must use to correct itself
 	 */
 	private double getCorrTheta() {
 		double corrTheta = 0;

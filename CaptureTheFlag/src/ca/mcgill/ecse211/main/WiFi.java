@@ -10,7 +10,13 @@ import lejos.hardware.Button;
 import lejos.hardware.lcd.LCD;
 
 /**
- * Collects all data about the challenge from the server jar file
+ * This class fetches all data sent to it from the server JAR
+ * file. The class contains methods to fetch attributes of the
+ * given challenge, including one's team, arrays for search zones,
+ * team zones, the tunnel and the bridge, the length of the tunnel/
+ * bridge, and whether the tunnel/bridge are vertical or horizontal. 
+ * This class is used by all classes in the second layer (navigation)
+ * since they need access to the attributes of the challenge.
  * 
  * @author Esa Khan
  */
@@ -43,7 +49,7 @@ public class WiFi {
 	}
 
 	/**
-	 * Stores all the data from the server jar file
+	 * Stores all the data sent by the server JAR file into a Map object.
 	 */
 	public void getData() {
 		System.out.println("Running..");
@@ -75,9 +81,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get the team you are.
+	 * Gets the color of the team you are in.
 	 * 
-	 * @return Team colour
+	 * @return Team color enumeration for the team you are in
 	 */
 	public Team getTeam() {
 		// Return the corresponding team colour for the team number (8)
@@ -91,9 +97,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get starting corner.
+	 * Gets the starting corner of the given team.
 	 * 
-	 * @return Starting Corner
+	 * @return an int representing the starting corner of the team.
 	 */
 	public int getStartingCorner(Team team) {
 		// Check which team we are
@@ -107,6 +113,11 @@ public class WiFi {
 		return -1;
 	}
 
+	/**
+	 * Gets the starting corner coordinates of your team.
+	 * 
+	 * @return an int array containing the x and y coordinates of your starting corner
+	 */
 	public int[] getStartingCornerCoords() {
 		int[] coords = { 0, 0 };
 		switch (getStartingCorner(this.getTeam())) {
@@ -135,9 +146,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get target flag color.
+	 * Gets the color of target flag of your team (from the opponent's search zone).
 	 * 
-	 * @return Flag color
+	 * @return Flag color enumeration representing your target flag color 
 	 */
 	public Flag getFlagColor() {
 		// Check which team we are
@@ -171,9 +182,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get the red zone.
+	 * Gets the coordinates of the red zone.
 	 * 
-	 * @return Red zone as an array of all four points
+	 * @return two dimensional int array containing the four corners of the red zone as (x, y) pairs
 	 */
 	public int[][] getRedZone() {
 		// Get coords of red zone
@@ -194,9 +205,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get the green zone.
+	 * Gets the coordinates of the green zone.
 	 * 
-	 * @return Green zone as an array of all four points
+	 * @return two dimensional int array containing the four corners of the green zone as (x, y) pairs
 	 */
 	public int[][] getGreenZone() {
 		// Get coords of green zone
@@ -217,9 +228,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get the tunnel zone.
+	 * Gets the coordinates of the tunnel.
 	 * 
-	 * @return Tunnel zone as an array of all four points
+	 * @return two dimensional int array containing the four corners of the tunnel as (x, y) pairs
 	 */
 	public int[][] getTunnelZone() {
 		// Get coords of tunnel zone
@@ -239,9 +250,9 @@ public class WiFi {
 	}
 
 	/**
-	 * Get the bridge zone.
+	 * Gets the coordinates of the bridge.
 	 * 
-	 * @return Bridge zone as an array of all four points
+	 * @return two dimensional int array containing the four corners of the bridge as (x, y) pairs
 	 */
 	public int[][] getBridgeZone() {
 		// Get coords of tunnel zone
@@ -261,11 +272,10 @@ public class WiFi {
 	}
 
 	/**
-	 * Get the search zone of the specified team
+	 * Gets the search zone of the specified team
 	 * 
-	 * @param team:
-	 *            the team of the search zone wanted
-	 * @return Search zone as an array of all four points
+	 * @param team the team of the search zone wanted
+	 * @return two dimensional int array containing the four corners of the search zone as (x, y) pairs
 	 */
 	public int[][] getSearchZone(Team team) {
 		int lowerLeftX, lowerLeftY, upperRightX, upperRightY;
@@ -309,8 +319,8 @@ public class WiFi {
 	}
 
 	/**
-	 * Determines the orientation of the crossings by checking
-	 * which side of the tunnel intersects with the greenzone (both point of the side).
+	 * Determines the orientation of the crossings by checking which side 
+	 * of the tunnel intersects with the greenzone (both point of the side).
 	 * 
 	 * @return whether or not the bridge/tunnel are placed vertically in the playzone
 	 */
@@ -353,6 +363,8 @@ public class WiFi {
 	}
 
 	/**
+	 * Gets the length of the bridge and tunnel.
+	 * 
 	 * @return the length of the bridge/tunnel
 	 */
 	public int getCrossingLength() {
