@@ -112,9 +112,15 @@ By Bijan Sadeghi & Esa Khan
 By Bijan Sadeghi, Esa Khan & Guillaume Richard
 
 ## 2.3
-### Working Beta Demo Code (18/03/29)
+### Working Beta Demo Code (18/03/28)
 * Simple OdometryCorrection (only correct the axis you're traveling on)
 * Set track to 18.0
 
 By Bijan Sadeghi, Esa Khan
+
+## 2.3.1
+### Add detailed Javadoc (18/03/29)
+* Made javadoc comments more detailed
+
+By Bijan Sadeghi
 
