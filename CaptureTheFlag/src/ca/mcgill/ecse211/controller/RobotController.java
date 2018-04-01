@@ -34,7 +34,7 @@ public class RobotController {
 	public final int ROTATE_SPEED; // made public due to frequent use
 	public final int ACCELERATION; // made public due to frequent use
 	public final double TILE_SIZE;
-	public final double SENSOR_DIST;
+	public final double REAR_SENSOR_DIST;
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
@@ -54,7 +54,7 @@ public class RobotController {
 	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
 	 */
 	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD,
-			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE, double SENSOR_DIST) {
+			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE, double REAR_SENSOR_DIST) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.WHEEL_RAD = WHEEL_RAD;
@@ -63,7 +63,7 @@ public class RobotController {
 		this.ROTATE_SPEED = ROTATE_SPEED;
 		this.ACCELERATION = ACCELERATION;
 		this.TILE_SIZE = TILE_SIZE;
-		this.SENSOR_DIST = SENSOR_DIST;
+		this.REAR_SENSOR_DIST = REAR_SENSOR_DIST;
 		try {
 			this.odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -140,9 +140,6 @@ public class RobotController {
 	 * @param lock an optional lock on the motors
 	 */
 	public void travelTo(int x, int y, int speed, boolean lock) {
-		// Unpause the OdometryCorrection, set the target destination
-		// odoCorrection.setTargetXY(x, y);
-		// odoCorrection.setPaused(false);
 
 		// Compute the nearest waypoint from the odometer reading
 		int lastX = (int) Math.round(odo.getXYT()[0] / TILE_SIZE);
@@ -158,6 +155,7 @@ public class RobotController {
 		if (lastY > y) {
 			negY = true;
 		}
+
 		// Angle to turn to to go to the next point. In OdometryCorrection, use this
 		// angle to correct the Odometer's theta.
 		double corrTheta = odo.getXYT()[2];
@@ -192,15 +190,13 @@ public class RobotController {
 
 			// travelToDirect() to the next closest point
 			directTravelTo(lastX + (tilesX / Math.abs(tilesX)) * i, lastY, FORWARD_SPEED, lock);
-			// leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
-			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
 
 			// Correct the robot in the X-direction with correct theta corrTheta
 			odoCorrection.correct(corrTheta, initialOdo);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesX)) {
-				this.travelDist(-SENSOR_DIST, true);
+				this.travelDist(-REAR_SENSOR_DIST, true);
 			}
 
 		}
@@ -241,12 +237,10 @@ public class RobotController {
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesY)) {
-				this.travelDist(-SENSOR_DIST, true);
+				this.travelDist(-REAR_SENSOR_DIST, true);
 			}
 		}
 
-		// Pause the OdometryCorrection
-		// odoCorrection.setPaused(true);
 	}
 
 	/**
@@ -286,6 +280,9 @@ public class RobotController {
 	 * @param dTheta the angle to turn the robot by
 	 */
 	public void turnBy(double dTheta, boolean lock) {
+		// Set speed to turn speed
+		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
+		
 		leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, dTheta), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, dTheta), !lock);
 	}

@@ -2,6 +2,7 @@ package ca.mcgill.ecse211.navigation;
 
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.enumeration.Flag;
+import ca.mcgill.ecse211.enumeration.SearchState;
 import ca.mcgill.ecse211.enumeration.Team;
 import ca.mcgill.ecse211.main.WiFi;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -18,12 +19,6 @@ import ca.mcgill.ecse211.odometer.OdometryCorrection;
  * @author Esa Khan
  */
 public class Navigator {
-
-	// *** Hardcoded Wifi variables (to remove) ***
-	private int tn_ll_x = 3;
-	private int tn_ll_y = 5;
-	private int tn_ur_x = 4;
-	private int tn_ur_y = 7;
 
 	// Robot controller
 	private RobotController rc;
@@ -48,12 +43,22 @@ public class Navigator {
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
+	
+	// Flag searcher
+	private FlagSearcher flagSearcher;
+
+	// Corner of the search zone we start and end the search at
+	private int[] startingSearchCorner;
+
+	// Search zone
+	private int[][] searchZone;
 
 	/**
 	 * @param rc the robot controller to use
 	 * @param wifi the wifi object to get the challenge data from
+	 * @param flagSeacher the flag searcher to use during the flag search
 	 */
-	public Navigator(RobotController rc, WiFi wifi) {
+	public Navigator(RobotController rc, WiFi wifi, FlagSearcher flagSearcher) {
 		this.FORWARD_SPEED = rc.FORWARD_SPEED;
 		this.rc = rc;
 		this.wifi = wifi;
@@ -66,6 +71,8 @@ public class Navigator {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.flagSearcher = flagSearcher;
+		this.searchZone = getSearchZone();
 	}
 
 	/**
@@ -276,7 +283,7 @@ public class Navigator {
 
 		// Correct until the line
 		odoCorrection.correct(getCorrTheta(), odo.getXYT());
-		
+
 		double[] odoBeforeCrossing = odo.getXYT();
 
 		// Travel through the tunnel/bridge by moving forward by the (length of the crossing + 1.5)
@@ -286,7 +293,7 @@ public class Navigator {
 		odoCorrection.correct(getCorrTheta(), odoBeforeCrossing);
 
 		// Move back so the robot is on the line
-		rc.travelDist(-rc.SENSOR_DIST, true);
+		rc.travelDist(-rc.REAR_SENSOR_DIST, true);
 
 		// Turn clockwise by 90 degrees
 		rc.turnBy(90, true);
@@ -311,17 +318,17 @@ public class Navigator {
 
 		// Correct until the line
 		odoCorrection.correct(getCorrTheta(), odo.getXYT());
-		
+
 		double[] odoBeforeCrossing = odo.getXYT();
-		
+
 		// Travel through the tunnel/bridge by moving forward by the (length of the crossing + 1.5)
 		rc.travelDist((wifi.getCrossingLength() + 1.5) * rc.TILE_SIZE, true);
 
 		// Correct until the line
 		odoCorrection.correct(getCorrTheta(), odoBeforeCrossing);
-		
+
 		// Move back so the robot is on the line
-		rc.travelDist(-rc.SENSOR_DIST, true);
+		rc.travelDist(-rc.REAR_SENSOR_DIST, true);
 
 		// Turn clockwise by 90 degrees
 		rc.turnBy(90, true);
@@ -382,7 +389,7 @@ public class Navigator {
 		odoCorrection.correct(corrTheta, odo.getXYT());
 
 		// Travel forward by half a tile
-		rc.travelDist(rc.TILE_SIZE / 2 - rc.SENSOR_DIST, true);
+		rc.travelDist(rc.TILE_SIZE / 2 - rc.REAR_SENSOR_DIST, true);
 
 		// Turn counterclockwise by 90 degrees
 		rc.turnBy(-90, true);
@@ -483,5 +490,146 @@ public class Navigator {
 		}
 
 		return corrTheta;
+	}
+
+	/**
+	 * Travels to the corner of the search zone closest to the robot
+	 * after it has crossed the bridge/tunnel into the opponent
+	 * team's zone.
+	 */
+	public void travelToSearchZone() {
+		startingSearchCorner = getClosestSearchCorner();
+		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED, true);
+	}
+
+	/**
+	 * Searches for the flag in the search zone. Navigates on the rectangular 
+	 * perimeter of the search zone with the ultrasonic sensor facing the
+	 * interior of the search zone. Continuously checks for falling edge signals,
+	 * which would indicate the presence of a block. When a block is detected,
+	 * the robot turns towards the interior of the search zone, approaches the
+	 * block to a given threshold distance, and identifies the color of the block.
+	 * If the block is the target, it beeps twice and ends its search. Otherwise,
+	 * it backs up to the perimeter and continues its search.
+	 * 
+	 */
+	public void searchFlag() {
+		// Pass in a thread object for current thread to the flag searcher
+		flagSearcher.setMainThread(Thread.currentThread());
+		
+		// Initialize search thread
+		Thread flagSearchThread = new Thread(flagSearcher);
+		flagSearchThread.start();
+		
+		// Boolean to make sure you're at the starting corner
+		Boolean atStartingCorner = true;
+		
+		// Travel to the next corner of the search zone
+		int[] currentCorner = startingSearchCorner;
+		int[] nextCorner = nextSearchCorner(currentCorner);		
+		rc.travelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, true);
+
+		// Keep traveling to the next corner as long as the search is in progress
+		// The robot will stop traveling to the next corner if the search state is either:
+		//	 1. TIMED_OUT
+		//   2. FLAG_FOUND
+		while (flagSearcher.getSearchState() == SearchState.IN_PROGRESS || !atStartingCorner) {	
+			currentCorner = nextCorner;
+			nextCorner = nextSearchCorner(currentCorner);
+			rc.travelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, true);
+		
+			if (nextCorner == startingSearchCorner){
+				atStartingCorner = true;
+			} else{
+				atStartingCorner = false;
+			}
+		}
+		
+		
+		System.out.println();
+
+	}
+
+	/**
+	 * Gets the corner of the search zone closest to the robot after crossing
+	 * the tunnel/bridge into the opponent's zone.
+	 * 
+	 * @return the corner of the search zone closest to the robot after it has crossed
+	 */
+	private int[] getClosestSearchCorner() {
+		/*Team opponentTeam = wifi.getTeam();
+		if (wifi.getTeam() == Team.GREEN) {
+			opponentTeam = Team.RED;
+		}else if(wifi.getTeam() == Team.RED){
+			opponentTeam = Team.GREEN;
+		}
+
+		switch(wifi.getStartingCorner(opponentTeam)) {
+		case 0:
+			return wifi.getSearchZone(opponentTeam)[2];
+		case 1:
+			return wifi.getSearchZone(opponentTeam)[3];
+		case 2:
+			return wifi.getSearchZone(opponentTeam)[0];
+		case 3:
+			return wifi.getSearchZone(opponentTeam)[1];
+		}*/
+
+		// Look for the closest corner of the search zone to the robot
+		double shortestDist = Double.MAX_VALUE;
+		int[] closestCorner = searchZone[0];
+		for(int[] corner : searchZone) {
+			double cornerDist = Math.hypot(odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE), odo.getXYT()[1] - (corner[1] * rc.TILE_SIZE));
+
+			if (cornerDist < shortestDist) {
+				shortestDist = cornerDist;
+				closestCorner = corner;
+			}
+		}
+
+		// Return the closest corner found
+		return closestCorner;
+	}
+
+	/**
+	 * Gets the search zone of the opponent team (which is the search zone the robot will search in)
+	 * 
+	 * @return a two-dimensional int array containing four (x, y) pairs for each corner of the search zone
+	 */
+	private int[][] getSearchZone() {
+		// Get the opponent team
+		Team opponentTeam = wifi.getTeam();
+		if (wifi.getTeam() == Team.GREEN) {
+			opponentTeam = Team.RED;
+		}else if(wifi.getTeam() == Team.RED){
+			opponentTeam = Team.GREEN;
+		}
+
+		// Get the search zone of the opponent team
+		return wifi.getSearchZone(opponentTeam);
+	}
+
+	/**
+	 * Gets the next corner of the search zone the robot should travel to based on where it is now
+	 * 
+	 * @param currentCorner
+	 * @return an int array holding the (x, y) of the next search corner
+	 */
+	private int[] nextSearchCorner(int[] currentCorner) {
+
+		// Get the index of the current corner
+		int currentCornerIndex = 0;
+		for(int i=0; i<searchZone.length; i++) {
+			if (searchZone[i][0] == currentCorner[0] && searchZone[i][1] == currentCorner[1]) {
+				currentCornerIndex = i;
+				break;
+			}
+		}
+
+		// Return the next corner in the search zone array
+		if (currentCornerIndex < 3)
+			return searchZone[currentCornerIndex + 1];
+		else
+			return searchZone[0];
 	}
 }

@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.controller;
 
+import lejos.hardware.motor.EV3MediumRegulatedMotor;
 import lejos.hardware.sensor.EV3UltrasonicSensor;
 import lejos.robotics.SampleProvider;
 import lejos.robotics.filter.MeanFilter;
@@ -21,14 +22,18 @@ public class UltrasonicSensorController {
 	private SampleProvider average;
 	private float[] usSample;
 	
+	// Motor to rotate sensor
+	private EV3MediumRegulatedMotor sensorMotor;
+	
 	/**
 	 * @param usSensor the ultrasonic sensor to use
 	 * @param usDistance the sample provider to use for the distance
 	 * @param average the sample provider to use for the average distance
 	 * @param usSample the array into which samples are fetched
 	 */
-	public UltrasonicSensorController(EV3UltrasonicSensor usSensor, SampleProvider usDistance, SampleProvider average, float[] usSample) {
+	public UltrasonicSensorController(EV3UltrasonicSensor usSensor, EV3MediumRegulatedMotor sensorMotor, SampleProvider usDistance, SampleProvider average, float[] usSample) {
 		this.usSensor = usSensor;
+		this.sensorMotor = sensorMotor;
 		this.usDistance = usDistance;
 		this.average = average;
 		this.usSample = usSample;
@@ -42,5 +47,9 @@ public class UltrasonicSensorController {
 	public int getAvgUSDistance() {
 		average.fetchSample(usSample, 0);
 		return (int) (usSample[0] * 100.0);
+	}
+	
+	public void rotateSensorTo(int theta) {
+		sensorMotor.rotateTo(theta);
 	}
 }

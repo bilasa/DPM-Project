@@ -29,7 +29,7 @@ public class WiFi {
 	// ***Esa's***
 	//private static final String SERVER_IP = "192.168.2.18";
 	// ***TA's***
-	private static final String SERVER_IP = "192.168.2.3";
+	private static final String SERVER_IP = "192.168.2.11";
 
 	private static final int TEAM_NUMBER = 8;
 
@@ -285,7 +285,7 @@ public class WiFi {
 			// Get coords of red search zone
 			lowerLeftX = ((Long) data.get("SR_LL_x")).intValue();
 			lowerLeftY = ((Long) data.get("SR_LL_y")).intValue();
-			upperRightX = ((Long) data.get("SR_LL_x")).intValue();
+			upperRightX = ((Long) data.get("SR_UR_x")).intValue();
 			upperRightY = ((Long) data.get("SR_UR_y")).intValue();
 
 			// Corner convention:
@@ -301,7 +301,7 @@ public class WiFi {
 			// Get coords of red search zone
 			lowerLeftX = ((Long) data.get("SG_LL_x")).intValue();
 			lowerLeftY = ((Long) data.get("SG_LL_y")).intValue();
-			upperRightX = ((Long) data.get("SG_LL_x")).intValue();
+			upperRightX = ((Long) data.get("SG_UR_x")).intValue();
 			upperRightY = ((Long) data.get("SG_UR_y")).intValue();
 
 			// Corner convention:

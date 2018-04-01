@@ -1,5 +1,6 @@
 package ca.mcgill.ecse211.controller;
 
+import ca.mcgill.ecse211.enumeration.Flag;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
@@ -20,11 +21,6 @@ public class LightSensorController {
 	private EV3ColorSensor colorSensor;
 	private SensorMode color;
 	private float[] colorSample;
-
-	// Block colors enumeration
-	private enum BlockColors {
-		RED, BLUE, YELLOW, WHITE, UNKNOWN
-	}
 
 	/**
 	 * @param colorSensor the color sensor to use
@@ -51,19 +47,19 @@ public class LightSensorController {
 	 * @param RGBSample The RGB sample of the block in front of the color sensor
 	 * @return The color of the detected block
 	 */
-	static BlockColors getBlockColor(float[] RGBSample) {
+	public static Flag getBlockColor(float[] RGBSample) {
 		double redProportion = RGBSample[0] / (RGBSample[0] + RGBSample[1] + RGBSample[2]);
 
 		if (redProportion >= 0 && redProportion <= 0.2) {
-			return BlockColors.BLUE;
+			return Flag.BLUE;
 		} else if (redProportion >= 0.3 && redProportion <= 0.4) {
-			return BlockColors.WHITE;
+			return Flag.WHITE;
 		} else if (redProportion >= 0.45 && redProportion <= 0.60) {
-			return BlockColors.YELLOW;
+			return Flag.YELLOW;
 		} else if (redProportion >= 0.7 && redProportion <= 1.0) {
-			return BlockColors.RED;
+			return Flag.RED;
 		} else {
-			return BlockColors.UNKNOWN;
+			return Flag.UNKNOWN;
 		}
 	}
 }

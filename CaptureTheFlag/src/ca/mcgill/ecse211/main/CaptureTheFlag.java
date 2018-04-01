@@ -38,42 +38,44 @@ import lejos.robotics.filter.MeanFilter;
 public class CaptureTheFlag {
 
 	// Motors
-	private final static EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
-	private final static EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
-	private final static EV3MediumRegulatedMotor sensorMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
+	private static final EV3LargeRegulatedMotor leftMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("D"));
+	private static final EV3LargeRegulatedMotor rightMotor = new EV3LargeRegulatedMotor(LocalEV3.get().getPort("A"));
+	private static final EV3MediumRegulatedMotor sensorMotor = new EV3MediumRegulatedMotor(LocalEV3.get().getPort("B"));
 
 	// Ultrasonic sensor
-	private final static EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(SensorPort.S1);
+	private static final EV3UltrasonicSensor usSensor = new EV3UltrasonicSensor(SensorPort.S1);
 	private static SampleProvider usDistance = usSensor.getMode("Distance");
 	private static SampleProvider average = new MeanFilter(usDistance, 8);
 	private static float[] usSample = new float[average.sampleSize()];
 
 	// Front light sensor
-	private final EV3ColorSensor frontColorSensor = new EV3ColorSensor(SensorPort.S4);
-	private SensorMode frontRGBColor = frontColorSensor.getRGBMode();
-	private float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];
+	private static final EV3ColorSensor frontColorSensor = new EV3ColorSensor(SensorPort.S4);
+	private static SensorMode frontRGBColor = frontColorSensor.getRGBMode();
+	private static float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];
 
 	// Left rear light sensor
-	private final static EV3ColorSensor leftRearColorSensor = new EV3ColorSensor(SensorPort.S2);
+	private static final EV3ColorSensor leftRearColorSensor = new EV3ColorSensor(SensorPort.S2);
 	private static SensorMode leftRearColorID = leftRearColorSensor.getColorIDMode();
 	private static float[] leftRearColorIDSample = new float[leftRearColorID.sampleSize()];
 
 	// Right rear light sensor
-	private final static EV3ColorSensor rightRearColorSensor = new EV3ColorSensor(SensorPort.S3);
+	private static final EV3ColorSensor rightRearColorSensor = new EV3ColorSensor(SensorPort.S3);
 	private static SensorMode rightRearColorID = rightRearColorSensor.getColorIDMode();
 	private static float[] rightRearColorIDSample = new float[rightRearColorID.sampleSize()];
 
 	// LCD
-	private final static TextLCD LCD = LocalEV3.get().getTextLCD();
+	private static final TextLCD LCD = LocalEV3.get().getTextLCD();
 
 	// Constants
-	private final static double WHEEL_RAD = 1.66;
-	private final static double TRACK = 18.0; // original 17.7
-	private final static int ROTATE_SPEED = 250;
-	private final static int FORWARD_SPEED = 250;
-	private final static int ACCELERATION = 2000;
-	private final static double TILE_SIZE = 30.48;
-	private final static double SENSOR_DIST = 12.5;
+	private static final double WHEEL_RAD = 1.66;
+	private static final double TRACK = 18.0; // original 17.7
+	private static final int ROTATE_SPEED = 250;
+	private static final int FORWARD_SPEED = 600;
+	private static final int ACCELERATION = 2000;
+	private static final double TILE_SIZE = 30.48;
+	private static final double REAR_SENSOR_DIST = 12.5;
+	private static final double FRONT_SENSOR_DIST = 10.0;
+	private static final long START_TIME = System.currentTimeMillis();
 
 	// Playzone constants
 	private static final int LL_PZx = 1;
@@ -87,30 +89,30 @@ public class CaptureTheFlag {
 	};
 
 	// Odometer
-	private final static Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
+	private static final Odometer odometer = Odometer.getOdometer(leftMotor, rightMotor, TRACK, WHEEL_RAD);
 
 	// WiFi class
 	private static WiFi wifi = new WiFi();
 
 	// Controllers
-	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE, SENSOR_DIST);
-	private static UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, usDistance, average, usSample);
-	private LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontRGBColor, frontRGBColorSample);
+	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE, REAR_SENSOR_DIST);
+	private static UltrasonicSensorController usCont = new UltrasonicSensorController(usSensor, sensorMotor, usDistance, average, usSample);
+	private static LightSensorController frontLsCont = new LightSensorController(frontColorSensor, frontRGBColor, frontRGBColorSample);
 	private static LightSensorController leftRearLsCont = new LightSensorController(leftRearColorSensor, leftRearColorID, leftRearColorIDSample);
 	private static LightSensorController rightRearLsCont = new LightSensorController(rightRearColorSensor, rightRearColorID, rightRearColorIDSample);
 
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
-	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, SENSOR_DIST, rc, leftRearLsCont);
-	private static Navigator navigator = new Navigator(rc, wifi);
-	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc);
+	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont);
+	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc, usCont, frontLsCont, FRONT_SENSOR_DIST, START_TIME);
+	private static Navigator navigator = new Navigator(rc, wifi, flagSearcher);
 
 	// Threads
 	private static ExitProgram exit = new ExitProgram();
 	private static Timer timer = new Timer();
 
 	// Odometry correction
-	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
+	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
 
 	/**
 	 * First localizes the robot at its starting corner.
@@ -152,18 +154,18 @@ public class CaptureTheFlag {
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
-		usLocalizer.usLocalize();
+		//usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
 		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
 
 		//rc.travelTo(1, 1, FORWARD_SPEED, true);
 		
-		Sound.beepSequence();
+		//Sound.beepSequence();
 		
-		if (team == Team.GREEN) {
+		/*if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();
 		} else if (team == Team.RED){
@@ -177,13 +179,15 @@ public class CaptureTheFlag {
 		} else if (team == Team.RED){
 			// ====== Travel through the bridge ====== //
 			navigator.travelThroughBridge();
-		}
+		}*/
+		
+		odometer.setXYT(5 * TILE_SIZE, 6 * TILE_SIZE, 0);
 
 		// ====== Travel to the search zone ====== //
-		//flagSearcher.travelToSearchZone();
+		navigator.travelToSearchZone();
 
 		// ====== Search for the flag ====== //
-		//flagSearcher.searchFlag();
+		navigator.searchFlag();
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //
