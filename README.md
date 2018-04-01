@@ -124,3 +124,13 @@ By Bijan Sadeghi, Esa Khan
 
 By Bijan Sadeghi
 
+## 2.4
+### Tentatively Implement Flag Search (18/04/01)
+* Changed FlagSearcher to a thread
+* Moved travelToSearchZone and searchFlag into Navigator
+* Pass main thread object to FlagSearcher to suspend it during block identification
+* Changed FORWAD_SPEED to 600
+* Implemented flagSearch to move counterclockwise along search zone perimeter
+
+By Bijan Sadeghi, Esa Khan
+
