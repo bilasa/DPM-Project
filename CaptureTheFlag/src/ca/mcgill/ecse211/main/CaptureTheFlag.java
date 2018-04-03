@@ -73,7 +73,7 @@ public class CaptureTheFlag {
 	private static final int FORWARD_SPEED = 600;
 	private static final int ACCELERATION = 2000;
 	private static final double TILE_SIZE = 30.48;
-	private static final double REAR_SENSOR_DIST = 12.5;
+	private static final double REAR_SENSOR_DIST = 14;
 	private static final double FRONT_SENSOR_DIST = 10.0;
 	private static final long START_TIME = System.currentTimeMillis();
 
@@ -159,13 +159,13 @@ public class CaptureTheFlag {
 		// ====== Do initial light localization in corner ======  //
 		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
+		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 		//rc.travelTo(1, 1, FORWARD_SPEED, true);
 		
 		//Sound.beepSequence();
 		
-		/*if (team == Team.GREEN) {
+		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();
 		} else if (team == Team.RED){
@@ -179,8 +179,8 @@ public class CaptureTheFlag {
 		} else if (team == Team.RED){
 			// ====== Travel through the bridge ====== //
 			navigator.travelThroughBridge();
-		}*/
-		
+		}
+/*		
 		odometer.setXYT(5 * TILE_SIZE, 6 * TILE_SIZE, 0);
 
 		// ====== Travel to the search zone ====== //
@@ -210,5 +210,6 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
+*/
 	}
 }
