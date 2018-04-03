@@ -181,36 +181,10 @@ public class RobotController {
 
 		setSpeeds(speed, speed);
 
-/*
-		// Advance towards next point's x coordinate
-		for (int i = 1; i <= Math.abs(tilesX); i++) {
-
-			// Immediate correction for the first tile moved
-			if (i == 1) {
-				odoCorrection.correct(corrTheta, odo.getXYT());
-			}
-
-			double[] initialOdo = odo.getXYT();
-
-			// travelToDirect() to the next closest point
-			directTravelTo(lastX + (tilesX / Math.abs(tilesX)) * i, lastY, FORWARD_SPEED, lock);
-			// leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
-			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
-
-			// Correct the robot in the X-direction with correct theta corrTheta
-			odoCorrection.correct(corrTheta, initialOdo);
-
-			// Move back by sensor offset at the last tile
-			if (i == Math.abs(tilesX)) {
-				this.travelDist(-SENSOR_DIST, true);
-			}
-
-		}
-*/
+		
 		// Advance towards next point's x coordinate
 		moveForward();
 		while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 2) {
-			moveForward();
 			double currX = odo.getXYT()[0];
 			// Proportionality constant between 0 and 0.5
 			double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
@@ -218,11 +192,12 @@ public class RobotController {
 			if(propCnst <= 0.008) {
 				odoCorrection.correct(corrTheta, odo.getXYT());
 			}
-			int propSpeed = (int) (150 + propCnst * 900);	// Speed between 150 and 600
+			int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
 			setSpeeds(propSpeed, propSpeed);
-			Delay.msDelay(50);
-			
+			moveForward();
+			Delay.msDelay(25);
 		}
+		odoCorrection.correct(corrTheta, odo.getXYT());
 		setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
 		travelDist(-SENSOR_DIST, lock);
 
@@ -244,44 +219,23 @@ public class RobotController {
 
 		setSpeeds(speed, speed);
 
-/*
-		// Advance towards next point's y coordinate
-		for (int i = 1; i <= Math.abs(tilesY); i++) {
-
-			// Immediate correction for the first tile moved
-			if (i == 1) {
-				odoCorrection.correct(corrTheta, odo.getXYT());
-			}
-
-			double[] initialOdo = odo.getXYT();
-
-			// travelToDirect() to the next closest point
-			directTravelTo(lastX, lastY + (tilesY / Math.abs(tilesY)) * i, FORWARD_SPEED, lock);
-
-			// Correct the robot in the Y-direction with correct theta corrTheta
-			odoCorrection.correct(corrTheta, initialOdo);
-
-			// Move back by sensor offset at the last tile
-			if (i == Math.abs(tilesY)) {
-				this.travelDist(-SENSOR_DIST, true);
-			}
-		}
-*/
-		// Advance towards next point's y coordinate
-		travelDist(tilesY * TILE_SIZE, false);
-		while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > SENSOR_DIST) {
-			// Proportionality constant between 0 and 0.5
+		
+		// Advance towards next point's x coordinate
+		moveForward();
+		while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 2) {
 			double currY = odo.getXYT()[1];
+			// Proportionality constant between 0 and 0.5
 			double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
+			// Correct if close enough to a line
 			if(propCnst <= 0.008) {
 				odoCorrection.correct(corrTheta, odo.getXYT());
 			}
-			int propSpeed = (int) (150 + propCnst * 900);	// Speed between 150 and 600
+			int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
 			setSpeeds(propSpeed, propSpeed);
 			moveForward();
-			Delay.msDelay(50);
-			
+			Delay.msDelay(25);
 		}
+		odoCorrection.correct(corrTheta, odo.getXYT());
 		setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
 		travelDist(-SENSOR_DIST, lock);
 		

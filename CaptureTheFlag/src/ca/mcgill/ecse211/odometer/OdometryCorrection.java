@@ -100,7 +100,7 @@ public class OdometryCorrection {
 		boolean leftLineDetected = false;
 
 		// Start moving the robot forward
-		rc.setSpeeds(150, 150);
+		rc.setSpeeds(200, 200);
 		rc.moveForward();
 
 		// Move the robot until one of the sensors detects a line
