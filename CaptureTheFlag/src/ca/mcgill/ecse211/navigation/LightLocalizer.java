@@ -10,9 +10,18 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
 /**
- * Localizes the robot at a waypoint using the left rear light sensor
+ * This class allows the robot to be localized using the left rear light
+ * sensor. The class allows both initial light localization at the
+ * robot's starting corner and general light localization at any
+ * waypoint the robot has traveled to during the challenge. Both
+ * localization methods rotate the robot in order to detect the four
+ * lines around a point and use the angles of detection to compute
+ * the robot's x and y offset from the point. They then move the robot
+ * to the point and set the angle straight by again using the left
+ * rear light sensor.
  * 
- * @author Bijan Sadeghi & Esa Khan
+ * @author Bijan Sadeghi
+ * @author Esa Khan
  */
 public class LightLocalizer {
 
@@ -31,6 +40,12 @@ public class LightLocalizer {
 	// Odometer
 	private Odometer odo;
 
+	/**
+	 * @param TILE_SIZE the size of a tile
+	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
+	 * @param rc the robot controller to use
+	 * @param lsCont the light sensor controller to use
+	 */
 	public LightLocalizer(double TILE_SIZE, double SENSOR_DIST, RobotController rc, LightSensorController lsCont) {
 		this.FORWARD_SPEED = rc.FORWARD_SPEED;
 		this.ROTATE_SPEED = rc.ROTATE_SPEED;
@@ -47,10 +62,13 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Light localize the robot in its initial corner
+	 * Light localizes the robot in its initial corner. Rotates the robot and notes the angle
+	 * at which each of the four lines were detected. Uses those angles to compute the offset of the
+	 * robot and moves the robot to the starting point. It then turns the robot so that it is
+	 * parallel with the right wall. It then updates the odometer appropriately.
 	 * 
-	 * @param startingCorner
-	 * @param playZoneCorners
+	 * @param startingCorner the starting corner of the robot
+	 * @param playZoneCorners a two dimensional int array containing four (x, y) pairs for the corners of the playzone
 	 */
 	public void initialLightLocalize(int startingCorner, int[][] playZoneCorners) {
 
@@ -136,7 +154,12 @@ public class LightLocalizer {
 	}
 
 	/**
-	 * Light localize the robot at a general waypoint (not in the initial corner)
+	 * Light localizes the robot in any waypoint it has traveled to. First ensures that the robot
+	 * is in the lower-left tile with respect to the point it is localizing at. Then rotates the robot 
+	 * and notes the angle at which each of the four lines were detected. Uses those angles to compute 
+	 * the offset of the robot and moves the robot to the point. It then turns the robot so that it is
+	 * facing 0 degrees. It then updates the odometer appropriately.
+	 * 
 	 */
 	public void generalLightLocalize() {
 		// Compute the nearest waypoint from the odometer reading

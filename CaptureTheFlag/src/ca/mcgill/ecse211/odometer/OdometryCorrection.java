@@ -9,10 +9,14 @@ import lejos.hardware.Sound;
 import lejos.hardware.lcd.LCD;
 
 /**
- * Corrects the odometer and ensures the robot travels forward in a straight
- * path
+ * This class allows the robot to correct itself by using
+ * the two rear sensors. When either sensor detects a perpendicular
+ * line on the path of the robot, that side's motor stops until
+ * the other sensor also detects the line, effectively straightening
+ * the robot.
  * 
  * @author Bijan Sadeghi
+ * @author Esa Khan
  *
  */
 public class OdometryCorrection {
@@ -26,10 +30,6 @@ public class OdometryCorrection {
 	// Robot controller
 	private RobotController rc;
 
-	// Target x, y point from the travelTo call
-	private int targetX;
-	private int targetY;
-
 	// Left and right rear sensor controllers
 	private LightSensorController leftLsCont;
 	private LightSensorController rightLsCont;
@@ -39,6 +39,9 @@ public class OdometryCorrection {
 
 	// Paused variable to tell pause/unpause the OdometryCorrection
 	private boolean paused;
+	
+	// Boolean to check if we are currently identifying a block
+	private boolean identifyingBlock = false;
 
 	// Enumeration to denote the state of the OdometryCorrection
 	private enum CorrState {
@@ -47,6 +50,13 @@ public class OdometryCorrection {
 
 	private CorrState corrState;
 
+	/**
+	 * @param TILE_SIZE the size of a tile
+	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
+	 * @param rc the robot controller to use
+	 * @param leftLsCont the light sensor controller to use to get data from the left rear sensor
+	 * @param rightLsCont the light sensor controller to use to get data from the right rear sensor
+	 */
 	public OdometryCorrection(double TILE_SIZE, double SENSOR_DIST, RobotController rc,
 			LightSensorController leftLsCont, LightSensorController rightLsCont) {
 		this.FORWARD_SPEED = rc.FORWARD_SPEED;
@@ -67,77 +77,17 @@ public class OdometryCorrection {
 	}
 
 	/**
-	 * Pause the OdometryCorrection
-	 * 
-	 * @param paused
-	 */
-	public void setPaused(boolean paused) {
-		this.paused = paused;
-	}
-
-	public void setTargetXY(int x, int y) {
-		this.targetX = x;
-		this.targetY = y;
-	}
-
-	/**
-	 * Here is where the odometer correction code should be run.
-	 * 
-	 * @throws OdometerExceptions
-	 */
-	// run method (required for Thread)
-	/*
-	 * public void run() {
-	 * 
-	 * while(true) { // Apply the correction if not paused if(!paused) { boolean
-	 * rightLineDetected = false; boolean leftLineDetected = false;
-	 * 
-	 * // Check the state of OdometryCorrection switch(corrState) { case CORRECTING:
-	 * if (rightLsCont.getColorSample()[0] != 13.0 && leftLsCont.getColorSample()[0]
-	 * != 13.0) { corrState = CorrState.EXPECTING_LINE; } break; case
-	 * EXPECTING_LINE: // If line detected with right sensor
-	 * if(rightLsCont.getColorSample()[0] == 13.0) { rightLineDetected = true; //
-	 * Stop the right motor //rc.stopMoving(false, true); rc.setSpeeds(100, 0); }
-	 * else if (leftLsCont.getColorSample()[0] == 13.0) { leftLineDetected = true;
-	 * // Stop the left motor //rc.stopMoving(true, false); rc.setSpeeds(0, 100); }
-	 * 
-	 * while (rightLineDetected || leftLineDetected) { //Sound.beep();
-	 * LCD.drawString("Right: " + rightLineDetected, 0, 5); LCD.drawString("Left: "
-	 * + leftLineDetected, 0, 6);
-	 * 
-	 * // Set the state to correcting corrState = CorrState.CORRECTING;
-	 * 
-	 * // If other line detected if (rightLineDetected &&
-	 * leftLsCont.getColorSample()[0] == 13.0) { leftLineDetected = true; } else if
-	 * (leftLineDetected && rightLsCont.getColorSample()[0] == 13.0) {
-	 * rightLineDetected = true; }
-	 * 
-	 * // If both lines have been detected, the robot is straight if
-	 * (rightLineDetected && leftLineDetected) { //rc.stopMoving();
-	 * 
-	 * // Travel to the original target destination //rc.travelTo(targetX, targetY,
-	 * rc.FORWARD_SPEED, false); rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-	 * 
-	 * // Set both line detections back to false rightLineDetected = false;
-	 * leftLineDetected = false; }
-	 * 
-	 * 
-	 * } break; } } } }
-	 */
-
-	/**
 	 * Moves the robot forward until a perpendicular line is detected by one of the
 	 * sensors. Re-aligns the robot so that both sensors are on the line. Corrects
-	 * the Odometer based on its new position.
+	 * the Odometer's theta and either the x or the y, based on which axis the robot
+	 * is traveling on.
 	 *
-	 * @param correctingX
-	 *            is the robot being corrected on the X-axis
-	 * @param corrTheta
-	 *            the angle we must correct the odometer to be
+	 * @param corrTheta the angle the Odometer must be set to after correction
+	 * @param initialOdo the Odometer values from the end of the last correction
 	 */
 	public void correct(double corrTheta, double[] initialOdo) {
 		// Intermediate odometer reading: odometer's reading after detecting the first line
-		double[] intermediateOdo = new double[3];
+		//double[] intermediateOdo = new double[3];
 
 		// Sleep for 250 ms
 		try {
@@ -157,26 +107,26 @@ public class OdometryCorrection {
 		rc.moveForward();
 
 		// Move the robot until one of the sensors detects a line
-		while (!leftLineDetected && !rightLineDetected) {
+		while (!leftLineDetected && !rightLineDetected && !identifyingBlock) {
 			if (rightLsCont.getColorSample()[0] == 13.0) {
 				rightLineDetected = true;
 				// Stop the right motor
 				rc.stopMoving(false, true);
-				intermediateOdo = odo.getXYT();
+				//intermediateOdo = odo.getXYT();
 
 			} else if (leftLsCont.getColorSample()[0] == 13.0) {
 				leftLineDetected = true;
 
 				// Stop the left motor
 				rc.stopMoving(true, false);
-				intermediateOdo = odo.getXYT();
+				//intermediateOdo = odo.getXYT();
 			}
 		}
 
 		// Get the odometer's reading 
 
 		// Keep moving the left/right motor until both lines have been detected
-		while (!leftLineDetected || !rightLineDetected) {
+		while ((!leftLineDetected || !rightLineDetected) && !identifyingBlock) {
 			// If the other line detected, stop the motors
 			if (rightLineDetected && leftLsCont.getColorSample()[0] == 13.0) {
 				leftLineDetected = true;
@@ -190,7 +140,7 @@ public class OdometryCorrection {
 		// The robot is now aligned. Correct the odometer.
 
 		// Get the final odometer reading: reading after both lines are detected
-		double[] finalOdo = odo.getXYT();
+		/*double[] finalOdo = odo.getXYT();
 
 		// Compute the angle the robot rotated by to correct itself
 		double dTheta = finalOdo[2] - intermediateOdo[2];
@@ -202,7 +152,7 @@ public class OdometryCorrection {
 		double c = rc.TRACK / 2 * Math.tan(Math.toRadians(Math.abs(dTheta)));
 
 		// Compute the robot's offset from its intended traveling axis
-		double offset = (dist - SENSOR_DIST + c) * Math.sin(Math.abs(dTheta));
+		double offset = (dist - SENSOR_DIST + c) * Math.sin(Math.abs(dTheta));*/
 
 		// Variables to store the final correct odometer values
 		double corrX = 0;
@@ -224,7 +174,7 @@ public class OdometryCorrection {
 				corrX = TILE_SIZE * corrSensorX + SENSOR_DIST;
 
 				// Get the correct Y
-				corrY = intermediateOdo[1] + (dTheta / Math.abs(dTheta) * offset);
+				//corrY = intermediateOdo[1] + (dTheta / Math.abs(dTheta) * offset);
 
 
 			} else {
@@ -238,8 +188,10 @@ public class OdometryCorrection {
 				corrX = TILE_SIZE * corrSensorX - SENSOR_DIST;
 
 				// Get the correct Y
-				corrY = intermediateOdo[1] - (dTheta / Math.abs(dTheta) * offset);
+				//corrY = intermediateOdo[1] - (dTheta / Math.abs(dTheta) * offset);
 			}
+			
+			odo.setX(corrX);
 
 		} else {
 
@@ -256,7 +208,7 @@ public class OdometryCorrection {
 				corrY = TILE_SIZE * corrSensorY + SENSOR_DIST;
 
 				// Get the correct X
-				corrX = intermediateOdo[0] - (dTheta / Math.abs(dTheta) * offset);
+				//corrX = intermediateOdo[0] - (dTheta / Math.abs(dTheta) * offset);
 
 			} else {
 				// Compute the sensors' Y position in cm's
@@ -269,13 +221,14 @@ public class OdometryCorrection {
 				corrY = TILE_SIZE * corrSensorY - SENSOR_DIST;
 
 				// Get the correct X
-				corrX = intermediateOdo[0] + (dTheta / Math.abs(dTheta) * offset);
+				//corrX = intermediateOdo[0] + (dTheta / Math.abs(dTheta) * offset);
 			}
-
+			odo.setY(corrY);
 		}
 
 		// Correct the odometer
-		odo.setXYT(corrX, corrY, corrTheta);
+		//odo.setXYT(corrX, corrY, corrTheta);
+		odo.setTheta(corrTheta);
 
 		rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
 
@@ -286,5 +239,14 @@ public class OdometryCorrection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * Set the identifyingBlock boolean
+	 * 
+	 * @param identifyingBlock
+	 */
+	public void setIdentifyingBlock(boolean identifyingBlock) {
+		this.identifyingBlock = identifyingBlock;
 	}
 }

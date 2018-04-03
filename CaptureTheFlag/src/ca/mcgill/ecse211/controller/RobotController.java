@@ -11,7 +11,12 @@ import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
 
 /**
- * Controls the low-level operations of the robot's motors
+ * This class controls the low-level operations of the robot's motors.
+ * These operations include turning the robot, moving it forward,
+ * stopping it, and traveling to a waypoint. The RobotController is used
+ * by any class that needs to do any of the operations described above.
+ * This class is used by all middle layer (navigation) classes, since
+ * they all involve the movement of the robot.
  * 
  * @author Bijan Sadeghi
  *
@@ -29,7 +34,7 @@ public class RobotController {
 	public final int ROTATE_SPEED; // made public due to frequent use
 	public final int ACCELERATION; // made public due to frequent use
 	public final double TILE_SIZE;
-	public final double SENSOR_DIST;
+	public final double REAR_SENSOR_DIST;
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
@@ -37,8 +42,19 @@ public class RobotController {
 	// Odometer
 	private Odometer odo;
 
+	/**
+	 * @param leftMotor the left motor
+	 * @param rightMotor the right motor
+	 * @param WHEEL_RAD the radius of the wheel
+	 * @param TRACK the track of the robot
+	 * @param FORWARD_SPEED the speed to travel forward at
+	 * @param ROTATE_SPEED the speed to rotate at
+	 * @param ACCELERATION the acceleration to use
+	 * @param TILE_SIZE the size of a tile
+	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
+	 */
 	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD,
-			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE, double SENSOR_DIST) {
+			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE, double REAR_SENSOR_DIST) {
 		this.leftMotor = leftMotor;
 		this.rightMotor = rightMotor;
 		this.WHEEL_RAD = WHEEL_RAD;
@@ -47,7 +63,7 @@ public class RobotController {
 		this.ROTATE_SPEED = ROTATE_SPEED;
 		this.ACCELERATION = ACCELERATION;
 		this.TILE_SIZE = TILE_SIZE;
-		this.SENSOR_DIST = SENSOR_DIST;
+		this.REAR_SENSOR_DIST = REAR_SENSOR_DIST;
 		try {
 			this.odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -58,9 +74,9 @@ public class RobotController {
 	}
 
 	/**
-	 * @param radius
-	 * @param distance
-	 * @return the angle the robot needs to rotate its wheels to travel forward by
+	 * @param radius the radius of the wheel
+	 * @param distance the desired distance to move the robot
+	 * @return the angle the robot needs to rotate its wheels by in order to travel forward by
 	 *         distance
 	 */
 	public int convertDistance(double radius, double distance) {
@@ -68,10 +84,10 @@ public class RobotController {
 	}
 
 	/**
-	 * @param radius
-	 * @param width
-	 * @param angle
-	 * @return the angle the robot needs to turn each wheel to rotate by angle
+	 * @param radius the radius of the wheel
+	 * @param width the track of the robot
+	 * @param angle the angle desired to turn the robot by
+	 * @return the angle the robot needs to turn each wheel to rotate by angle.
 	 */
 	public int convertAngle(double radius, double width, double angle) {
 		return convertDistance(radius, Math.PI * width * angle / 360.0);
@@ -80,10 +96,10 @@ public class RobotController {
 	/**
 	 * Travels to (x, y) with speed "speed" and an optional lock for the motors.
 	 * 
-	 * @param x
-	 * @param y
-	 * @param speed
-	 * @param lock
+	 * @param x the x destination of the robot
+	 * @param y the y destination of the robot
+	 * @param speed the speed to move the robot at
+	 * @param lock an optional lock on the motors
 	 */
 	public void directTravelTo(double x, double y, int speed, boolean lock) {
 
@@ -112,18 +128,18 @@ public class RobotController {
 	}
 
 	/**
-	 * Travels to (x, y) with speed "speed" and an optional lock for the motors by
-	 * rolling horizontally and vertically only.
+	 * Travels to (x, y) stricly on the x-axis and y-axis using odometry correction. 
+	 * If one of x or y is the same as the robot's current x or y, then the robot 
+	 * will travel directly either horizontally or vertically. If both x and y differ 
+	 * from the robot's, then the robot will travel in an L-shape, starting on the 
+	 * x-axis first.
 	 * 
-	 * @param x
-	 * @param y
-	 * @param speed
-	 * @param lock
+	 * @param x the x destination of the robot
+	 * @param y the y destination of the robot
+	 * @param speed the speed to move the robot at
+	 * @param lock an optional lock on the motors
 	 */
 	public void travelTo(int x, int y, int speed, boolean lock) {
-		// Unpause the OdometryCorrection, set the target destination
-		// odoCorrection.setTargetXY(x, y);
-		// odoCorrection.setPaused(false);
 
 		// Compute the nearest waypoint from the odometer reading
 		int lastX = (int) Math.round(odo.getXYT()[0] / TILE_SIZE);
@@ -139,6 +155,7 @@ public class RobotController {
 		if (lastY > y) {
 			negY = true;
 		}
+
 		// Angle to turn to to go to the next point. In OdometryCorrection, use this
 		// angle to correct the Odometer's theta.
 		double corrTheta = odo.getXYT()[2];
@@ -168,20 +185,18 @@ public class RobotController {
 			if (i == 1) {
 				odoCorrection.correct(corrTheta, odo.getXYT());
 			}
-			
+
 			double[] initialOdo = odo.getXYT();
 
 			// travelToDirect() to the next closest point
-			directTravelTo(lastX + (tilesX / Math.abs(tilesX)) * i, lastY, FORWARD_SPEED, lock);
-			// leftMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), true);
-			// rightMotor.rotate(convertDistance(WHEEL_RAD, 2.0 / 3.0 * TILE_SIZE), false);
+			directTravelTo(lastX + (tilesX / Math.abs(tilesX)) * i, lastY, speed, lock);
 
 			// Correct the robot in the X-direction with correct theta corrTheta
 			odoCorrection.correct(corrTheta, initialOdo);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesX)) {
-				this.travelDist(-SENSOR_DIST, true);
+				this.travelDist(-REAR_SENSOR_DIST, true);
 			}
 
 		}
@@ -211,29 +226,27 @@ public class RobotController {
 			if (i == 1) {
 				odoCorrection.correct(corrTheta, odo.getXYT());
 			}
-			
+
 			double[] initialOdo = odo.getXYT();
 
 			// travelToDirect() to the next closest point
-			directTravelTo(lastX, lastY + (tilesY / Math.abs(tilesY)) * i, FORWARD_SPEED, lock);
+			directTravelTo(lastX, lastY + (tilesY / Math.abs(tilesY)) * i, speed, lock);
 
 			// Correct the robot in the Y-direction with correct theta corrTheta
 			odoCorrection.correct(corrTheta, initialOdo);
 
 			// Move back by sensor offset at the last tile
 			if (i == Math.abs(tilesY)) {
-				this.travelDist(-SENSOR_DIST, true);
+				this.travelDist(-REAR_SENSOR_DIST, true);
 			}
 		}
 
-		// Pause the OdometryCorrection
-		// odoCorrection.setPaused(true);
 	}
 
 	/**
-	 * Turns the robot to the absolute angle "absTheta"
+	 * Turns the robot to the specified absolute angle.
 	 * 
-	 * @param absTheta
+	 * @param absTheta the absolute angle to turn the robot to
 	 */
 	public void turnTo(double absTheta) {
 
@@ -262,20 +275,23 @@ public class RobotController {
 	}
 
 	/**
-	 * Turns the robot by an angle "dTheta" with an optional lock
+	 * Turns the robot by the specified angle with an optional lock.
 	 * 
-	 * @param dTheta
+	 * @param dTheta the angle to turn the robot by
 	 */
 	public void turnBy(double dTheta, boolean lock) {
+		// Set speed to turn speed
+		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
+		
 		leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, dTheta), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, dTheta), !lock);
 	}
 
 	/**
-	 * Sets the speeds of the motors
+	 * Sets the speeds of the motors.
 	 * 
-	 * @param leftSpeed
-	 * @param rightSpeed
+	 * @param leftSpeed the speed to set the left motor to
+	 * @param rightSpeed the speed to set the right motor to
 	 */
 	public void setSpeeds(int leftSpeed, int rightSpeed) {
 		leftMotor.setSpeed(leftSpeed);
@@ -283,9 +299,9 @@ public class RobotController {
 	}
 
 	/**
-	 * Set the acceleration of the motors
+	 * Set the acceleration of the motors.
 	 * 
-	 * @param acceleration
+	 * @param acceleration the acceleration to set the left and right motor to
 	 */
 	public void setAcceleration(int acceleration) {
 		leftMotor.setAcceleration(acceleration);
@@ -293,9 +309,9 @@ public class RobotController {
 	}
 
 	/**
-	 * Moves the robot forward by distance "dist" with an optional lock
+	 * Moves the robot forward by the specified distance with an optional lock
 	 * 
-	 * @param dist
+	 * @param dist the desired distance in cm's to move the robot by
 	 */
 	public void travelDist(double dist, boolean lock) {
 		leftMotor.rotate(convertDistance(WHEEL_RAD, dist), true);
@@ -303,7 +319,7 @@ public class RobotController {
 	}
 
 	/**
-	 * Starts moving the robot forward with motor synchronization
+	 * Starts moving the robot forward with motor synchronization.
 	 */
 	public void moveForward() {
 		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
@@ -314,7 +330,7 @@ public class RobotController {
 	}
 
 	/**
-	 * Starts moving the robot backward with motor synchronization
+	 * Starts moving the robot backward with motor synchronization.
 	 */
 	public void moveBackward() {
 		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
@@ -325,10 +341,10 @@ public class RobotController {
 	}
 
 	/**
-	 * Starts rotating the robot clockwise or counterclockwise
+	 * Starts rotating the robot clockwise or counterclockwise.
 	 * 
-	 * @param rotateClockwise
-	 * @param speed
+	 * @param rotateClockwise whether the robot should rotate clockwise
+	 * @param speed the speed to set the motors to during the rotation
 	 */
 	public void rotate(boolean rotateClockwise, int speed) {
 		setSpeeds(speed, speed);
@@ -342,7 +358,9 @@ public class RobotController {
 	}
 
 	/**
-	 * @return true if either of the robot's motors are moving
+	 * Specifies whether the robot is current moving.
+	 * 
+	 * @return true if the left or right motor is moving
 	 */
 	public boolean isMoving() {
 		if (leftMotor.isMoving() || rightMotor.isMoving())
@@ -351,7 +369,7 @@ public class RobotController {
 	}
 
 	/**
-	 * Stops the robot with motor synchronization
+	 * Stops the robot with motor synchronization.
 	 */
 	public void stopMoving() {
 		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
@@ -362,10 +380,10 @@ public class RobotController {
 	}
 
 	/**
-	 * Stop the robot, choosing which motors to stop
+	 * Stops the specified motors of the robot.
 	 * 
-	 * @param stopLeft
-	 * @param stopRight
+	 * @param stopLeft whether to stop the left motor
+	 * @param stopRight whether to stop the right motor
 	 */
 	public void stopMoving(boolean stopLeft, boolean stopRight) {
 		leftMotor.synchronizeWith(new RegulatedMotor[] { rightMotor });
@@ -378,9 +396,9 @@ public class RobotController {
 	}
 
 	/**
-	 * Set the OdometryCorrection to be used by the robot controller
+	 * Sets the OdometryCorrection object to be used by the robot controller.
 	 * 
-	 * @param odoCorrection
+	 * @param odoCorrection the OdometryCorrection object to be used
 	 */
 	public void setOdoCorrection(OdometryCorrection odoCorrection) {
 		this.odoCorrection = odoCorrection;

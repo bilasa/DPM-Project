@@ -7,5 +7,5 @@ package ca.mcgill.ecse211.enumeration;
  *
  */
 public enum Flag {
-	RED, BLUE, YELLOW, WHITE
+	RED, BLUE, YELLOW, WHITE, UNKNOWN
 }
