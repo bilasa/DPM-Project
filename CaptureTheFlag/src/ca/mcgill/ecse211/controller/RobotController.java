@@ -146,94 +146,86 @@ public class RobotController {
 		int lastX = (int) Math.round(odo.getXYT()[0] / TILE_SIZE);
 		int lastY = (int) Math.round(odo.getXYT()[1] / TILE_SIZE);
 
-		boolean negX = false;
-		boolean negY = false;
-
-		// Check if the target point is below the current X and current Y
-		if (lastX > x) {
-			negX = true;
-		}
-		if (lastY > y) {
-			negY = true;
-		}
-
 		// Angle to turn to to go to the next point. In OdometryCorrection, use this
 		// angle to correct the Odometer's theta.
 		double corrTheta = odo.getXYT()[2];
 
-		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
-
-		// Find the proper angle to rotate to (if lastX == x, not needed)
-		if (negX) {
+		// Check if the target point is below the current X and current Y
+		if (lastX > x) {
 			corrTheta = 270;
-		} else {
+		} else if (lastX < x) {
 			corrTheta = 90;
 		}
 
-		// Rotate to the proper angle
-		if (lastX != x)
-			turnTo(corrTheta);
-
-		// Calculate the number of tiles the robot needs to move in the X direction
-		int tilesX = x - lastX;
-
-		setSpeeds(speed, speed);
-
-		// Advance towards next point's x coordinate
-		moveForward();
-		while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 2) {
-			double currX = odo.getXYT()[0];
-			// Proportionality constant between 0 and 0.5
-			double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
-			// Correct if close enough to a line
-			if(propCnst <= 0.008) {
-				odoCorrection.correct(corrTheta, odo.getXYT());
-			}
-			int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
-			setSpeeds(propSpeed, propSpeed);
-			moveForward();
-			Delay.msDelay(25);
-		}
-		odoCorrection.correct(corrTheta, odo.getXYT());
-		setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-		travelDist(-REAR_SENSOR_DIST, lock);
-
 		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 
+		// If we need to travel in the X direction
+		if (lastX != x) {
+			turnTo(corrTheta);
+
+			setSpeeds(speed, speed);
+
+			// Advance towards next point's x coordinate
+			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 2) {
+				// Move forward
+				moveForward();
+
+				double currX = odo.getXYT()[0];
+				// Proportionality constant between 0 and 0.5
+				double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
+				// Correct if close enough to a line
+				if(propCnst <= 0.008) {
+					odoCorrection.correct(corrTheta, odo.getXYT());
+				}
+				int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
+				setSpeeds(propSpeed, propSpeed);
+				moveForward();
+				Delay.msDelay(25);
+			}
+			odoCorrection.correct(corrTheta, odo.getXYT());
+			setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+			travelDist(-REAR_SENSOR_DIST, lock);
+		}
+
 		// Find the proper angle to rotate to (if lastY == y, not needed)
-		if (negY) {
+		if (lastY > y) {
 			corrTheta = 180;
-		} else {
+		} else if (lastY < y) {
 			corrTheta = 0;
 		}
 
-		// Rotate to the proper angle
-		if (lastY != y)
+		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
+
+		// If we need to travel in the X direction
+		if (lastY != y) {
 			turnTo(corrTheta);
 
-		// Calculate the number of tiles the robot needs to move in the Y direction
-		int tilesY = y - lastY;
+			// Calculate the number of tiles the robot needs to move in the Y direction
+			int tilesY = y - lastY;
 
-		setSpeeds(speed, speed);
+			setSpeeds(speed, speed);
 
-		// Advance towards next point's x coordinate
-		moveForward();
-		while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 2) {
-			double currY = odo.getXYT()[1];
-			// Proportionality constant between 0 and 0.5
-			double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
-			// Correct if close enough to a line
-			if(propCnst <= 0.008) {
-				odoCorrection.correct(corrTheta, odo.getXYT());
+			// Advance towards next point's y coordinate
+			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 2) {
+				// Move forward
+				moveForward();
+
+				double currY = odo.getXYT()[1];
+				// Proportionality constant between 0 and 0.5
+				double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
+				// Correct if close enough to a line
+				if(propCnst <= 0.008) {
+					odoCorrection.correct(corrTheta, odo.getXYT());
+				}
+				int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
+				setSpeeds(propSpeed, propSpeed);
+				moveForward();
+				Delay.msDelay(25);
 			}
-			int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
-			setSpeeds(propSpeed, propSpeed);
-			moveForward();
-			Delay.msDelay(25);
+			odoCorrection.correct(corrTheta, odo.getXYT());
+			setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+			travelDist(-REAR_SENSOR_DIST, lock);
 		}
-		odoCorrection.correct(corrTheta, odo.getXYT());
-		setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-		travelDist(-REAR_SENSOR_DIST, lock);
 
 	}
 
@@ -276,7 +268,7 @@ public class RobotController {
 	public void turnBy(double dTheta, boolean lock) {
 		// Set speed to turn speed
 		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
-		
+
 		leftMotor.rotate(convertAngle(WHEEL_RAD, TRACK, dTheta), true);
 		rightMotor.rotate(-convertAngle(WHEEL_RAD, TRACK, dTheta), !lock);
 	}
