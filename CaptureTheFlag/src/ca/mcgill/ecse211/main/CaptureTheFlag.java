@@ -73,7 +73,7 @@ public class CaptureTheFlag {
 	private final static int FORWARD_SPEED = 250;
 	private final static int ACCELERATION = 2000;
 	private final static double TILE_SIZE = 30.48;
-	private final static double SENSOR_DIST = 12.5;
+	private final static double SENSOR_DIST = 14;
 
 	// Playzone constants
 	private static final int LL_PZx = 1;
@@ -152,15 +152,15 @@ public class CaptureTheFlag {
 		Team team = wifi.getTeam();
 
 		// ====== Do ultrasonic localization in corner ======  //
-		usLocalizer.usLocalize();
+		//usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 270);
+		odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
-		//rc.travelTo(1, 1, FORWARD_SPEED, true);
-		
+		rc.travelTo(3, 4, FORWARD_SPEED, true);
+/*		
 		Sound.beepSequence();
 		
 		if (team == Team.GREEN) {
@@ -206,5 +206,7 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
+		
+*/
 	}
 }

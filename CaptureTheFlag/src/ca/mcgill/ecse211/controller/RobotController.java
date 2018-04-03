@@ -9,6 +9,7 @@ import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
+import lejos.utility.Delay;
 
 /**
  * This class controls the low-level operations of the robot's motors.
@@ -128,7 +129,7 @@ public class RobotController {
 	}
 
 	/**
-	 * Travels to (x, y) stricly on the x-axis and y-axis using odometry correction. 
+	 * Travels to (x, y) strictly on the x-axis and y-axis using odometry correction. 
 	 * If one of x or y is the same as the robot's current x or y, then the robot 
 	 * will travel directly either horizontally or vertically. If both x and y differ 
 	 * from the robot's, then the robot will travel in an L-shape, starting on the 
@@ -136,7 +137,7 @@ public class RobotController {
 	 * 
 	 * @param x the x destination of the robot
 	 * @param y the y destination of the robot
-	 * @param speed the speed to move the robot at
+	 * @param speed max speed to move the robot at
 	 * @param lock an optional lock on the motors
 	 */
 	public void travelTo(int x, int y, int speed, boolean lock) {
@@ -180,6 +181,7 @@ public class RobotController {
 
 		setSpeeds(speed, speed);
 
+/*
 		// Advance towards next point's x coordinate
 		for (int i = 1; i <= Math.abs(tilesX); i++) {
 
@@ -204,6 +206,25 @@ public class RobotController {
 			}
 
 		}
+*/
+		// Advance towards next point's x coordinate
+		moveForward();
+		while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 2) {
+			moveForward();
+			double currX = odo.getXYT()[0];
+			// Proportionality constant between 0 and 0.5
+			double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
+			// Correct if close enough to a line
+			if(propCnst <= 0.008) {
+				odoCorrection.correct(corrTheta, odo.getXYT());
+			}
+			int propSpeed = (int) (150 + propCnst * 900);	// Speed between 150 and 600
+			setSpeeds(propSpeed, propSpeed);
+			Delay.msDelay(50);
+			
+		}
+		setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+		travelDist(-SENSOR_DIST, lock);
 
 		setSpeeds(ROTATE_SPEED, ROTATE_SPEED);
 
@@ -223,6 +244,7 @@ public class RobotController {
 
 		setSpeeds(speed, speed);
 
+/*
 		// Advance towards next point's y coordinate
 		for (int i = 1; i <= Math.abs(tilesY); i++) {
 
@@ -244,7 +266,26 @@ public class RobotController {
 				this.travelDist(-SENSOR_DIST, true);
 			}
 		}
-
+*/
+		// Advance towards next point's y coordinate
+		travelDist(tilesY * TILE_SIZE, false);
+		while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > SENSOR_DIST) {
+			// Proportionality constant between 0 and 0.5
+			double currY = odo.getXYT()[1];
+			double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
+			if(propCnst <= 0.008) {
+				odoCorrection.correct(corrTheta, odo.getXYT());
+			}
+			int propSpeed = (int) (150 + propCnst * 900);	// Speed between 150 and 600
+			setSpeeds(propSpeed, propSpeed);
+			moveForward();
+			Delay.msDelay(50);
+			
+		}
+		setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
+		travelDist(-SENSOR_DIST, lock);
+		
+		
 		// Pause the OdometryCorrection
 		// odoCorrection.setPaused(true);
 	}
