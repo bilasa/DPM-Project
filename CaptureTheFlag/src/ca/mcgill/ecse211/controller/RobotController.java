@@ -36,6 +36,9 @@ public class RobotController {
 	public final int ACCELERATION; // made public due to frequent use
 	public final double TILE_SIZE;
 	public final double REAR_SENSOR_DIST;
+	
+	// Flag
+	private boolean hasReached = false;
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
@@ -104,6 +107,8 @@ public class RobotController {
 	 */
 	public void directTravelTo(double x, double y, int speed, boolean lock) {
 
+		hasReached = false;
+		
 		double lastX = odo.getXYT()[0];
 		double lastY = odo.getXYT()[1];
 		double theta; // Angle to next point
@@ -126,6 +131,11 @@ public class RobotController {
 		rightMotor.setSpeed(speed);
 		leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
 		rightMotor.rotate(convertDistance(WHEEL_RAD, distance), !lock);
+		hasReached = true;
+	}
+	
+	public boolean hasReached() {
+		return hasReached ? true : false;
 	}
 
 	/**
@@ -138,7 +148,6 @@ public class RobotController {
 	 * @param x the x destination of the robot
 	 * @param y the y destination of the robot
 	 * @param speed the speed to move the robot at
-	 * @param search enable searching while travelling
 	 */
 	public void travelTo(int x, int y, int speed) {
 

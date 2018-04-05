@@ -129,9 +129,6 @@ public class FlagSearcher {
 		// Rotate the sensor to the left
 		usCont.rotateSensorTo(90);
 
-		// Boolean to make sure you're at the starting corner
-		boolean atStartingCorner = true;
-
 		// Travel to the next corner of the search zone
 		int[] startingSearchCorner = getClosestSearchCorner();
 		int[] currentCorner = startingSearchCorner;
@@ -143,41 +140,34 @@ public class FlagSearcher {
 		//	 1. TIMED_OUT
 		//   2. FLAG_FOUND
 		while(searchState == SearchState.IN_PROGRESS) {
+			
+			// Keep going until the next corner is reached
+			while(!rc.hasReached()) {
+				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 
-			// Time elapsed
-			long timeElapsed = System.currentTimeMillis() - START_TIME;
+				// Time elapsed
+				long timeElapsed = System.currentTimeMillis() - START_TIME;
 
-			// If 3.5 minutes have elapsed since the beginning, time out the search
-			if(timeElapsed > 150000) {
-				searchState = SearchState.TIMED_OUT;
+				// If 3.5 minutes have elapsed since the beginning, time out the search
+				if(timeElapsed > 150000) {
+					searchState = SearchState.TIMED_OUT;
+				}
+
+				// CHeck for blocks
+				int usDist = usCont.getAvgUSDistance();
+				if(usDist < DETECT_THRESH) {
+					rc.stopMoving();
+					Sound.beepSequence();
+					identifyBlock(usDist);
+				}
 			}
-
-			// CHeck for blocks
-			int usDist = usCont.getAvgUSDistance();
-			System.out.println("" + usDist);
-			if(usDist < DETECT_THRESH) {
-				rc.stopMoving();
-				Sound.beepSequence();
-				searchState = SearchState.CHECKING_FLAG;
-				identifyBlock(usDist);
-			}
+			// Next corner has been reached; set new destination
+			currentCorner = nextCorner;
+			nextCorner = nextSearchCorner(currentCorner);
+			rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 		}
-	}
-
-	/**
-	 * Returns true if a block has been detected, which occurs
-	 * when the distance detected by the ultrasonic sensor is less
-	 * than 
-	 * 
-	 * @return whether a block has been detected by the ultrasonic sensor
-	 */
-	private boolean blockDetected(int previousDist) {
-		int usDist = usCont.getAvgUSDistance();
-
-		if (usDist < previousDist && usDist <= DETECT_THRESH)
-			return true;
-
-		return false;
+		
+		// Flag has been found or search was timed-out
 	}
 
 	/**
@@ -190,7 +180,7 @@ public class FlagSearcher {
 
 		if(distanceDetected < 5) {
 			// Get the block's color
-			if(lsCont.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
+			if(LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
 				Sound.beep();
 				searchState = SearchState.FLAG_FOUND;
 			}
@@ -209,7 +199,7 @@ public class FlagSearcher {
 			rc.travelDist(distanceDetected - 17, true);
 
 			// Get the block's color
-			if(lsCont.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
+			if(LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
 				Sound.beep();
 				searchState = SearchState.FLAG_FOUND;
 			}
