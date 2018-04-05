@@ -70,7 +70,7 @@ public class CaptureTheFlag {
 	private static final double WHEEL_RAD = 1.66;
 	private static final double TRACK = 18.0; // original 17.7
 	private static final int ROTATE_SPEED = 250;
-	private static final int FORWARD_SPEED = 300;
+	private static final int FORWARD_SPEED = 600;
 	private static final int ACCELERATION = 2000;
 	private static final double TILE_SIZE = 30.48;
 	private static final double REAR_SENSOR_DIST = 14;
@@ -161,7 +161,7 @@ public class CaptureTheFlag {
 
 		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
-		//rc.travelTo(1, 1, FORWARD_SPEED, true);
+		//rc.travelTo(1, 1, FORWARD_SPEED, false);
 		
 		//Sound.beepSequence();
 		
@@ -181,14 +181,14 @@ public class CaptureTheFlag {
 			navigator.travelThroughBridge();
 		}*/
 		
-		odometer.setXYT(5 * TILE_SIZE, 6 * TILE_SIZE, 0);
-
+		odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		
 		// ====== Travel to the search zone ====== //
 		navigator.travelToSearchZone();
 
 		// ====== Search for the flag ====== //
-		navigator.searchFlag();
-
+		flagSearcher.searchFlag(wifi.getFlagColor());
+/*
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //
 			navigator.travelToBridge();
@@ -210,6 +210,6 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
-
+*/
 	}
 }

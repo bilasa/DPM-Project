@@ -9,5 +9,5 @@ package ca.mcgill.ecse211.enumeration;
  *
  */
 public enum SearchState {
-	IN_PROGRESS, TIMED_OUT, FLAG_FOUND
+	IN_PROGRESS, TIMED_OUT, FLAG_FOUND, CHECKING_FLAG
 }

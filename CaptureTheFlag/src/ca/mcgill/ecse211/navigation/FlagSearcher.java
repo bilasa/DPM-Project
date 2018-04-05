@@ -3,6 +3,7 @@ package ca.mcgill.ecse211.navigation;
 import ca.mcgill.ecse211.controller.LightSensorController;
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
+import ca.mcgill.ecse211.enumeration.Flag;
 import ca.mcgill.ecse211.enumeration.SearchState;
 import ca.mcgill.ecse211.enumeration.Team;
 import ca.mcgill.ecse211.main.WiFi;
@@ -14,6 +15,7 @@ import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
+import lejos.utility.Delay;
 
 /**
  * This class includes all flag searching tasks of the robot.
@@ -26,7 +28,7 @@ import lejos.hardware.sensor.SensorMode;
  * @author Bijan Sadeghi
  * @author Esa Khan
  */
-public class FlagSearcher implements Runnable {
+public class FlagSearcher {
 
 	// WiFi class
 	private WiFi wifi;
@@ -59,6 +61,7 @@ public class FlagSearcher implements Runnable {
 	private int IDENTIFY_THRESH = 5; // Minimum distance at which a block is identified
 	private double FRONT_SENSOR_DIST;
 	private long START_TIME;
+	private int[][] searchZone;
 
 	/**
 	 * @param wifi the wifi object to get the challenge data from
@@ -77,9 +80,10 @@ public class FlagSearcher implements Runnable {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+		this.searchZone = getSearchZone();
 	}
 
-	@Override
+	/*	@Override
 	public void run() {
 		// Rotate the sensor to the left
 		usCont.rotateSensorTo(90);
@@ -118,9 +122,46 @@ public class FlagSearcher implements Runnable {
 		// Rotate the sensor back to 0 degrees
 		usCont.rotateSensorTo(0);
 	}
+	 */
 
-	public SearchState getSearchState() {
-		return searchState;
+	public void searchFlag(Flag color) {
+
+		// Rotate the sensor to the left
+		usCont.rotateSensorTo(90);
+
+		// Boolean to make sure you're at the starting corner
+		boolean atStartingCorner = true;
+
+		// Travel to the next corner of the search zone
+		int[] startingSearchCorner = getClosestSearchCorner();
+		int[] currentCorner = startingSearchCorner;
+		int[] nextCorner = nextSearchCorner(currentCorner);
+		rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
+
+		// Keep traveling to the next corner as long as the search is in progress
+		// The robot will stop traveling to the next corner if the search state is either:
+		//	 1. TIMED_OUT
+		//   2. FLAG_FOUND
+		while(searchState == SearchState.IN_PROGRESS) {
+
+			// Time elapsed
+			long timeElapsed = System.currentTimeMillis() - START_TIME;
+
+			// If 3.5 minutes have elapsed since the beginning, time out the search
+			if(timeElapsed > 150000) {
+				searchState = SearchState.TIMED_OUT;
+			}
+
+			// CHeck for blocks
+			int usDist = usCont.getAvgUSDistance();
+			System.out.println("" + usDist);
+			if(usDist < DETECT_THRESH) {
+				rc.stopMoving();
+				Sound.beepSequence();
+				searchState = SearchState.CHECKING_FLAG;
+				identifyBlock(usDist);
+			}
+		}
 	}
 
 	/**
@@ -143,102 +184,50 @@ public class FlagSearcher implements Runnable {
 	 * Approaches the block that has been detected and
 	 * checks if its color matches the target
 	 */
-	private void identifyBlock(double distanceDetected) {
+	private void identifyBlock(double distanceDetected) {	
 		// Move forward by the front sensor offset
 		rc.travelDist(FRONT_SENSOR_DIST, true);
 
-		// Turn to the left by 90 degrees
-		rc.turnBy(-90, true);
-
-		//Turn the sensor to 0 degrees
-		usCont.rotateSensorTo(0);
-
-		// Get the initial odometer reading
-		//double[] initialPosition = odo.getXYT();
-
-		// Keep moving forward while the ultrasonic sensor distance is less than the threshold
-		/*rc.moveForward();
-		while(usCont.getAvgUSDistance() > IDENTIFY_THRESH) {
-			// Keep moving
-			LCD.drawString("US DIST: " + usCont.getAvgUSDistance(), 0, 5);
+		if(distanceDetected < 5) {
+			// Get the block's color
+			if(lsCont.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
+				Sound.beep();
+				searchState = SearchState.FLAG_FOUND;
+			}
+			else {
+				Sound.twoBeeps();
+			}
 		}
+		else {
+			// Turn to the left by 90 degrees
+			rc.turnBy(-90, true);
 
-		// Stop the robot, the block is close enough
-		rc.stopMoving();*/
+			//Turn the sensor to 0 degrees
+			usCont.rotateSensorTo(0);
 
-		// Travel by the distance the sensor detected the object at
-		rc.travelDist(distanceDetected - 17, true);
+			// Travel by the distance the sensor detected the object at
+			rc.travelDist(distanceDetected - 17, true);
 
-		// Get the block's color
-		if(lsCont.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
-			Sound.beep();
-			searchState = SearchState.FLAG_FOUND;
+			// Get the block's color
+			if(lsCont.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
+				Sound.beep();
+				searchState = SearchState.FLAG_FOUND;
+			}
+			else {
+				Sound.twoBeeps();
+			}
+
+			// Go back by the same distance
+			rc.travelDist(-(distanceDetected - 17), true);
+
+			// Turn back
+			rc.turnBy(90, true);
+
+			// Rotate the sensor back to the left
+			usCont.rotateSensorTo(90);
 		}
-
-		// Get the final odometer reading
-		//double[] finalPosition = odo.getXYT();
-
-		// Compute the distance we traveled to reach the block
-		//double distTraveled = Math.hypot(initialPosition[0] - finalPosition[0], initialPosition[1] - finalPosition[1]);
-
-		// Go back by the same distance
-		rc.travelDist(-(distanceDetected - 17), true);
-
-		// Turn back
-		rc.turnBy(90, true);
-
-		// Rotate the sensor back to the left
-		usCont.rotateSensorTo(90);
 	}
 
-	/**
-	 * Set mainThread to the main thread in order to be able to pause it
-	 * 
-	 * @param mainThread
-	 */
-	public void setMainThread(Thread mainThread) {
-		this.mainThread = mainThread;
-	}
-
-	/**
-	 * Travels to the corner of the search zone closest to the robot
-	 * after it has crossed the bridge/tunnel into the opponent
-	 * team's zone.
-	 */
-	/*public void travelToSearchZone() {
-		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED, true);
-	}
-
-	/**
-	 * Searches for the flag in the search zone. Navigates on the rectangular 
-	 * perimeter of the search zone with the ultrasonic sensor facing the
-	 * interior of the search zone. Continuously checks for falling edge signals,
-	 * which would indicate the presence of a block. When a block is detected,
-	 * the robot turns towards the interior of the search zone, approaches the
-	 * block to a given threshold distance, and identifies the color of the block.
-	 * If the block is the target, it beeps twice and ends its search. Otherwise,
-	 * it backs up to the perimeter and continues its search.
-	 * 
-	 */
-	/*public void searchFlag() {
-		// Initialize search thread
-		// _______ 
-
-		int[] currentCorner = startingSearchCorner;
-		int[] nextCorner = nextSearchCorner(currentCorner);		
-		rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED, true);
-
-		// Keep traveling to the next corner as long as the search is in progress
-		// The robot will stop traveling to the next corner if the search state is either:
-		//	 1. TIMED_OUT
-		//   2. FLAG_FOUND
-		while (searchState == SearchState.IN_PROGRESS) {
-			currentCorner = nextCorner;
-			nextCorner = nextSearchCorner(currentCorner);
-			rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED, true);
-		}
-
-	}
 
 	/**
 	 * Gets the corner of the search zone closest to the robot after crossing
@@ -246,27 +235,10 @@ public class FlagSearcher implements Runnable {
 	 * 
 	 * @return the corner of the search zone closest to the robot after it has crossed
 	 */
-	/*private int[] getClosestSearchCorner() {
-		/*Team opponentTeam = wifi.getTeam();
-		if (wifi.getTeam() == Team.GREEN) {
-			opponentTeam = Team.RED;
-		}else if(wifi.getTeam() == Team.RED){
-			opponentTeam = Team.GREEN;
-		}
+	private int[] getClosestSearchCorner() {
 
-		switch(wifi.getStartingCorner(opponentTeam)) {
-		case 0:
-			return wifi.getSearchZone(opponentTeam)[2];
-		case 1:
-			return wifi.getSearchZone(opponentTeam)[3];
-		case 2:
-			return wifi.getSearchZone(opponentTeam)[0];
-		case 3:
-			return wifi.getSearchZone(opponentTeam)[1];
-		}*/
-
-	// Look for the closest corner of the search zone to the robot
-	/*double shortestDist = Double.MAX_VALUE;
+		// Look for the closest corner of the search zone to the robot
+		double shortestDist = Double.MAX_VALUE;
 		int[] closestCorner = searchZone[0];
 		for(int[] corner : searchZone) {
 			double cornerDist = Math.hypot(odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE), odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE));
@@ -286,7 +258,7 @@ public class FlagSearcher implements Runnable {
 	 * 
 	 * @return a two-dimensional int array containing four (x, y) pairs for each corner of the search zone
 	 */
-	/*private int[][] getSearchZone() {
+	private int[][] getSearchZone() {
 		// Get the opponent team
 		Team opponentTeam = wifi.getTeam();
 		if (wifi.getTeam() == Team.GREEN) {
@@ -305,7 +277,7 @@ public class FlagSearcher implements Runnable {
 	 * @param currentCorner
 	 * @return an int array holding the (x, y) of the next search corner
 	 */
-	/*private int[] nextSearchCorner(int[] currentCorner) {
+	private int[] nextSearchCorner(int[] currentCorner) {
 
 		// Get the index of the current corner
 		int currentCornerIndex = 0;
@@ -321,6 +293,6 @@ public class FlagSearcher implements Runnable {
 			return searchZone[currentCornerIndex + 1];
 		else
 			return searchZone[0];
-	}*/
+	}
 
 }

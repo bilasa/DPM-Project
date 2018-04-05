@@ -29,7 +29,7 @@ public class WiFi {
 	// ***Esa's***
 	//private static final String SERVER_IP = "192.168.2.18";
 	// ***Gui's***
-	private static final String SERVER_IP = "192.168.2.19";
+	private static final String SERVER_IP = "192.168.2.44";
 	// ***TA's***
 	//private static final String SERVER_IP = "192.168.2.11";
 

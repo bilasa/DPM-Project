@@ -138,9 +138,9 @@ public class RobotController {
 	 * @param x the x destination of the robot
 	 * @param y the y destination of the robot
 	 * @param speed the speed to move the robot at
-	 * @param lock an optional lock on the motors
+	 * @param search enable searching while travelling
 	 */
-	public void travelTo(int x, int y, int speed, boolean lock) {
+	public void travelTo(int x, int y, int speed) {
 
 		// Compute the nearest waypoint from the odometer reading
 		int lastX = (int) Math.round(odo.getXYT()[0] / TILE_SIZE);
@@ -166,25 +166,24 @@ public class RobotController {
 			setSpeeds(speed, speed);
 
 			// Advance towards next point's x coordinate
-			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 2) {
+			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > REAR_SENSOR_DIST) {
 				// Move forward
 				moveForward();
 
+				// Correct if not searching
 				double currX = odo.getXYT()[0];
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
 				// Correct if close enough to a line
-				if(propCnst <= 0.008) {
+				if(propCnst <= 0.1) {
 					odoCorrection.correct(corrTheta, odo.getXYT());
 				}
-				int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
-				setSpeeds(propSpeed, propSpeed);
+				setSpeeds(speed, speed);
 				moveForward();
-				Delay.msDelay(25);
 			}
 			odoCorrection.correct(corrTheta, odo.getXYT());
-			setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-			travelDist(-REAR_SENSOR_DIST, lock);
+			setSpeeds(speed, speed);
+			travelDist(-REAR_SENSOR_DIST, true);
 		}
 
 		// Find the proper angle to rotate to (if lastY == y, not needed)
@@ -206,10 +205,11 @@ public class RobotController {
 			setSpeeds(speed, speed);
 
 			// Advance towards next point's y coordinate
-			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 2) {
+			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > REAR_SENSOR_DIST) {
 				// Move forward
 				moveForward();
 
+				// Correct if not searching
 				double currY = odo.getXYT()[1];
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
@@ -217,14 +217,12 @@ public class RobotController {
 				if(propCnst <= 0.008) {
 					odoCorrection.correct(corrTheta, odo.getXYT());
 				}
-				int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
-				setSpeeds(propSpeed, propSpeed);
+				setSpeeds(speed, speed);
 				moveForward();
-				Delay.msDelay(25);
 			}
 			odoCorrection.correct(corrTheta, odo.getXYT());
-			setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-			travelDist(-REAR_SENSOR_DIST, lock);
+			setSpeeds(speed, speed);
+			travelDist(-REAR_SENSOR_DIST, true);
 		}
 
 	}
