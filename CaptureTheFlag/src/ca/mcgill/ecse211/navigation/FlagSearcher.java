@@ -17,12 +17,15 @@ import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
 
 /**
- * This class includes all flag searching tasks of the robot.
- * The class allows the navigation of the robot to the search
- * zone, as well as the execution of the search algorithm.
- * The FlagSearcher makes the robot search for its target block
- * by going on the perimeter of the search zone. If the target
- * block is found, the robot ends its search.
+ * This class is a runnable class from which a thread is
+ * created in the navigation class. The thread is created
+ * when the flag search is ready to begin. The run method 
+ * continuously checks if a block has been detected within 
+ * a certain distance threshold. If a block is detected, 
+ * the robot approaches and identifies the block. The
+ * FlagSearcher keeps track of the state of the search in
+ * the form of an enumeration, and the search will end if
+ * the state is either TIMED_OUT or FLAG_FOUND.
  * 
  * @author Bijan Sadeghi
  * @author Esa Khan
@@ -137,6 +140,11 @@ public class FlagSearcher implements Runnable {
 		usCont.rotateSensorTo(0);
 	}
 
+	/**
+	 * Returns the state of the search in the form of a SearchState enumeration
+	 * 
+	 * @return an enumeration representing the state of the search
+	 */
 	public SearchState getSearchState() {
 		return searchState;
 	}
@@ -144,7 +152,7 @@ public class FlagSearcher implements Runnable {
 	/**
 	 * Returns true if a block has been detected, which occurs
 	 * when the distance detected by the ultrasonic sensor is less
-	 * than 
+	 * than the DETECT_THRESH
 	 * 
 	 * @return whether a block has been detected by the ultrasonic sensor
 	 */
@@ -159,7 +167,9 @@ public class FlagSearcher implements Runnable {
 
 	/**
 	 * Approaches the block that has been detected and
-	 * checks if its color matches the target
+	 * checks if its color matches the target. If it matches,
+	 * the robot beeps and the search state is changed to 
+	 * FLAG_FOUND.
 	 */
 	private void identifyBlock(double distanceDetected) {
 		// Get the initial odometer reading
@@ -221,7 +231,7 @@ public class FlagSearcher implements Runnable {
 	/**
 	 * Set mainThread to the main thread in order to be able to pause it
 	 * 
-	 * @param mainThread
+	 * @param mainThread the thread to set the mainThread to
 	 */
 	public void setMainThread(Thread mainThread) {
 		this.mainThread = mainThread;
@@ -235,128 +245,5 @@ public class FlagSearcher implements Runnable {
 	public void setOdoCorrection(OdometryCorrection odoCorrection) {
 		this.odoCorrection = odoCorrection;
 	}
-
-	/**
-	 * Travels to the corner of the search zone closest to the robot
-	 * after it has crossed the bridge/tunnel into the opponent
-	 * team's zone.
-	 */
-	/*public void travelToSearchZone() {
-		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED, true);
-	}
-
-	/**
-	 * Searches for the flag in the search zone. Navigates on the rectangular 
-	 * perimeter of the search zone with the ultrasonic sensor facing the
-	 * interior of the search zone. Continuously checks for falling edge signals,
-	 * which would indicate the presence of a block. When a block is detected,
-	 * the robot turns towards the interior of the search zone, approaches the
-	 * block to a given threshold distance, and identifies the color of the block.
-	 * If the block is the target, it beeps twice and ends its search. Otherwise,
-	 * it backs up to the perimeter and continues its search.
-	 * 
-	 */
-	/*public void searchFlag() {
-		// Initialize search thread
-		// _______ 
-
-		int[] currentCorner = startingSearchCorner;
-		int[] nextCorner = nextSearchCorner(currentCorner);		
-		rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED, true);
-
-		// Keep traveling to the next corner as long as the search is in progress
-		// The robot will stop traveling to the next corner if the search state is either:
-		//	 1. TIMED_OUT
-		//   2. FLAG_FOUND
-		while (searchState == SearchState.IN_PROGRESS) {
-			currentCorner = nextCorner;
-			nextCorner = nextSearchCorner(currentCorner);
-			rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED, true);
-		}
-
-	}
-
-	/**
-	 * Gets the corner of the search zone closest to the robot after crossing
-	 * the tunnel/bridge into the opponent's zone.
-	 * 
-	 * @return the corner of the search zone closest to the robot after it has crossed
-	 */
-	/*private int[] getClosestSearchCorner() {
-		/*Team opponentTeam = wifi.getTeam();
-		if (wifi.getTeam() == Team.GREEN) {
-			opponentTeam = Team.RED;
-		}else if(wifi.getTeam() == Team.RED){
-			opponentTeam = Team.GREEN;
-		}
-
-		switch(wifi.getStartingCorner(opponentTeam)) {
-		case 0:
-			return wifi.getSearchZone(opponentTeam)[2];
-		case 1:
-			return wifi.getSearchZone(opponentTeam)[3];
-		case 2:
-			return wifi.getSearchZone(opponentTeam)[0];
-		case 3:
-			return wifi.getSearchZone(opponentTeam)[1];
-		}*/
-
-	// Look for the closest corner of the search zone to the robot
-	/*double shortestDist = Double.MAX_VALUE;
-		int[] closestCorner = searchZone[0];
-		for(int[] corner : searchZone) {
-			double cornerDist = Math.hypot(odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE), odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE));
-
-			if (cornerDist < shortestDist) {
-				shortestDist = cornerDist;
-				closestCorner = corner;
-			}
-		}
-
-		// Return the closest corner found
-		return closestCorner;
-	}
-
-	/**
-	 * Gets the search zone of the opponent team (which is the search zone the robot will search in)
-	 * 
-	 * @return a two-dimensional int array containing four (x, y) pairs for each corner of the search zone
-	 */
-	/*private int[][] getSearchZone() {
-		// Get the opponent team
-		Team opponentTeam = wifi.getTeam();
-		if (wifi.getTeam() == Team.GREEN) {
-			opponentTeam = Team.RED;
-		}else if(wifi.getTeam() == Team.RED){
-			opponentTeam = Team.GREEN;
-		}
-
-		// Get the search zone of the opponent team
-		return wifi.getSearchZone(opponentTeam);
-	}
-
-	/**
-	 * Gets the next corner of the search zone the robot should travel to based on where it is now
-	 * 
-	 * @param currentCorner
-	 * @return an int array holding the (x, y) of the next search corner
-	 */
-	/*private int[] nextSearchCorner(int[] currentCorner) {
-
-		// Get the index of the current corner
-		int currentCornerIndex = 0;
-		for(int i=0; i<searchZone.length; i++) {
-			if (searchZone[i][0] == currentCorner[0] && searchZone[i][1] == currentCorner[1]) {
-				currentCornerIndex = i;
-				break;
-			}
-		}
-
-		// Return the next corner in the search zone array
-		if (currentCornerIndex < 3)
-			return searchZone[currentCornerIndex + 1];
-		else
-			return searchZone[0];
-	}*/
 
 }

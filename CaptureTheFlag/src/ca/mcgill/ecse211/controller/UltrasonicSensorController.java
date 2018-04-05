@@ -49,6 +49,13 @@ public class UltrasonicSensorController {
 		return (int) (usSample[0] * 100.0);
 	}
 	
+	/**
+	 * Rotates the ultrasonic sensor's motor to the specified angle, where a 
+	 * positive angle rotates the sensor to the left, and a negative angle
+	 * rotates it to the right. 
+	 * 
+	 * @param theta the angle to turn the ultrasonic sensor's motor to
+	 */
 	public void rotateSensorTo(int theta) {
 		sensorMotor.rotateTo(theta);
 	}

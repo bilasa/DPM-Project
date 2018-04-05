@@ -52,6 +52,7 @@ public class CaptureTheFlag {
 	/*private static final EV3ColorSensor frontColorSensor = new EV3ColorSensor(SensorPort.S4);
 	private static SensorMode frontRGBColor = frontColorSensor.getRGBMode();
 	private static float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];*/
+	
 	// Left rear light sensor
 	private static final EV3ColorSensor leftRearColorSensor = new EV3ColorSensor(SensorPort.S2);
 	private static SensorMode leftRearColorID = leftRearColorSensor.getColorIDMode();
@@ -108,7 +109,6 @@ public class CaptureTheFlag {
 
 	// Threads
 	private static ExitProgram exit = new ExitProgram();
-	private static Timer timer = new Timer();
 
 	// Odometry correction
 	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
@@ -140,15 +140,10 @@ public class CaptureTheFlag {
 		Thread odoDisplayThread = new Thread(odometryDisplay);
 		odoDisplayThread.start();
 
-		// Timer thread
-		//Thread timerThread = new Thread(timer);
-		//timer.start();
-
 		// Add odoCorrection to the robot controller and navigator
 		rc.setOdoCorrection(odoCorrection);
 		navigator.setOdoCorrection(odoCorrection);
 		flagSearcher.setOdoCorrection(odoCorrection);
-
 
 		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
