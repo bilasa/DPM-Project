@@ -9,6 +9,7 @@ import ca.mcgill.ecse211.enumeration.Team;
 import ca.mcgill.ecse211.main.WiFi;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
+import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import lejos.hardware.Sound;
 import lejos.hardware.Wifi;
 import lejos.hardware.lcd.LCD;
@@ -27,6 +28,7 @@ import lejos.utility.Delay;
  * 
  * @author Bijan Sadeghi
  * @author Esa Khan
+ * @author Guillaume Richard
  */
 public class FlagSearcher {
 
@@ -49,12 +51,12 @@ public class FlagSearcher {
 
 	// Odometer
 	private Odometer odo;
+	
+	// Odmometry Correction
+	private OdometryCorrection odoCorrection;
 
 	// Enumeration to represent the state of the search
 	private SearchState searchState;
-
-	// Object to store the main thrad
-	private Thread mainThread;
 
 	// Constants
 	private int DETECT_THRESH = 30; // Minimum distance at which block is detected
@@ -82,49 +84,20 @@ public class FlagSearcher {
 		}
 		this.searchZone = getSearchZone();
 	}
-
-	/*	@Override
-	public void run() {
-		// Rotate the sensor to the left
-		usCont.rotateSensorTo(90);
-
-		// Get the current distance read by the ultrasonic sensor
-		int usDist = usCont.getAvgUSDistance();
-
-		while(searchState == SearchState.IN_PROGRESS) {
-
-			// Time elapsed
-			long timeElapsed = System.currentTimeMillis() - START_TIME;
-
-			// If 3.5 minutes have elapsed since the beginning, time out the search
-			if(timeElapsed > 150000) {
-				searchState = SearchState.TIMED_OUT;
-			}
-
-			// If a block is detected, identify it
-			if (blockDetected(usDist)) {
-				Sound.beepSequence();
-
-				// Make the main thread wait
-				mainThread.suspend();
-
-				rc.stopMoving();
-				identifyBlock(usDist);
-
-				// Notify the main thread to start it again
-				mainThread.resume();
-			}
-
-			// Update the current distance read by the ultrasonic sensor
-			usDist = usCont.getAvgUSDistance();
-		}
-
-		// Rotate the sensor back to 0 degrees
-		usCont.rotateSensorTo(0);
-	}
+	
+	/**
+	 * Set the OdometryCorrection object to be used by the robot controller
+	 * 
+	 * @param odoCorrection the OdometryCorrection object to be used
 	 */
+	public void setOdoCorrection(OdometryCorrection odoCorrection) {
+		this.odoCorrection = odoCorrection;
+	}
 
 	public void searchFlag(Flag color) {
+
+		// Position after identifying block
+		double[] currPos = {0,0,0};
 
 		// Rotate the sensor to the left
 		usCont.rotateSensorTo(90);
@@ -140,33 +113,48 @@ public class FlagSearcher {
 		//	 1. TIMED_OUT
 		//   2. FLAG_FOUND
 		while(searchState == SearchState.IN_PROGRESS) {
-			
-			// Keep going until the next corner is reached
-			while(!rc.hasReached()) {
+			// Time elapsed
+			long timeElapsed = System.currentTimeMillis() - START_TIME;
+
+			// If 3.5 minutes have elapsed since the beginning, time out the search
+			if(timeElapsed > 150000) {
+				searchState = SearchState.TIMED_OUT;
+			}
+
+			// Check for blocks
+			int usDist = usCont.getAvgUSDistance();
+			if(usDist < DETECT_THRESH) {
+				rc.stopMoving();
+				Sound.beepSequence();
+
+				// Go and check the block
+				identifyBlock(usDist);
+				
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
-
-				// Time elapsed
-				long timeElapsed = System.currentTimeMillis() - START_TIME;
-
-				// If 3.5 minutes have elapsed since the beginning, time out the search
-				if(timeElapsed > 150000) {
-					searchState = SearchState.TIMED_OUT;
-				}
-
-				// CHeck for blocks
-				int usDist = usCont.getAvgUSDistance();
-				if(usDist < DETECT_THRESH) {
-					rc.stopMoving();
-					Sound.beepSequence();
-					identifyBlock(usDist);
+				
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
 				}
 			}
-			// Next corner has been reached; set new destination
-			currentCorner = nextCorner;
-			nextCorner = nextSearchCorner(currentCorner);
-			rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
+
+			// Check if it has reached the corner
+			currPos = odo.getXYT();
+			if(!rc.isMoving()) {
+			//if(rc.euclideanDistance(currPos[0], currPos[1], nextCorner[0], nextCorner[1]) < FRONT_SENSOR_DIST) {
+				// Next corner has been reached by the sensor; finish the travel and set new destination
+				odoCorrection.correct(currPos[2], currPos);
+				rc.travelDist(-rc.REAR_SENSOR_DIST, true);
+				currentCorner = nextCorner;
+				nextCorner = nextSearchCorner(currentCorner);
+				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
+			}
+
 		}
-		
+		rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED);
+		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED);
 		// Flag has been found or search was timed-out
 	}
 
@@ -175,8 +163,14 @@ public class FlagSearcher {
 	 * checks if its color matches the target
 	 */
 	private void identifyBlock(double distanceDetected) {	
+		
+		// Position before identification
+		double[] initialPos = {0,0,0};
+		double[] finalPos = {0,0,0};
+		
 		// Move forward by the front sensor offset
-		rc.travelDist(FRONT_SENSOR_DIST, true);
+		rc.setSpeeds(150, 150);
+		rc.travelDist(FRONT_SENSOR_DIST + 4, true);
 
 		if(distanceDetected < 5) {
 			// Get the block's color
@@ -191,12 +185,22 @@ public class FlagSearcher {
 		else {
 			// Turn to the left by 90 degrees
 			rc.turnBy(-90, true);
-
+			
 			//Turn the sensor to 0 degrees
 			usCont.rotateSensorTo(0);
 
-			// Travel by the distance the sensor detected the object at
-			rc.travelDist(distanceDetected - 17, true);
+			initialPos = odo.getXYT();
+			// Keep moving forward while the ultrasonic sensor distance is less than the threshold
+			rc.moveForward();
+			while(usCont.getAvgUSDistance() > IDENTIFY_THRESH) {
+				// Intermediate position
+				double[] interPos = odo.getXYT();
+				if(Math.hypot(interPos[0] - initialPos[0], interPos[1] - initialPos[1]) > distanceDetected) {
+					break;
+				}
+			}
+			
+			rc.stopMoving();
 
 			// Get the block's color
 			if(LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
@@ -206,9 +210,11 @@ public class FlagSearcher {
 			else {
 				Sound.twoBeeps();
 			}
-
+			
+			finalPos = odo.getXYT();
+			double dist = Math.hypot(finalPos[0] - initialPos[0], finalPos[1] - initialPos[1]);
 			// Go back by the same distance
-			rc.travelDist(-(distanceDetected - 17), true);
+			rc.travelDist(-dist, true);
 
 			// Turn back
 			rc.turnBy(90, true);

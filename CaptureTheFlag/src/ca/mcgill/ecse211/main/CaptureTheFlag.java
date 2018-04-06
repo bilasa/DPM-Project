@@ -71,6 +71,7 @@ public class CaptureTheFlag {
 	private static final double TRACK = 18.0; // original 17.7
 	private static final int ROTATE_SPEED = 250;
 	private static final int FORWARD_SPEED = 600;
+	private static final int CORRECTION_SPEED = 150;
 	private static final int ACCELERATION = 2000;
 	private static final double TILE_SIZE = 30.48;
 	private static final double REAR_SENSOR_DIST = 14;
@@ -112,7 +113,7 @@ public class CaptureTheFlag {
 	private static Timer timer = new Timer();
 
 	// Odometry correction
-	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
+	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, CORRECTION_SPEED, rc, leftRearLsCont, rightRearLsCont);
 
 	/**
 	 * First localizes the robot at its starting corner.
@@ -148,6 +149,7 @@ public class CaptureTheFlag {
 		// Add odoCorrection to the robot controller and navigator
 		rc.setOdoCorrection(odoCorrection);
 		navigator.setOdoCorrection(odoCorrection);
+		flagSearcher.setOdoCorrection(odoCorrection);
 
 
 		// ====== Get the robot's team ======  //
@@ -188,6 +190,7 @@ public class CaptureTheFlag {
 
 		// ====== Search for the flag ====== //
 		flagSearcher.searchFlag(wifi.getFlagColor());
+		Sound.beepSequenceUp();
 /*
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //

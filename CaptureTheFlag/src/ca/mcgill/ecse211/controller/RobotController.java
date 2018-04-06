@@ -32,8 +32,8 @@ public class RobotController {
 	public final double WHEEL_RAD;
 	public final double TRACK;
 	public final int FORWARD_SPEED; // made public due to frequent use
-	public final int ROTATE_SPEED; // made public due to frequent use
-	public final int ACCELERATION; // made public due to frequent use
+	public final int ROTATE_SPEED; 	// made public due to frequent use
+	public final int ACCELERATION; 	// made public due to frequent use
 	public final double TILE_SIZE;
 	public final double REAR_SENSOR_DIST;
 	
@@ -106,8 +106,6 @@ public class RobotController {
 	 * @param lock an optional lock on the motors
 	 */
 	public void directTravelTo(double x, double y, int speed, boolean lock) {
-
-		hasReached = false;
 		
 		double lastX = odo.getXYT()[0];
 		double lastY = odo.getXYT()[1];
@@ -131,11 +129,6 @@ public class RobotController {
 		rightMotor.setSpeed(speed);
 		leftMotor.rotate(convertDistance(WHEEL_RAD, distance), true);
 		rightMotor.rotate(convertDistance(WHEEL_RAD, distance), !lock);
-		hasReached = true;
-	}
-	
-	public boolean hasReached() {
-		return hasReached ? true : false;
 	}
 
 	/**
@@ -175,7 +168,7 @@ public class RobotController {
 			setSpeeds(speed, speed);
 
 			// Advance towards next point's x coordinate
-			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > REAR_SENSOR_DIST) {
+			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 10) {
 				// Move forward
 				moveForward();
 
@@ -208,13 +201,10 @@ public class RobotController {
 		if (lastY != y) {
 			turnTo(corrTheta);
 
-			// Calculate the number of tiles the robot needs to move in the Y direction
-			int tilesY = y - lastY;
-
 			setSpeeds(speed, speed);
 
 			// Advance towards next point's y coordinate
-			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > REAR_SENSOR_DIST) {
+			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 10) {
 				// Move forward
 				moveForward();
 
@@ -223,7 +213,7 @@ public class RobotController {
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
 				// Correct if close enough to a line
-				if(propCnst <= 0.008) {
+				if(propCnst <= 0.1) {
 					odoCorrection.correct(corrTheta, odo.getXYT());
 				}
 				setSpeeds(speed, speed);
@@ -388,6 +378,19 @@ public class RobotController {
 		leftMotor.endSynchronization();
 	}
 
+	/**
+	 * Calculates the Euclidean Distance between two points given by (x1, y1) and 
+	 * (x2,y2).
+	 * @param x1 X coordinate of first point
+	 * @param y1 Y coordinate of first point
+	 * @param x2 X coordinate of second point
+	 * @param y2 Y coordinate of secon point
+	 * @return the distance between the two points
+	 */
+	public double euclideanDistance(double x1, double y1, double x2, double y2) {
+		return Math.sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+	}
+	
 	/**
 	 * Sets the OdometryCorrection object to be used by the robot controller.
 	 * 
