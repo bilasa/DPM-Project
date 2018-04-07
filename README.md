@@ -134,3 +134,14 @@ By Bijan Sadeghi
 
 By Bijan Sadeghi, Esa Khan
 
+## 3.0
+### Near-final Flag Search and near-final implementation (18/04/06)
+#### Currently in branch merge-odo_proportinal-master
+* FlagSearcher is now a class (no more threads pausing and resuming)
+* Moved back `searchFlag` into FlagSearcher
+* Added `SEARCH_SPEED` and `CORRECT_SPEED`
+* `travelTo` relies on `moveForward`
+* Small javadoc update and improved comments
+* Simple filter in `identifyBlock` to stop false positives
+
+By Bijan Sadeghi, Esa Khan & Guillaume Richard
