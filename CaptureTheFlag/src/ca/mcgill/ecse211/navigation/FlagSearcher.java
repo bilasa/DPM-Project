@@ -61,6 +61,7 @@ public class FlagSearcher {
 	// Constants
 	private int DETECT_THRESH = 30; // Minimum distance at which block is detected
 	private int IDENTIFY_THRESH = 5; // Minimum distance at which a block is identified
+	private int SEARCH_SPEED;
 	private double FRONT_SENSOR_DIST;
 	private long START_TIME;
 	private int[][] searchZone;
@@ -69,13 +70,14 @@ public class FlagSearcher {
 	 * @param wifi the wifi object to get the challenge data from
 	 * @param rc the robot controller to use
 	 */
-	public FlagSearcher(WiFi wifi, RobotController rc, UltrasonicSensorController usCont, double FRONT_SENSOR_DIST, long START_TIME) {
+	public FlagSearcher(WiFi wifi, RobotController rc, UltrasonicSensorController usCont, double FRONT_SENSOR_DIST, long START_TIME, int SEARCH_SPEED) {
 		this.wifi = wifi;
 		this.rc = rc;
 		this.usCont = usCont;
 		this.searchState = SearchState.IN_PROGRESS;
 		this.FRONT_SENSOR_DIST = FRONT_SENSOR_DIST;
 		this.START_TIME = START_TIME;
+		this.SEARCH_SPEED = SEARCH_SPEED;
 		try {
 			this.odo = Odometer.getOdometer();
 		} catch (OdometerExceptions e) {
@@ -129,7 +131,7 @@ public class FlagSearcher {
 				Sound.beepSequence();
 
 				// Go and check the block
-				identifyBlock(usDist);
+				identifyBlock();
 				
 				// When the block is identified, keep going towards the current destination corner
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
@@ -171,16 +173,24 @@ public class FlagSearcher {
 	 * Approaches the block that has been detected and
 	 * checks if its color matches the target
 	 * 
-	 * @param distanceDetected the distance at which the ultrasonic captured a block
 	 */
-	private void identifyBlock(double distanceDetected) {	
+	private void identifyBlock() {	
+		
+		// Take another samples to make sure a block is really detected
+		int distanceDetected = usCont.getAvgUSDistance();
+		
+		// Check the validity of the new sample
+		if(distanceDetected > DETECT_THRESH) {
+			// Do nothing and go back to travelling
+			return;
+		}
 		
 		// Position before identification
 		double[] initialPos = {0,0,0};
 		double[] finalPos = {0,0,0};
 		
 		// Move forward by the front sensor offset
-		rc.setSpeeds(150, 150);
+		rc.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
 		rc.travelDist(FRONT_SENSOR_DIST + 4, true);
 
 		// If the block was detected close enough already, sample directly

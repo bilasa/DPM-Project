@@ -72,6 +72,7 @@ public class CaptureTheFlag {
 	private static final int ROTATE_SPEED = 250;
 	private static final int FORWARD_SPEED = 600;
 	private static final int CORRECTION_SPEED = 150;
+	private static final int SEARCH_SPEED = 150;
 	private static final int ACCELERATION = 2000;
 	private static final double TILE_SIZE = 30.48;
 	private static final double REAR_SENSOR_DIST = 14;
@@ -105,7 +106,7 @@ public class CaptureTheFlag {
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
 	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont);
-	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc, usCont, FRONT_SENSOR_DIST, START_TIME);
+	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc, usCont, FRONT_SENSOR_DIST, START_TIME, SEARCH_SPEED);
 	private static Navigator navigator = new Navigator(rc, wifi, flagSearcher);
 
 	// Threads
