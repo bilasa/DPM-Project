@@ -112,8 +112,9 @@ public class LightLocalizer {
 		// Move to the origin
 		rc.directTravelTo(0, 0, FORWARD_SPEED, true);
 		
-		// Check if color sensor is already on a line
-		if (lsCont.getColorSample()[0] == 13.0) {
+		// Make sure the light sensor is not already on a line
+		rc.turnBy(-5, true);
+		if(lsCont.getColorSample()[0] == 13.0) {
 			rc.turnBy(-15, true);
 		}
 		

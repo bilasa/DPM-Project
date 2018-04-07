@@ -11,12 +11,9 @@ import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import lejos.hardware.Sound;
-import lejos.hardware.Wifi;
-import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
-import lejos.utility.Delay;
 
 /**
  * This class includes all flag searching tasks of the robot. The class allows
@@ -103,10 +100,6 @@ public class FlagSearcher {
 
 	public void searchFlag(Flag color) {
 
-		
-		// Position after identifying block
-		double[] currPos = { 0, 0, 0 };
-
 		// Rotate the sensor to the left
 		usCont.rotateSensorTo(90);
 
@@ -116,15 +109,13 @@ public class FlagSearcher {
 		int[] nextCorner = nextSearchCorner(currentCorner);
 		rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 
-		
 		try {
 			Thread.sleep(750);
 		} catch (InterruptedException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
-		
+
 		// Keep traveling to the next corner as long as the search is in progress
 		// The robot will stop traveling to the next corner if the search state is
 		// either:
@@ -144,7 +135,7 @@ public class FlagSearcher {
 
 			// Check for blocks with the ultrasonic sensor
 			int usDist = usCont.getAvgUSDistance();
-			if (usDist < DETECT_THRESH) {
+			if (usDist < DETECT_THRESH && withinArea(usDist, searchZone)) {
 				// Block was found; stop moving and notify user
 				rc.stopMoving();
 				Sound.beepSequence();
@@ -153,20 +144,19 @@ public class FlagSearcher {
 				identifyBlock();
 
 				try {
-					Thread.sleep(250);
+					Thread.sleep(500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
-				
+
 				// When the block is identified, keep going towards the current destination
 				// corner
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 
 				// Sleep so that the same block is not detected again
 				try {
-					Thread.sleep(800);
+					Thread.sleep(3000);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -175,21 +165,29 @@ public class FlagSearcher {
 
 			// If the robot is stopped, it means it reached the destination corner,
 			// so the next corner has to be set as the destination
-			currPos = odo.getXYT();
 			if (!rc.isMoving()) {
-				// if(rc.euclideanDistance(currPos[0], currPos[1], nextCorner[0], nextCorner[1])
+				// if(rc.euclideanDistance([0], [1], nextCorner[0], nextCorner[1])
 				// < FRONT_SENSOR_DIST) {
 				// Finish the travel with correction
-				odoCorrection.correct(currPos[2], currPos);
+				odoCorrection.correct();
 				rc.travelDist(-rc.REAR_SENSOR_DIST, true);
 				// Rotate towards the next corner and correct first
 				rc.turnBy(-90, true);
-				odoCorrection.correct(currPos[2], currPos);
-
+				
+				odoCorrection.correct();
+				
+				
 				// Set new destination
 				currentCorner = nextCorner;
 				nextCorner = nextSearchCorner(currentCorner);
 
+				try {
+					Thread.sleep(250);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				
 				// Start travelling
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 			}
@@ -228,7 +226,7 @@ public class FlagSearcher {
 
 		// Move forward by the front sensor offset
 		rc.setSpeeds(SEARCH_SPEED, SEARCH_SPEED);
-		rc.travelDist(FRONT_SENSOR_DIST + 4, true);
+		rc.travelDist(FRONT_SENSOR_DIST + 2, true);
 
 		// If the block was detected close enough already, sample directly
 		if (distanceDetected < 5) {
@@ -263,14 +261,29 @@ public class FlagSearcher {
 				}
 			}
 
-
 			rc.stopMoving();
 
 			// Get the block's color
 			if (LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
 				Sound.beep();
 				searchState = SearchState.FLAG_FOUND;
-			} else {
+			}
+
+			usCont.rotateSensorTo(45);
+			if (searchState != SearchState.FLAG_FOUND
+					&& LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
+				Sound.beep();
+				searchState = SearchState.FLAG_FOUND;
+			}
+
+			usCont.rotateSensorTo(-45);
+			if (searchState != SearchState.FLAG_FOUND
+					&& LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
+				Sound.beep();
+				searchState = SearchState.FLAG_FOUND;
+			}
+
+			if (searchState != SearchState.FLAG_FOUND) {
 				Sound.twoBeeps();
 			}
 
@@ -283,9 +296,76 @@ public class FlagSearcher {
 			// Turn back on the initial path
 			rc.turnBy(90, true);
 
+			rc.travelDist(-(FRONT_SENSOR_DIST + 2), true);
+			
+			try {
+				Thread.sleep(250);
+			} catch (InterruptedException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+
 			// Rotate the sensor back to the left
 			usCont.rotateSensorTo(90);
 		}
+	}
+
+	private boolean withinArea(float distance, int[][] searchZone) {
+		float usAngle = 90;
+		boolean result = false;
+		double[] data;
+		double absAngle = 0, xPos = 0, yPos = 0;
+
+		data = odo.getXYT();
+
+		double URy = searchZone[2][1] * rc.TILE_SIZE;
+		double URx = searchZone[2][0] * rc.TILE_SIZE;
+		double LLx = searchZone[0][0] * rc.TILE_SIZE;
+		double LLy = searchZone[0][1] * rc.TILE_SIZE;
+
+		absAngle = data[2] - usAngle;
+
+		if (absAngle < 0)
+			absAngle += 360;
+
+		if (absAngle >= 0 && absAngle < 90) {
+			xPos = distance * Math.sin(Math.toRadians(absAngle));
+			yPos = distance * Math.cos(Math.toRadians(absAngle));
+
+			xPos += data[0];
+			yPos += data[1];
+
+		} else if (absAngle >= 90 && absAngle < 180) {
+			xPos = distance * Math.cos(Math.toRadians(absAngle - 90));
+			yPos = distance * Math.sin(Math.toRadians(absAngle - 90));
+
+			xPos += data[0];
+			yPos -= data[1];
+
+		} else if (absAngle >= 180 && absAngle < 270) {
+			xPos = distance * Math.sin(Math.toRadians(absAngle - 180));
+			yPos = distance * Math.cos(Math.toRadians(absAngle - 180));
+
+			xPos -= data[0];
+			yPos -= data[1];
+
+		} else {
+			xPos = distance * Math.cos(Math.toRadians(absAngle - 270));
+			yPos = distance * Math.sin(Math.toRadians(absAngle - 270));
+
+			xPos -= data[0];
+			yPos += data[1];
+
+		}
+
+		xPos = Math.abs(xPos);
+		yPos = Math.abs(yPos);
+
+		if (xPos >= LLx && xPos <= URx && yPos >= LLy && yPos <= URy) {
+			result = true;
+		}
+
+		return result;
 	}
 
 	/**

@@ -1,15 +1,10 @@
 package ca.mcgill.ecse211.controller;
 
-import ca.mcgill.ecse211.main.CaptureTheFlag;
-import ca.mcgill.ecse211.navigation.Navigator;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import lejos.hardware.Sound;
-import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.motor.EV3LargeRegulatedMotor;
 import lejos.robotics.RegulatedMotor;
-import lejos.utility.Delay;
 
 /**
  * This class controls the low-level operations of the robot's motors.
@@ -37,9 +32,6 @@ public class RobotController {
 	public final int ACCELERATION; 	// made public due to frequent use
 	public final double TILE_SIZE;
 	public final double REAR_SENSOR_DIST;
-	
-	// Flag
-	private boolean hasReached = false;
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
@@ -180,12 +172,12 @@ public class RobotController {
 				double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
 				// Correct if close enough to a line
 				if(propCnst <= 0.1) {
-					odoCorrection.correct(corrTheta, odo.getXYT());
+					odoCorrection.correct();
 				}
 				setSpeeds(speed, speed);
 				moveForward();
 			}
-			odoCorrection.correct(corrTheta, odo.getXYT());
+			odoCorrection.correct();
 			setSpeeds(speed, speed);
 			travelDist(-REAR_SENSOR_DIST, true);
 		}
@@ -216,12 +208,12 @@ public class RobotController {
 				double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
 				// Correct if close enough to a line
 				if(propCnst <= 0.1) {
-					odoCorrection.correct(corrTheta, odo.getXYT());
+					odoCorrection.correct();
 				}
 				setSpeeds(speed, speed);
 				moveForward();
 			}
-			odoCorrection.correct(corrTheta, odo.getXYT());
+			odoCorrection.correct();
 			setSpeeds(speed, speed);
 			travelDist(-REAR_SENSOR_DIST, true);
 		}

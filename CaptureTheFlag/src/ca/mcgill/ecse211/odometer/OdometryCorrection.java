@@ -67,14 +67,13 @@ public class OdometryCorrection {
 	 * sensors. Re-aligns the robot so that both sensors are on the line. Corrects
 	 * the Odometer's theta and either the x or the y, based on which axis the robot
 	 * is traveling on.
-	 *
-	 * @param corrTheta the angle the Odometer must be set to after correction
-	 * @param initialOdo the Odometer values from the end of the last correction
 	 */
-	public void correct(double corrTheta, double[] initialOdo) {
+	public void correct() {
 		// Intermediate odometer reading: odometer's reading after detecting the first line
 		//double[] intermediateOdo = new double[3];
 
+		double corrTheta = odo.getXYT()[2];
+		
 		// Sleep for 250 ms
 		try {
 			Thread.sleep(250);
@@ -123,6 +122,8 @@ public class OdometryCorrection {
 			}
 		}
 
+		
+		
 		// The robot is now aligned. Correct the odometer.
 
 		// Get the final odometer reading: reading after both lines are detected
@@ -139,6 +140,21 @@ public class OdometryCorrection {
 
 		// Compute the robot's offset from its intended traveling axis
 		double offset = (dist - SENSOR_DIST + c) * Math.sin(Math.abs(dTheta));*/
+		
+		
+		// Get an approximation of the correct theta
+		if(corrTheta >= 350 && corrTheta <= 10) {
+			corrTheta = 0;
+		}
+		else if(corrTheta >= 80 && corrTheta <= 100) {
+			corrTheta = 90;
+		}
+		else if(corrTheta >= 170 && corrTheta <= 190) {
+			corrTheta = 180;
+		}
+		else if(corrTheta >= 260 && corrTheta <= 280) {
+			corrTheta = 270;
+		}
 
 		// Variables to store the final correct odometer values
 		double corrX = 0;

@@ -1,8 +1,6 @@
 package ca.mcgill.ecse211.navigation;
 
 import ca.mcgill.ecse211.controller.RobotController;
-import ca.mcgill.ecse211.enumeration.Flag;
-import ca.mcgill.ecse211.enumeration.SearchState;
 import ca.mcgill.ecse211.enumeration.Team;
 import ca.mcgill.ecse211.main.WiFi;
 import ca.mcgill.ecse211.odometer.Odometer;
@@ -50,9 +48,6 @@ public class Navigator {
 	// Corner of the search zone we start and end the search at
 	private int[] startingSearchCorner;
 
-	// Search zone
-	private int[][] searchZone;
-
 	/**
 	 * @param rc the robot controller to use
 	 * @param wifi the wifi object to get the challenge data from
@@ -72,7 +67,6 @@ public class Navigator {
 			e.printStackTrace();
 		}
 		this.flagSearcher = flagSearcher;
-		this.searchZone = getSearchZone();
 	}
 
 	/**
@@ -282,15 +276,18 @@ public class Navigator {
 		turnToCrossing(tunnelZone);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta(), odo.getXYT());
+		odoCorrection.correct();
 
-		double[] odoBeforeCrossing = odo.getXYT();
-
+		rc.setSpeeds(5000, 5000);
+		
 		// Travel through the tunnel/bridge by moving forward by the (length of the crossing + 1.5)
 		rc.travelDist((wifi.getCrossingLength() + 1.5) * rc.TILE_SIZE, true);
 
+		rc.setSpeeds(rc.FORWARD_SPEED, rc.FORWARD_SPEED);
+
+		
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta(), odoBeforeCrossing);
+		odoCorrection.correct();
 
 		// Move back so the robot is on the line
 		rc.travelDist(-rc.REAR_SENSOR_DIST, true);
@@ -302,7 +299,7 @@ public class Navigator {
 		rc.travelDist(rc.TILE_SIZE / 2, true);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta(), odo.getXYT());
+		odoCorrection.correct();
 
 	}
 
@@ -317,15 +314,17 @@ public class Navigator {
 		turnToCrossing(bridgeZone);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta(), odo.getXYT());
-
-		double[] odoBeforeCrossing = odo.getXYT();
-
+		odoCorrection.correct();
+		
+		rc.setSpeeds(1000, 1000);
+		
 		// Travel through the tunnel/bridge by moving forward by the (length of the crossing + 1.5)
 		rc.travelDist((wifi.getCrossingLength() + 1.5) * rc.TILE_SIZE, true);
 
+		rc.setSpeeds(rc.FORWARD_SPEED, rc.FORWARD_SPEED);
+		
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta(), odoBeforeCrossing);
+		odoCorrection.correct();
 
 		// Move back so the robot is on the line
 		rc.travelDist(-rc.REAR_SENSOR_DIST, true);
@@ -337,7 +336,7 @@ public class Navigator {
 		rc.travelDist(rc.TILE_SIZE / 2, true);
 
 		// Correct until the line
-		odoCorrection.correct(getCorrTheta(), odo.getXYT());
+		odoCorrection.correct();
 
 	}
 
@@ -383,10 +382,8 @@ public class Navigator {
 			rc.turnTo(0);
 		}
 
-		double corrTheta = getCorrTheta();
-
 		// Correct until the line
-		odoCorrection.correct(corrTheta, odo.getXYT());
+		odoCorrection.correct();
 
 		// Travel forward by half a tile
 		rc.travelDist(rc.TILE_SIZE / 2 - rc.REAR_SENSOR_DIST, true);
@@ -461,13 +458,14 @@ public class Navigator {
 		this.odoCorrection = odoCorrection;
 	}
 
+
 	/**
 	 * Gets the corrected angle of the robot given the odometer's theta reading
 	 * when the robot's intended path is vertical or horizontal.
 	 * 
 	 * @return the correct angle the robot's odometer must use to correct itself
 	 */
-	private double getCorrTheta() {
+	/*private double getCorrTheta() {
 		double corrTheta = 0;
 		double[] odoData = { 0, 0, 0 };
 
@@ -491,7 +489,7 @@ public class Navigator {
 
 		return corrTheta;
 	}
-
+*/
 	
 	
 	
@@ -503,26 +501,5 @@ public class Navigator {
 	public void travelToSearchZone() {
 		startingSearchCorner = flagSearcher.getClosestSearchCorner();
 		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED);
-	}
-
-	
-	
-	
-	/**
-	 * Gets the search zone of the opponent team (which is the search zone the robot will search in)
-	 * 
-	 * @return a two-dimensional int array containing four (x, y) pairs for each corner of the search zone
-	 */
-	private int[][] getSearchZone() {
-		// Get the opponent team
-		Team opponentTeam = wifi.getTeam();
-		if (wifi.getTeam() == Team.GREEN) {
-			opponentTeam = Team.RED;
-		}else if(wifi.getTeam() == Team.RED){
-			opponentTeam = Team.GREEN;
-		}
-
-		// Get the search zone of the opponent team
-		return wifi.getSearchZone(opponentTeam);
 	}
 }

@@ -1,7 +1,5 @@
 package ca.mcgill.ecse211.main;
 
-import java.io.File;
-
 import ca.mcgill.ecse211.controller.LightSensorController;
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
@@ -14,7 +12,6 @@ import ca.mcgill.ecse211.odometer.Display;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
-import lejos.hardware.Audio;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -50,11 +47,6 @@ public class CaptureTheFlag {
 	private static SampleProvider usDistance = usSensor.getMode("Distance");
 	private static SampleProvider average = new MeanFilter(usDistance, 8);
 	private static float[] usSample = new float[average.sampleSize()];
-
-	// Front light sensor
-	/*private static final EV3ColorSensor frontColorSensor = new EV3ColorSensor(SensorPort.S4);
-	private static SensorMode frontRGBColor = frontColorSensor.getRGBMode();
-	private static float[] frontRGBColorSample = new float[frontRGBColor.sampleSize()];*/
 
 	// Left rear light sensor
 	private static final EV3ColorSensor leftRearColorSensor = new EV3ColorSensor(SensorPort.S2);
@@ -162,7 +154,7 @@ public class CaptureTheFlag {
 		//Sound.playSample(new File("E:\\McGill\\ECSE 211\\Labs\\Project\\CaptureTheFlag\\battle.wav"));
 		//Sound.playSample(new File("battle.wav"), 100	);
 		 
-		
+		/*
 		// ====== Do ultrasonic localization in corner ======  //
 		usLocalizer.usLocalize();
 
@@ -171,12 +163,12 @@ public class CaptureTheFlag {
 
 		
 		
-		//odometer.setXYT(5 * TILE_SIZE, 2 * TILE_SIZE, 270);
+		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 		//rc.travelTo(1, 1, FORWARD_SPEED, false);
 		
 		//Sound.beepSequence();
-		
+
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();
@@ -192,9 +184,10 @@ public class CaptureTheFlag {
 			// ====== Travel through the bridge ====== //
 			navigator.travelThroughBridge();
 		}
-		
-		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
-		
+	
+	*/
+		odometer.setXYT(2 * TILE_SIZE, 6 * TILE_SIZE, 0);
+
 		
 		// ====== Travel to the search zone ====== //
 		navigator.travelToSearchZone();
