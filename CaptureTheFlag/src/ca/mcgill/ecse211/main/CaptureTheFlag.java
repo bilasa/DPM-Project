@@ -1,5 +1,7 @@
 package ca.mcgill.ecse211.main;
 
+import java.io.File;
+
 import ca.mcgill.ecse211.controller.LightSensorController;
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
@@ -12,6 +14,7 @@ import ca.mcgill.ecse211.odometer.Display;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
+import lejos.hardware.Audio;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -155,19 +158,26 @@ public class CaptureTheFlag {
 		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
+		
+		//Sound.playSample(new File("E:\\McGill\\ECSE 211\\Labs\\Project\\CaptureTheFlag\\battle.wav"));
+		//Sound.playSample(new File("battle.wav"), 100	);
+		 
+		
 		// ====== Do ultrasonic localization in corner ======  //
-		//usLocalizer.usLocalize();
+		usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		
+		
+		//odometer.setXYT(5 * TILE_SIZE, 2 * TILE_SIZE, 270);
 
 		//rc.travelTo(1, 1, FORWARD_SPEED, false);
 		
 		//Sound.beepSequence();
 		
-		/*if (team == Team.GREEN) {
+		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();
 		} else if (team == Team.RED){
@@ -181,9 +191,10 @@ public class CaptureTheFlag {
 		} else if (team == Team.RED){
 			// ====== Travel through the bridge ====== //
 			navigator.travelThroughBridge();
-		}*/
+		}
 		
-		odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		
 		
 		// ====== Travel to the search zone ====== //
 		navigator.travelToSearchZone();
@@ -191,7 +202,7 @@ public class CaptureTheFlag {
 		// ====== Search for the flag ====== //
 		flagSearcher.searchFlag(wifi.getFlagColor());
 		Sound.beepSequenceUp();
-/*
+
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //
 			navigator.travelToBridge();
@@ -213,6 +224,9 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
-*/
+		
+		
+		Sound.twoBeeps();
+		System.exit(0);
 	}
 }

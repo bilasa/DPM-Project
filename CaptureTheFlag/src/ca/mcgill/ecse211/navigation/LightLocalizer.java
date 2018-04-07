@@ -111,8 +111,13 @@ public class LightLocalizer {
 
 		// Move to the origin
 		rc.directTravelTo(0, 0, FORWARD_SPEED, true);
+		
+		// Check if color sensor is already on a line
+		if (lsCont.getColorSample()[0] == 13.0) {
+			rc.turnBy(-15, true);
+		}
+		
 		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
-
 		// Set the angle to perfect 0
 		while (rc.isMoving()) {
 			// The robot is in the third quadrant, if the robot turns counter clockwise

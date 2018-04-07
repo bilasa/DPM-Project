@@ -492,40 +492,22 @@ public class Navigator {
 		return corrTheta;
 	}
 
+	
+	
+	
 	/**
 	 * Travels to the corner of the search zone closest to the robot
 	 * after it has crossed the bridge/tunnel into the opponent
 	 * team's zone.
 	 */
 	public void travelToSearchZone() {
-		startingSearchCorner = getClosestSearchCorner();
+		startingSearchCorner = flagSearcher.getClosestSearchCorner();
 		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED);
 	}
 
-	/**
-	 * Gets the corner of the search zone closest to the robot after crossing
-	 * the tunnel/bridge into the opponent's zone.
-	 * 
-	 * @return the corner of the search zone closest to the robot after it has crossed
-	 */
-	private int[] getClosestSearchCorner() {
-
-		// Look for the closest corner of the search zone to the robot
-		double shortestDist = Double.MAX_VALUE;
-		int[] closestCorner = searchZone[0];
-		for(int[] corner : searchZone) {
-			double cornerDist = Math.hypot(odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE), odo.getXYT()[1] - (corner[1] * rc.TILE_SIZE));
-
-			if (cornerDist < shortestDist) {
-				shortestDist = cornerDist;
-				closestCorner = corner;
-			}
-		}
-
-		// Return the closest corner found
-		return closestCorner;
-	}
-
+	
+	
+	
 	/**
 	 * Gets the search zone of the opponent team (which is the search zone the robot will search in)
 	 * 
