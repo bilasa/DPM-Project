@@ -1,5 +1,7 @@
 package ca.mcgill.ecse211.main;
 
+import java.io.File;
+
 import ca.mcgill.ecse211.controller.LightSensorController;
 import ca.mcgill.ecse211.controller.RobotController;
 import ca.mcgill.ecse211.controller.UltrasonicSensorController;
@@ -12,6 +14,7 @@ import ca.mcgill.ecse211.odometer.Display;
 import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
+import lejos.hardware.Audio;
 import lejos.hardware.Sound;
 import lejos.hardware.ev3.LocalEV3;
 import lejos.hardware.lcd.TextLCD;
@@ -70,7 +73,9 @@ public class CaptureTheFlag {
 	private static final double WHEEL_RAD = 1.66;
 	private static final double TRACK = 18.0; // original 17.7
 	private static final int ROTATE_SPEED = 250;
-	private static final int FORWARD_SPEED = 300;
+	private static final int FORWARD_SPEED = 600;
+	private static final int CORRECTION_SPEED = 150;
+	private static final int SEARCH_SPEED = 150;
 	private static final int ACCELERATION = 2000;
 	private static final double TILE_SIZE = 30.48;
 	private static final double REAR_SENSOR_DIST = 14;
@@ -104,15 +109,14 @@ public class CaptureTheFlag {
 	// Navigation classes
 	private static UltrasonicLocalizer usLocalizer = new UltrasonicLocalizer(rc, usCont);
 	private static LightLocalizer lightLocalizer = new LightLocalizer(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont);
-	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc, usCont, FRONT_SENSOR_DIST, START_TIME);
+	private static FlagSearcher flagSearcher = new FlagSearcher(wifi, rc, usCont, FRONT_SENSOR_DIST, START_TIME, SEARCH_SPEED);
 	private static Navigator navigator = new Navigator(rc, wifi, flagSearcher);
 
 	// Threads
 	private static ExitProgram exit = new ExitProgram();
-	private static Timer timer = new Timer();
 
 	// Odometry correction
-	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, rc, leftRearLsCont, rightRearLsCont);
+	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, CORRECTION_SPEED, rc, leftRearLsCont, rightRearLsCont);
 
 	/**
 	 * First localizes the robot at its starting corner.
@@ -148,24 +152,32 @@ public class CaptureTheFlag {
 		// Add odoCorrection to the robot controller and navigator
 		rc.setOdoCorrection(odoCorrection);
 		navigator.setOdoCorrection(odoCorrection);
+		flagSearcher.setOdoCorrection(odoCorrection);
 
 
 		// ====== Get the robot's team ======  //
 		Team team = wifi.getTeam();
 
+		
+		//Sound.playSample(new File("E:\\McGill\\ECSE 211\\Labs\\Project\\CaptureTheFlag\\battle.wav"));
+		//Sound.playSample(new File("battle.wav"), 100	);
+		 
+		
 		// ====== Do ultrasonic localization in corner ======  //
-		//usLocalizer.usLocalize();
+		usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
-		//lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
+		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
-		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		
+		
+		//odometer.setXYT(5 * TILE_SIZE, 2 * TILE_SIZE, 270);
 
-		//rc.travelTo(1, 1, FORWARD_SPEED, true);
+		//rc.travelTo(1, 1, FORWARD_SPEED, false);
 		
 		//Sound.beepSequence();
 		
-		/*if (team == Team.GREEN) {
+		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
 			navigator.travelToTunnel();
 		} else if (team == Team.RED){
@@ -179,15 +191,17 @@ public class CaptureTheFlag {
 		} else if (team == Team.RED){
 			// ====== Travel through the bridge ====== //
 			navigator.travelThroughBridge();
-		}*/
+		}
 		
-		odometer.setXYT(5 * TILE_SIZE, 6 * TILE_SIZE, 0);
-
+		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		
+		
 		// ====== Travel to the search zone ====== //
 		navigator.travelToSearchZone();
 
 		// ====== Search for the flag ====== //
-		navigator.searchFlag();
+		flagSearcher.searchFlag(wifi.getFlagColor());
+		Sound.beepSequenceUp();
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the bridge ====== //
@@ -210,6 +224,9 @@ public class CaptureTheFlag {
 
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
-
+		
+		
+		Sound.twoBeeps();
+		System.exit(0);
 	}
 }

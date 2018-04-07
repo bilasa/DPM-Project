@@ -20,6 +20,7 @@ import lejos.utility.Delay;
  * they all involve the movement of the robot.
  * 
  * @author Bijan Sadeghi
+ * @author Guillaume Richard
  *
  */
 public class RobotController {
@@ -32,10 +33,13 @@ public class RobotController {
 	public final double WHEEL_RAD;
 	public final double TRACK;
 	public final int FORWARD_SPEED; // made public due to frequent use
-	public final int ROTATE_SPEED; // made public due to frequent use
-	public final int ACCELERATION; // made public due to frequent use
+	public final int ROTATE_SPEED; 	// made public due to frequent use
+	public final int ACCELERATION; 	// made public due to frequent use
 	public final double TILE_SIZE;
 	public final double REAR_SENSOR_DIST;
+	
+	// Flag
+	private boolean hasReached = false;
 
 	// OdometryCorrection
 	private OdometryCorrection odoCorrection;
@@ -52,7 +56,7 @@ public class RobotController {
 	 * @param ROTATE_SPEED the speed to rotate at
 	 * @param ACCELERATION the acceleration to use
 	 * @param TILE_SIZE the size of a tile
-	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
+	 * @param REAR_SENSOR_DIST the vertical offset of the rear sensors from the robot's center
 	 */
 	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD,
 			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE, double REAR_SENSOR_DIST) {
@@ -95,7 +99,8 @@ public class RobotController {
 	}
 
 	/**
-	 * Travels to (x, y) with speed "speed" and an optional lock for the motors.
+	 * Travels to (x, y) with speed "speed" and an optional lock for the motors. Correction
+	 * is not enabled
 	 * 
 	 * @param x the x destination of the robot
 	 * @param y the y destination of the robot
@@ -103,7 +108,7 @@ public class RobotController {
 	 * @param lock an optional lock on the motors
 	 */
 	public void directTravelTo(double x, double y, int speed, boolean lock) {
-
+		
 		double lastX = odo.getXYT()[0];
 		double lastY = odo.getXYT()[1];
 		double theta; // Angle to next point
@@ -138,9 +143,8 @@ public class RobotController {
 	 * @param x the x destination of the robot
 	 * @param y the y destination of the robot
 	 * @param speed the speed to move the robot at
-	 * @param lock an optional lock on the motors
 	 */
-	public void travelTo(int x, int y, int speed, boolean lock) {
+	public void travelTo(int x, int y, int speed) {
 
 		// Compute the nearest waypoint from the odometer reading
 		int lastX = (int) Math.round(odo.getXYT()[0] / TILE_SIZE);
@@ -166,25 +170,24 @@ public class RobotController {
 			setSpeeds(speed, speed);
 
 			// Advance towards next point's x coordinate
-			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 2) {
+			while(Math.abs(odo.getXYT()[0] - x * TILE_SIZE) > 10) {
 				// Move forward
 				moveForward();
 
+				// Correct if not searching
 				double currX = odo.getXYT()[0];
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
 				// Correct if close enough to a line
-				if(propCnst <= 0.008) {
+				if(propCnst <= 0.1) {
 					odoCorrection.correct(corrTheta, odo.getXYT());
 				}
-				int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
-				setSpeeds(propSpeed, propSpeed);
+				setSpeeds(speed, speed);
 				moveForward();
-				Delay.msDelay(25);
 			}
 			odoCorrection.correct(corrTheta, odo.getXYT());
-			setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-			travelDist(-REAR_SENSOR_DIST, lock);
+			setSpeeds(speed, speed);
+			travelDist(-REAR_SENSOR_DIST, true);
 		}
 
 		// Find the proper angle to rotate to (if lastY == y, not needed)
@@ -200,31 +203,27 @@ public class RobotController {
 		if (lastY != y) {
 			turnTo(corrTheta);
 
-			// Calculate the number of tiles the robot needs to move in the Y direction
-			int tilesY = y - lastY;
-
 			setSpeeds(speed, speed);
 
 			// Advance towards next point's y coordinate
-			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 2) {
+			while(Math.abs(odo.getXYT()[1] - y * TILE_SIZE) > 10) {
 				// Move forward
 				moveForward();
 
+				// Correct if not searching
 				double currY = odo.getXYT()[1];
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
 				// Correct if close enough to a line
-				if(propCnst <= 0.008) {
+				if(propCnst <= 0.1) {
 					odoCorrection.correct(corrTheta, odo.getXYT());
 				}
-				int propSpeed = (int) (300 + propCnst * 800);	// Speed between 300 and 700
-				setSpeeds(propSpeed, propSpeed);
+				setSpeeds(speed, speed);
 				moveForward();
-				Delay.msDelay(25);
 			}
 			odoCorrection.correct(corrTheta, odo.getXYT());
-			setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
-			travelDist(-REAR_SENSOR_DIST, lock);
+			setSpeeds(speed, speed);
+			travelDist(-REAR_SENSOR_DIST, true);
 		}
 
 	}
@@ -344,7 +343,7 @@ public class RobotController {
 	}
 
 	/**
-	 * Specifies whether the robot is current moving.
+	 * Specifies whether the robot is currently moving.
 	 * 
 	 * @return true if the left or right motor is moving
 	 */
@@ -381,6 +380,20 @@ public class RobotController {
 		leftMotor.endSynchronization();
 	}
 
+	/**
+	 * Calculates the Euclidean Distance between two points given by (x1, y1) and 
+	 * (x2,y2).
+	 * 
+	 * @param x1 X coordinate of first point
+	 * @param y1 Y coordinate of first point
+	 * @param x2 X coordinate of second point
+	 * @param y2 Y coordinate of secon point
+	 * @return the distance between the two points
+	 */
+	public double euclideanDistance(double x1, double y1, double x2, double y2) {
+		return Math.sqrt((x1 - x2)*(x1 - x2) + (y1 - y2)*(y1 - y2));
+	}
+	
 	/**
 	 * Sets the OdometryCorrection object to be used by the robot controller.
 	 * 

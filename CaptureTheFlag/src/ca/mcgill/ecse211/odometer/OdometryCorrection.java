@@ -23,7 +23,7 @@ public class OdometryCorrection {
 
 	// Constants
 	private final int FORWARD_SPEED;
-	private final int ROTATE_SPEED;
+	private final int CORRECTION_SPEED;
 	private final double TILE_SIZE;
 	private final double SENSOR_DIST;
 
@@ -37,16 +37,6 @@ public class OdometryCorrection {
 	// Odometer
 	private Odometer odo;
 
-	// Paused variable to tell pause/unpause the OdometryCorrection
-	private boolean paused;
-
-	// Enumeration to denote the state of the OdometryCorrection
-	private enum CorrState {
-		EXPECTING_LINE, CORRECTING
-	}
-
-	private CorrState corrState;
-
 	/**
 	 * @param TILE_SIZE the size of a tile
 	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
@@ -54,10 +44,11 @@ public class OdometryCorrection {
 	 * @param leftLsCont the light sensor controller to use to get data from the left rear sensor
 	 * @param rightLsCont the light sensor controller to use to get data from the right rear sensor
 	 */
-	public OdometryCorrection(double TILE_SIZE, double SENSOR_DIST, RobotController rc,
-			LightSensorController leftLsCont, LightSensorController rightLsCont) {
+	public OdometryCorrection(double TILE_SIZE, double SENSOR_DIST, int CORRECTION_SPEED,
+			RobotController rc, LightSensorController leftLsCont,
+			LightSensorController rightLsCont) {
 		this.FORWARD_SPEED = rc.FORWARD_SPEED;
-		this.ROTATE_SPEED = rc.ROTATE_SPEED;
+		this.CORRECTION_SPEED = CORRECTION_SPEED;
 		this.TILE_SIZE = TILE_SIZE;
 		this.SENSOR_DIST = SENSOR_DIST;
 		this.rc = rc;
@@ -69,8 +60,6 @@ public class OdometryCorrection {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.paused = true;
-		this.corrState = CorrState.EXPECTING_LINE;
 	}
 
 	/**
@@ -100,7 +89,7 @@ public class OdometryCorrection {
 		boolean leftLineDetected = false;
 
 		// Start moving the robot forward
-		rc.setSpeeds(150, 150);
+		rc.setSpeeds(CORRECTION_SPEED, CORRECTION_SPEED);
 		rc.moveForward();
 
 		// Move the robot until one of the sensors detects a line
