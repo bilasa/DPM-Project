@@ -11,6 +11,7 @@ import ca.mcgill.ecse211.odometer.Odometer;
 import ca.mcgill.ecse211.odometer.OdometerExceptions;
 import ca.mcgill.ecse211.odometer.OdometryCorrection;
 import lejos.hardware.Sound;
+import lejos.hardware.lcd.LCD;
 import lejos.hardware.port.SensorPort;
 import lejos.hardware.sensor.EV3ColorSensor;
 import lejos.hardware.sensor.SensorMode;
@@ -57,12 +58,12 @@ public class FlagSearcher {
 	private SearchState searchState;
 
 	// Constants
-	private int DETECT_THRESH = 30; // Minimum distance at which block is detected
-	private int IDENTIFY_THRESH = 5; // Minimum distance at which a block is identified
-	private int SEARCH_SPEED;
-	private double FRONT_SENSOR_DIST;
-	private long START_TIME;
-	private int[][] searchZone;
+	private final int DETECT_THRESHOLD = 60; // Minimum distance at which block is detected
+	private final int IDENTIFY_THRESH = 5; // Minimum distance at which a block is identified
+	private final int SEARCH_SPEED;
+	private final double FRONT_SENSOR_DIST;
+	private final long START_TIME;
+	private final int[][] SEARCH_ZONE;
 
 	/**
 	 * @param wifi
@@ -85,7 +86,7 @@ public class FlagSearcher {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		this.searchZone = getSearchZone();
+		this.SEARCH_ZONE = getSearchZone();
 	}
 
 	/**
@@ -129,13 +130,14 @@ public class FlagSearcher {
 			if (timeElapsed > 240000) {
 				searchState = SearchState.TIMED_OUT;
 				// Play sound when timed out
-				Sound.playTone(440, 100);
-				Sound.playTone(500, 100);
+				Sound.playTone(440, 1000);
+				Sound.playTone(500, 1000);
+				
 			}
 
 			// Check for blocks with the ultrasonic sensor
 			int usDist = usCont.getAvgUSDistance();
-			if (usDist < DETECT_THRESH && withinArea(usDist, searchZone)) {
+			if (usDist < DETECT_THRESHOLD && withinArea(usDist, SEARCH_ZONE)) {
 				// Block was found; stop moving and notify user
 				rc.stopMoving();
 				Sound.beepSequence();
@@ -156,7 +158,7 @@ public class FlagSearcher {
 
 				// Sleep so that the same block is not detected again
 				try {
-					Thread.sleep(3000);
+					Thread.sleep(2500);
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -172,11 +174,10 @@ public class FlagSearcher {
 				odoCorrection.correct();
 				rc.travelDist(-rc.REAR_SENSOR_DIST, true);
 				// Rotate towards the next corner and correct first
-				rc.turnBy(-90, true);
-				
-				odoCorrection.correct();
-				
-				
+				// rc.turnBy(-90, true);
+
+				// odoCorrection.correct();
+
 				// Set new destination
 				currentCorner = nextCorner;
 				nextCorner = nextSearchCorner(currentCorner);
@@ -187,19 +188,20 @@ public class FlagSearcher {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
-				
+
 				// Start travelling
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 			}
 
 		}
+
+		// Rotate the sensor back to 0 degrees
+		usCont.rotateSensorTo(0);
+
 		// Flag has been found or search was timed-out, so finish the
 		// current travelling and go back to the starting corner of the search
 		rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED);
 		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED);
-
-		// Rotate the sensor back to 0 degrees
-		usCont.rotateSensorTo(0);
 
 	}
 
@@ -214,7 +216,7 @@ public class FlagSearcher {
 		int distanceDetected = usCont.getAvgUSDistance();
 
 		// Check the validity of the new sample
-		if (distanceDetected > DETECT_THRESH) {
+		if (distanceDetected > DETECT_THRESHOLD) {
 			Sound.twoBeeps();
 			// Do nothing and go back to travelling
 			return;
@@ -296,8 +298,8 @@ public class FlagSearcher {
 			// Turn back on the initial path
 			rc.turnBy(90, true);
 
-			rc.travelDist(-(FRONT_SENSOR_DIST + 2), true);
-			
+			// rc.travelDist(-(FRONT_SENSOR_DIST + 2), true);
+
 			try {
 				Thread.sleep(250);
 			} catch (InterruptedException e) {
@@ -333,13 +335,13 @@ public class FlagSearcher {
 			yPos = distance * Math.cos(Math.toRadians(absAngle));
 
 			xPos += data[0];
-			yPos += data[1];
+			yPos += data[1] + FRONT_SENSOR_DIST;
 
 		} else if (absAngle >= 90 && absAngle < 180) {
 			xPos = distance * Math.cos(Math.toRadians(absAngle - 90));
 			yPos = distance * Math.sin(Math.toRadians(absAngle - 90));
 
-			xPos += data[0];
+			xPos += data[0] + FRONT_SENSOR_DIST;
 			yPos -= data[1];
 
 		} else if (absAngle >= 180 && absAngle < 270) {
@@ -347,13 +349,13 @@ public class FlagSearcher {
 			yPos = distance * Math.cos(Math.toRadians(absAngle - 180));
 
 			xPos -= data[0];
-			yPos -= data[1];
+			yPos -= data[1] + FRONT_SENSOR_DIST;
 
 		} else {
 			xPos = distance * Math.cos(Math.toRadians(absAngle - 270));
 			yPos = distance * Math.sin(Math.toRadians(absAngle - 270));
 
-			xPos -= data[0];
+			xPos -= data[0] + FRONT_SENSOR_DIST;
 			yPos += data[1];
 
 		}
@@ -361,7 +363,10 @@ public class FlagSearcher {
 		xPos = Math.abs(xPos);
 		yPos = Math.abs(yPos);
 
-		if (xPos >= LLx && xPos <= URx && yPos >= LLy && yPos <= URy) {
+		xPos = (int) xPos;
+		yPos = (int) yPos;
+
+		if (xPos > LLx && xPos < URx && yPos > LLy && yPos < URy) {
 			result = true;
 		}
 
@@ -379,8 +384,8 @@ public class FlagSearcher {
 
 		// Look for the closest corner of the search zone to the robot
 		double shortestDist = Double.MAX_VALUE;
-		int[] closestCorner = searchZone[0];
-		for (int[] corner : searchZone) {
+		int[] closestCorner = SEARCH_ZONE[0];
+		for (int[] corner : SEARCH_ZONE) {
 			double cornerDist = Math.hypot(odo.getXYT()[0] - (corner[0] * rc.TILE_SIZE),
 					odo.getXYT()[1] - (corner[1] * rc.TILE_SIZE));
 
@@ -425,8 +430,8 @@ public class FlagSearcher {
 
 		// Get the index of the current corner
 		int currentCornerIndex = 0;
-		for (int i = 0; i < searchZone.length; i++) {
-			if (searchZone[i][0] == currentCorner[0] && searchZone[i][1] == currentCorner[1]) {
+		for (int i = 0; i < SEARCH_ZONE.length; i++) {
+			if (SEARCH_ZONE[i][0] == currentCorner[0] && SEARCH_ZONE[i][1] == currentCorner[1]) {
 				currentCornerIndex = i;
 				break;
 			}
@@ -434,9 +439,9 @@ public class FlagSearcher {
 
 		// Return the next corner in the search zone array
 		if (currentCornerIndex < 3)
-			return searchZone[currentCornerIndex + 1];
+			return SEARCH_ZONE[currentCornerIndex + 1];
 		else
-			return searchZone[0];
+			return SEARCH_ZONE[0];
 	}
 
 }

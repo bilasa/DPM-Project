@@ -186,7 +186,7 @@ public class CaptureTheFlag {
 		}
 	
 	*/
-		odometer.setXYT(2 * TILE_SIZE, 6 * TILE_SIZE, 0);
+		odometer.setXYT(1 * TILE_SIZE, 7 * TILE_SIZE, 180);
 
 		
 		// ====== Travel to the search zone ====== //
