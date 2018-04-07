@@ -22,6 +22,8 @@ import lejos.hardware.sensor.SensorMode;
  * 
  * @author Bijan Sadeghi
  * @author Esa Khan
+ * @author Guillaume Richard
+ * @author Olivier Therrien
  */
 public class LightLocalizer {
 

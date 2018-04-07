@@ -13,6 +13,7 @@ import lejos.robotics.filter.MeanFilter;
  * average distance read by the sensor.
  * 
  * @author Bijan Sadeghi
+ * @author Guillaume Richard
  */
 public class UltrasonicSensorController {
 

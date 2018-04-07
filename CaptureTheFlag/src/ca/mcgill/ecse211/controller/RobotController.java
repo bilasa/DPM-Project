@@ -20,6 +20,7 @@ import lejos.utility.Delay;
  * they all involve the movement of the robot.
  * 
  * @author Bijan Sadeghi
+ * @author Guillaume Richard
  *
  */
 public class RobotController {
@@ -55,7 +56,7 @@ public class RobotController {
 	 * @param ROTATE_SPEED the speed to rotate at
 	 * @param ACCELERATION the acceleration to use
 	 * @param TILE_SIZE the size of a tile
-	 * @param SENSOR_DIST the vertical offset of the rear sensors from the robot's center
+	 * @param REAR_SENSOR_DIST the vertical offset of the rear sensors from the robot's center
 	 */
 	public RobotController(EV3LargeRegulatedMotor leftMotor, EV3LargeRegulatedMotor rightMotor, double WHEEL_RAD,
 			double TRACK, int FORWARD_SPEED, int ROTATE_SPEED, int ACCELERATION, double TILE_SIZE, double REAR_SENSOR_DIST) {
@@ -98,7 +99,8 @@ public class RobotController {
 	}
 
 	/**
-	 * Travels to (x, y) with speed "speed" and an optional lock for the motors.
+	 * Travels to (x, y) with speed "speed" and an optional lock for the motors. Correction
+	 * is not enabled
 	 * 
 	 * @param x the x destination of the robot
 	 * @param y the y destination of the robot
@@ -341,7 +343,7 @@ public class RobotController {
 	}
 
 	/**
-	 * Specifies whether the robot is current moving.
+	 * Specifies whether the robot is currently moving.
 	 * 
 	 * @return true if the left or right motor is moving
 	 */
@@ -381,6 +383,7 @@ public class RobotController {
 	/**
 	 * Calculates the Euclidean Distance between two points given by (x1, y1) and 
 	 * (x2,y2).
+	 * 
 	 * @param x1 X coordinate of first point
 	 * @param y1 Y coordinate of first point
 	 * @param x2 X coordinate of second point

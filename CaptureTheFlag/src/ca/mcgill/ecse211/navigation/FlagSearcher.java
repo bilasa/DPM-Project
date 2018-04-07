@@ -20,11 +20,11 @@ import lejos.utility.Delay;
 
 /**
  * This class includes all flag searching tasks of the robot.
- * The class allows the navigation of the robot to the search
- * zone, as well as the execution of the search algorithm.
+ * The class allows the execution of the search algorithm.
  * The FlagSearcher makes the robot search for its target block
- * by going on the perimeter of the search zone. If the target
- * block is found, the robot ends its search.
+ * by going on the perimeter of the search zone. When a block is
+ * found, the robot moves towards it to identify it. If the target
+ * block is found or if too much time was spent, the robot ends its search.
  * 
  * @author Bijan Sadeghi
  * @author Esa Khan
@@ -121,17 +121,20 @@ public class FlagSearcher {
 				searchState = SearchState.TIMED_OUT;
 			}
 
-			// Check for blocks
+			// Check for blocks with the ultrasonic sensor
 			int usDist = usCont.getAvgUSDistance();
 			if(usDist < DETECT_THRESH) {
+				// Block was found; stop moving and notify user
 				rc.stopMoving();
 				Sound.beepSequence();
 
 				// Go and check the block
 				identifyBlock(usDist);
 				
+				// When the block is identified, keep going towards the current destination corner
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 				
+				// Sleep so that the same block is not detected again
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException e) {
@@ -140,27 +143,35 @@ public class FlagSearcher {
 				}
 			}
 
-			// Check if it has reached the corner
+			// If the robot is stopped, it means it reached the destination corner, 
+			// so the next corner has to be set as the destination
 			currPos = odo.getXYT();
 			if(!rc.isMoving()) {
 			//if(rc.euclideanDistance(currPos[0], currPos[1], nextCorner[0], nextCorner[1]) < FRONT_SENSOR_DIST) {
-				// Next corner has been reached by the sensor; finish the travel and set new destination
+				// Finish the travel with correction
 				odoCorrection.correct(currPos[2], currPos);
 				rc.travelDist(-rc.REAR_SENSOR_DIST, true);
+				
+				// Set new destination
 				currentCorner = nextCorner;
 				nextCorner = nextSearchCorner(currentCorner);
+				
+				// Start travelling
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 			}
 
 		}
+		// Flag has been found or search was timed-out, so finish the
+		// current travelling and go back to the starting corner of the search
 		rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED);
 		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED);
-		// Flag has been found or search was timed-out
 	}
 
 	/**
 	 * Approaches the block that has been detected and
 	 * checks if its color matches the target
+	 * 
+	 * @param distanceDetected the distance at which the ultrasonic captured a block
 	 */
 	private void identifyBlock(double distanceDetected) {	
 		
@@ -172,6 +183,7 @@ public class FlagSearcher {
 		rc.setSpeeds(150, 150);
 		rc.travelDist(FRONT_SENSOR_DIST + 4, true);
 
+		// If the block was detected close enough already, sample directly
 		if(distanceDetected < 5) {
 			// Get the block's color
 			if(LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
@@ -182,18 +194,21 @@ public class FlagSearcher {
 				Sound.twoBeeps();
 			}
 		}
+		// Approach the block if it is too far
 		else {
 			// Turn to the left by 90 degrees
 			rc.turnBy(-90, true);
 			
-			//Turn the sensor to 0 degrees
+			//Turn the sensor to 0 degrees, facing forward
 			usCont.rotateSensorTo(0);
 
+			// Record the position before approaching the block
 			initialPos = odo.getXYT();
-			// Keep moving forward while the ultrasonic sensor distance is less than the threshold
+			
+			// Keep moving forward until the block is close enough or until the robot traveled too far in case of a false positive
 			rc.moveForward();
 			while(usCont.getAvgUSDistance() > IDENTIFY_THRESH) {
-				// Intermediate position
+				// Intermediate position used to know if the robot traveled too far without noticing a block
 				double[] interPos = odo.getXYT();
 				if(Math.hypot(interPos[0] - initialPos[0], interPos[1] - initialPos[1]) > distanceDetected) {
 					break;
@@ -213,10 +228,11 @@ public class FlagSearcher {
 			
 			finalPos = odo.getXYT();
 			double dist = Math.hypot(finalPos[0] - initialPos[0], finalPos[1] - initialPos[1]);
-			// Go back by the same distance
+			
+			// Go back by the distance traveled to reach the block
 			rc.travelDist(-dist, true);
 
-			// Turn back
+			// Turn back on the initial path
 			rc.turnBy(90, true);
 
 			// Rotate the sensor back to the left

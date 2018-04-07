@@ -110,7 +110,6 @@ public class CaptureTheFlag {
 
 	// Threads
 	private static ExitProgram exit = new ExitProgram();
-	private static Timer timer = new Timer();
 
 	// Odometry correction
 	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, CORRECTION_SPEED, rc, leftRearLsCont, rightRearLsCont);

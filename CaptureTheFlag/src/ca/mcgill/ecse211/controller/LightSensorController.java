@@ -14,6 +14,7 @@ import lejos.hardware.sensor.SensorMode;
  * as well as provide the color of a block.
  * 
  * @author Bijan Sadeghi
+ * @author Guillaume Richard
  */
 public class LightSensorController {
 

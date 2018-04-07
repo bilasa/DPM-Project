@@ -18,6 +18,8 @@ import lejos.robotics.filter.MeanFilter;
  * 
  * @author Bijan Sadeghi
  * @author Esa Khan
+ * @author Guillaume Richard
+ * @author Olivier Therrien
  */
 public class UltrasonicLocalizer {
 
