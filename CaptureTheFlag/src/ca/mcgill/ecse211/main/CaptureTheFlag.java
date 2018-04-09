@@ -63,7 +63,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private static final double WHEEL_RAD = 1.66;
-	private static final double TRACK = 18.0; // original 17.7
+	private static final double TRACK = 18.05;
 	private static final int ROTATE_SPEED = 250;
 	private static final int FORWARD_SPEED = 600;
 	private static final int CORRECTION_SPEED = 150;
@@ -72,13 +72,12 @@ public class CaptureTheFlag {
 	private static final double TILE_SIZE = 30.48;
 	private static final double REAR_SENSOR_DIST = 14;
 	private static final double FRONT_SENSOR_DIST = 10.0;
-	private static final long START_TIME = System.currentTimeMillis();
 
 	// Playzone constants
 	private static final int LL_PZx = 1;
 	private static final int LL_PZy = 1;
-	private static final int UR_PZx = 7;
-	private static final int UR_PZy = 7;
+	private static final int UR_PZx = 11;
+	private static final int UR_PZy = 11;
 	private static final int[][] PLAY_ZONE = new int[][] { { LL_PZx, LL_PZy }, // Lower left
 		{ UR_PZx, LL_PZy }, // Lower right
 		{ UR_PZx, UR_PZy }, // Upper right
@@ -90,6 +89,9 @@ public class CaptureTheFlag {
 
 	// WiFi class
 	private static WiFi wifi = new WiFi();
+	
+	// Start time
+	private static final long START_TIME = System.currentTimeMillis();
 
 	// Controllers
 	private static RobotController rc = new RobotController(leftMotor, rightMotor, WHEEL_RAD, TRACK, FORWARD_SPEED, ROTATE_SPEED, ACCELERATION, TILE_SIZE, REAR_SENSOR_DIST);
@@ -154,7 +156,7 @@ public class CaptureTheFlag {
 		//Sound.playSample(new File("E:\\McGill\\ECSE 211\\Labs\\Project\\CaptureTheFlag\\battle.wav"));
 		//Sound.playSample(new File("battle.wav"), 100	);
 		 
-		/*
+
 		// ====== Do ultrasonic localization in corner ======  //
 		usLocalizer.usLocalize();
 
@@ -162,7 +164,7 @@ public class CaptureTheFlag {
 		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
 
 		
-		
+	
 		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 		//rc.travelTo(1, 1, FORWARD_SPEED, false);
@@ -185,8 +187,8 @@ public class CaptureTheFlag {
 			navigator.travelThroughBridge();
 		}
 	
-	*/
-		odometer.setXYT(1 * TILE_SIZE, 7 * TILE_SIZE, 180);
+
+		//odometer.setXYT(2 * TILE_SIZE, 3 * TILE_SIZE, 0);
 
 		
 		// ====== Travel to the search zone ====== //
@@ -204,8 +206,6 @@ public class CaptureTheFlag {
 			navigator.travelToTunnel();
 		}
 
-		// ====== Localize before crossing the bridge/tunnel ====== //
-		//lightLocalizer.generalLightLocalize();
 
 		if (team == Team.GREEN) {
 			// ====== Travel through the bridge ====== //

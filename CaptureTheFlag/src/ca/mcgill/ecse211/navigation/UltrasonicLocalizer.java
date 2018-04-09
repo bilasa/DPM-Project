@@ -80,7 +80,7 @@ public class UltrasonicLocalizer {
 		}
 
 		// Turn clockwise
-		rc.rotate(true, ROTATE_SPEED + 150);
+		rc.rotate(true, ROTATE_SPEED + 200);
 		int prevAvgDistance = usCont.getAvgUSDistance();
 		int deltaDistance;
 
@@ -99,7 +99,7 @@ public class UltrasonicLocalizer {
 		Sound.playTone(520, 250);
 
 		// Turn the other way (counterclockwise)
-		rc.rotate(false, ROTATE_SPEED + 150);
+		rc.rotate(false, ROTATE_SPEED + 200);
 
 		// Sleep for 2 seconds
 		try {

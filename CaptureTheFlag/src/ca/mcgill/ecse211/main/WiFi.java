@@ -128,20 +128,20 @@ public class WiFi {
 			coords[1] = 1;
 			break;
 		case 1:
-			//coords[0] = 11;
-			coords[0] = 7;
+			coords[0] = 11;
+			//coords[0] = 7;
 			coords[1] = 1;
 			break;
 		case 2:
-			//coords[0] = 11;
-			coords[0] = 7;
-			//coords[1] = 11;
-			coords[1] = 7;
+			coords[0] = 11;
+			//coords[0] = 7;
+			coords[1] = 11;
+			//coords[1] = 7;
 			break;
 		case 3:
 			coords[0] = 1;
-			//coords[1] = 11;
-			coords[1] = 7;
+			coords[1] = 11;
+			//coords[1] = 7;
 			break;
 		}
 		return coords;

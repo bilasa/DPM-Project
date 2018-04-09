@@ -252,11 +252,11 @@ public class Navigator {
 				// ==========================================================//
 				switch (wifi.getStartingCorner(team)) {
 				case 0:
-				case 1:
+				case 3:
 					rc.travelTo(bridgeUR[0] + 1, bridgeUR[1] - 1, FORWARD_SPEED);
 					break;
+				case 1:
 				case 2:
-				case 3:
 					rc.travelTo(bridgeLL[0] - 1, bridgeLL[1] + 1, FORWARD_SPEED);
 					break;
 				}
