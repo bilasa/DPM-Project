@@ -145,3 +145,9 @@ By Bijan Sadeghi, Esa Khan
 * Simple filter in `identifyBlock` to stop false positives
 
 By Bijan Sadeghi, Esa Khan & Guillaume Richard
+
+## 3.1
+### Final Version (18/04/09)
+* Fixed FlagSearch as much as possible
+
+By Esa Khan & Guillaume Richard
