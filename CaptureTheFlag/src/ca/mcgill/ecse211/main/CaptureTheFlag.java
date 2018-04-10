@@ -63,7 +63,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private static final double WHEEL_RAD = 1.66;
-	private static final double TRACK = 18.05;
+	private static final double TRACK = 18.7;
 	private static final int ROTATE_SPEED = 250;
 	private static final int FORWARD_SPEED = 600;
 	private static final int CORRECTION_SPEED = 150;
@@ -188,7 +188,7 @@ public class CaptureTheFlag {
 		}
 	
 
-		//odometer.setXYT(2 * TILE_SIZE, 3 * TILE_SIZE, 0);
+		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 		
 		// ====== Travel to the search zone ====== //
