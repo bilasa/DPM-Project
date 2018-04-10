@@ -165,7 +165,7 @@ public class CaptureTheFlag {
 
 		
 	
-		//odometer.setXYT(1 * TILE_SIZE, 1 * TILE_SIZE, 0);
+		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
 
 		//rc.travelTo(1, 1, FORWARD_SPEED, false);
 		
