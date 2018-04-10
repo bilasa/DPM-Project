@@ -70,7 +70,7 @@ public class OdometryCorrection {
 	 */
 	public void correct() {
 		// Intermediate odometer reading: odometer's reading after detecting the first line
-		//double[] intermediateOdo = new double[3];
+		long initialTime = 0;
 
 		double corrTheta = odo.getXYT()[2];
 		
@@ -83,7 +83,7 @@ public class OdometryCorrection {
 		}
 
 		// Booleans for whether the line has been detected by the right sensor or left
-		// sensor
+		// sensor or if the correction went for too long
 		boolean rightLineDetected = false;
 		boolean leftLineDetected = false;
 
@@ -97,14 +97,14 @@ public class OdometryCorrection {
 				rightLineDetected = true;
 				// Stop the right motor
 				rc.stopMoving(false, true);
-				//intermediateOdo = odo.getXYT();
+				initialTime = System.currentTimeMillis();
 
 			} else if (leftLsCont.getColorSample()[0] == 13.0) {
 				leftLineDetected = true;
 
 				// Stop the left motor
 				rc.stopMoving(true, false);
-				//intermediateOdo = odo.getXYT();
+				initialTime = System.currentTimeMillis();
 			}
 		}
 
@@ -112,6 +112,10 @@ public class OdometryCorrection {
 
 		// Keep moving the left/right motor until both lines have been detected
 		while (!leftLineDetected || !rightLineDetected) {
+			// If the correction went for too long (1.5 s), abort
+			if(System.currentTimeMillis() - initialTime > 1500) {
+				return;
+			}
 			// If the other line detected, stop the motors
 			if (rightLineDetected && leftLsCont.getColorSample()[0] == 13.0) {
 				leftLineDetected = true;
