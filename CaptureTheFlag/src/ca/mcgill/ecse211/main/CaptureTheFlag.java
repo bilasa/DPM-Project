@@ -124,7 +124,10 @@ public class CaptureTheFlag {
 	 */
 	public static void main(String[] args) throws OdometerExceptions {
 
-		
+		Sound.setVolume(Sound.VOL_MAX);
+		Sound.beep();
+		Sound.beep();
+		Sound.beep();
 		
 		// Display
 		Display odometryDisplay = new Display(LCD);
@@ -221,7 +224,35 @@ public class CaptureTheFlag {
 		navigator.returnToStart();
 		
 		
-		Sound.twoBeeps();
+		/*Sound.playTone(440, 100);
+		Sound.playTone(450, 100);
+		Sound.playTone(460, 100);
+		Sound.playTone(470, 100);
+		Sound.playTone(480, 100);
+		Sound.playTone(490, 100);
+		Sound.playTone(500, 100);
+		Sound.playTone(510, 100);
+		Sound.playTone(520, 100);
+		Sound.playTone(530, 100);
+		Sound.playTone(540, 100);
+		Sound.playTone(550, 100);
+		Sound.playTone(560, 100);
+		Sound.playTone(570, 100);
+		Sound.playTone(580, 100);
+		Sound.playTone(570, 100);
+		Sound.playTone(560, 100);
+		Sound.playTone(550, 100);
+		Sound.playTone(540, 100);
+		Sound.playTone(530, 100);
+		Sound.playTone(520, 100);
+		Sound.playTone(510, 100);
+		Sound.playTone(500, 100);
+		Sound.playTone(490, 100);
+		Sound.playTone(480, 100);
+		Sound.playTone(470, 100);
+		Sound.playTone(460, 100);
+		Sound.playTone(450, 100);
+		Sound.playTone(440, 100);*/
 		System.exit(0);
 	}
 }

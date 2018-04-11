@@ -130,8 +130,13 @@ public class FlagSearcher {
 			if (timeElapsed > 180000) {
 				searchState = SearchState.TIMED_OUT;
 				// Play sound when timed out
-				Sound.beepSequenceUp();
-				
+				Sound.setVolume(Sound.VOL_MAX);
+				Sound.beep();
+				Sound.beep();
+				Sound.beep();
+				Sound.beep();
+				Sound.beep();
+				Sound.beep();
 			}
 
 			// Check for blocks with the ultrasonic sensor
@@ -266,36 +271,33 @@ public class FlagSearcher {
 
 			// Get the block's color
 			if (LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
-				Sound.beep();
 				searchState = SearchState.FLAG_FOUND;
 			}
 
 			usCont.rotateSensorTo(45);
 			if (searchState != SearchState.FLAG_FOUND
 					&& LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
-				Sound.beep();
 				searchState = SearchState.FLAG_FOUND;
 			}
 
 			usCont.rotateSensorTo(-45);
 			if (searchState != SearchState.FLAG_FOUND
 					&& LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
-				Sound.beep();
 				searchState = SearchState.FLAG_FOUND;
-			}
-
-			if (searchState != SearchState.FLAG_FOUND) {
-				Sound.twoBeeps();
 			}
 
 			
 			if (searchState == SearchState.FLAG_FOUND) {
 				Sound.setVolume(Sound.VOL_MAX);
-				Sound.playTone(440, 1000);
-				Sound.playTone(500, 1000);
-				Sound.playTone(440, 1000);
-				Sound.playTone(500, 1000);
-				Sound.playTone(440, 1000);
+				Sound.beep();
+				Sound.beep();
+				Sound.beep();
+				try {
+					Thread.sleep(2500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 			
 			finalPos = odo.getXYT();
