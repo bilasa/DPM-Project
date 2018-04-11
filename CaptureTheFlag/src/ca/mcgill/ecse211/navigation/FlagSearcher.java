@@ -127,7 +127,7 @@ public class FlagSearcher {
 			long timeElapsed = System.currentTimeMillis() - START_TIME;
 
 			// If 4 minutes have elapsed since the beginning, time out the search
-			if (timeElapsed > 240000) {
+			if (timeElapsed > 180000) {
 				searchState = SearchState.TIMED_OUT;
 				// Play sound when timed out
 				Sound.playTone(440, 1000);

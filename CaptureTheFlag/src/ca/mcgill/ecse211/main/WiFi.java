@@ -27,11 +27,11 @@ public class WiFi {
 	// ***Bijan's***
 	//private static final String SERVER_IP = "192.168.2.10";
 	// ***Esa's***
-	//private static final String SERVER_IP = "192.168.2.6";
+	//private static final String SERVER_IP = "192.168.2.8";
 	// ***Gui's***
-	private static final String SERVER_IP = "192.168.2.44";
+	//private static final String SERVER_IP = "192.168.2.44";
 	// ***TA's***
-	//private static final String SERVER_IP = "192.168.2.11";
+	private static final String SERVER_IP = "192.168.2.3";
 
 	private static final int TEAM_NUMBER = 8;
 

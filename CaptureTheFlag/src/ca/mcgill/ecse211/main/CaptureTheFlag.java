@@ -63,7 +63,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private static final double WHEEL_RAD = 1.66;
-	private static final double TRACK = 18.7;
+	private static final double TRACK = 18.65;
 	private static final int ROTATE_SPEED = 250;
 	private static final int FORWARD_SPEED = 600;
 	private static final int CORRECTION_SPEED = 150;
