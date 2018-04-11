@@ -63,7 +63,7 @@ public class CaptureTheFlag {
 
 	// Constants
 	private static final double WHEEL_RAD = 1.66;
-	private static final double TRACK = 18.65;
+	private static final double TRACK = 18.7;
 	private static final int ROTATE_SPEED = 250;
 	private static final int FORWARD_SPEED = 600;
 	private static final int CORRECTION_SPEED = 150;
@@ -111,7 +111,7 @@ public class CaptureTheFlag {
 
 	// Odometry correction
 	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, CORRECTION_SPEED, rc, leftRearLsCont, rightRearLsCont);
-
+	
 	/**
 	 * First localizes the robot at its starting corner.
 	 * Then navigates the robot through the tunnel/bridge.
@@ -123,6 +123,8 @@ public class CaptureTheFlag {
 	 * @throws OdometerExceptions
 	 */
 	public static void main(String[] args) throws OdometerExceptions {
+
+		
 		
 		// Display
 		Display odometryDisplay = new Display(LCD);

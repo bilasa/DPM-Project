@@ -130,8 +130,7 @@ public class FlagSearcher {
 			if (timeElapsed > 180000) {
 				searchState = SearchState.TIMED_OUT;
 				// Play sound when timed out
-				Sound.playTone(440, 1000);
-				Sound.playTone(500, 1000);
+				Sound.beepSequenceUp();
 				
 			}
 
@@ -150,7 +149,7 @@ public class FlagSearcher {
 				} catch (InterruptedException e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
-				}
+				}	
 
 				// When the block is identified, keep going towards the current destination
 				// corner
@@ -289,6 +288,16 @@ public class FlagSearcher {
 				Sound.twoBeeps();
 			}
 
+			
+			if (searchState == SearchState.FLAG_FOUND) {
+				Sound.setVolume(Sound.VOL_MAX);
+				Sound.playTone(440, 1000);
+				Sound.playTone(500, 1000);
+				Sound.playTone(440, 1000);
+				Sound.playTone(500, 1000);
+				Sound.playTone(440, 1000);
+			}
+			
 			finalPos = odo.getXYT();
 			double dist = Math.hypot(finalPos[0] - initialPos[0], finalPos[1] - initialPos[1]);
 
