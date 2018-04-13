@@ -125,26 +125,6 @@ public class OdometryCorrection {
 				rc.stopMoving();
 			}
 		}
-
-		
-		
-		// The robot is now aligned. Correct the odometer.
-
-		// Get the final odometer reading: reading after both lines are detected
-		/*double[] finalOdo = odo.getXYT();
-
-		// Compute the angle the robot rotated by to correct itself
-		double dTheta = finalOdo[2] - intermediateOdo[2];
-
-		// Compute the distance traveled from initial to intermediate
-		double dist = Math.hypot(intermediateOdo[0] - initialOdo[0], intermediateOdo[1] - initialOdo[1]);
-
-		// Compute the offset of the sensor's from the line
-		double c = rc.TRACK / 2 * Math.tan(Math.toRadians(Math.abs(dTheta)));
-
-		// Compute the robot's offset from its intended traveling axis
-		double offset = (dist - SENSOR_DIST + c) * Math.sin(Math.abs(dTheta));*/
-		
 		
 		// Get an approximation of the correct theta
 		if(corrTheta >= 350 && corrTheta <= 10) {

@@ -66,10 +66,8 @@ public class FlagSearcher {
 	private final int[][] SEARCH_ZONE;
 
 	/**
-	 * @param wifi
-	 *            the wifi object to get the challenge data from
-	 * @param rc
-	 *            the robot controller to use
+	 * @param wifi the wifi object to get the challenge data from
+	 * @param rc the robot controller to use
 	 */
 	public FlagSearcher(WiFi wifi, RobotController rc, UltrasonicSensorController usCont, double FRONT_SENSOR_DIST,
 			long START_TIME, int SEARCH_SPEED) {
@@ -92,8 +90,7 @@ public class FlagSearcher {
 	/**
 	 * Set the OdometryCorrection object to be used by the robot controller
 	 * 
-	 * @param odoCorrection
-	 *            the OdometryCorrection object to be used
+	 * @param odoCorrection the OdometryCorrection object to be used
 	 */
 	public void setOdoCorrection(OdometryCorrection odoCorrection) {
 		this.odoCorrection = odoCorrection;
@@ -110,6 +107,7 @@ public class FlagSearcher {
 		int[] nextCorner = nextSearchCorner(currentCorner);
 		rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 
+		// Sleep for 750 ms
 		try {
 			Thread.sleep(750);
 		} catch (InterruptedException e) {
@@ -129,18 +127,57 @@ public class FlagSearcher {
 			// If 4 minutes have elapsed since the beginning, time out the search
 			if (timeElapsed > 180000) {
 				searchState = SearchState.TIMED_OUT;
-				// Play sound when timed out
+				
+				// Play 6 beeps separated by 100 ms each
 				Sound.setVolume(Sound.VOL_MAX);
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 			}
 
 			// Check for blocks with the ultrasonic sensor
 			int usDist = usCont.getAvgUSDistance();
+			
+			// Check if a block was detected and it is in the search zone
 			if (usDist < DETECT_THRESHOLD && withinArea(usDist, SEARCH_ZONE)) {
 				// Block was found; stop moving and notify user
 				rc.stopMoving();
@@ -172,15 +209,9 @@ public class FlagSearcher {
 			// If the robot is stopped, it means it reached the destination corner,
 			// so the next corner has to be set as the destination
 			if (!rc.isMoving()) {
-				// if(rc.euclideanDistance([0], [1], nextCorner[0], nextCorner[1])
-				// < FRONT_SENSOR_DIST) {
-				// Finish the travel with correction
+				// Finish the traveling with correction
 				odoCorrection.correct();
 				rc.travelDist(-rc.REAR_SENSOR_DIST, true);
-				// Rotate towards the next corner and correct first
-				// rc.turnBy(-90, true);
-
-				// odoCorrection.correct();
 
 				// Set new destination
 				currentCorner = nextCorner;
@@ -193,7 +224,7 @@ public class FlagSearcher {
 					e.printStackTrace();
 				}
 
-				// Start travelling
+				// Start traveling
 				rc.directTravelTo(nextCorner[0], nextCorner[1], rc.ROTATE_SPEED, false);
 			}
 
@@ -203,7 +234,7 @@ public class FlagSearcher {
 		usCont.rotateSensorTo(0);
 
 		// Flag has been found or search was timed-out, so finish the
-		// current travelling and go back to the starting corner of the search
+		// current traveling and go back to the starting corner of the search
 		rc.travelTo(nextCorner[0], nextCorner[1], rc.FORWARD_SPEED);
 		rc.travelTo(startingSearchCorner[0], startingSearchCorner[1], rc.FORWARD_SPEED);
 
@@ -211,7 +242,7 @@ public class FlagSearcher {
 
 	/**
 	 * Approaches the block that has been detected and checks if its color matches
-	 * the target
+	 * the target.
 	 * 
 	 */
 	private void identifyBlock() {
@@ -244,7 +275,8 @@ public class FlagSearcher {
 				Sound.twoBeeps();
 			}
 		}
-		// Approach the block if it is too far
+		
+		// Otherwise approach the block if it is too far
 		else {
 			// Turn to the left by 90 degrees
 			rc.turnBy(-90, true);
@@ -269,28 +301,42 @@ public class FlagSearcher {
 
 			rc.stopMoving();
 
-			// Get the block's color
+			// Check the color of the block at 0 degrees
 			if (LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
 				searchState = SearchState.FLAG_FOUND;
 			}
 
+			// Check the color of the block at 45 degrees
 			usCont.rotateSensorTo(45);
 			if (searchState != SearchState.FLAG_FOUND
 					&& LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
 				searchState = SearchState.FLAG_FOUND;
 			}
 
+			// Check the color of the block at -45 degrees
 			usCont.rotateSensorTo(-45);
 			if (searchState != SearchState.FLAG_FOUND
 					&& LightSensorController.getBlockColor(lsCont.getColorSample()) == wifi.getFlagColor()) {
 				searchState = SearchState.FLAG_FOUND;
 			}
 
-			
+			// Beep 3 times if the target block was identified
 			if (searchState == SearchState.FLAG_FOUND) {
 				Sound.setVolume(Sound.VOL_MAX);
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
+				try {
+					Thread.sleep(100);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
 				Sound.beep();
 				try {
 					Thread.sleep(2500);
@@ -300,7 +346,10 @@ public class FlagSearcher {
 				}
 			}
 			
+			// Record the position of the robot after traveling to the block
 			finalPos = odo.getXYT();
+			
+			// Compute the distance traveled when approaching the block
 			double dist = Math.hypot(finalPos[0] - initialPos[0], finalPos[1] - initialPos[1]);
 
 			// Go back by the distance traveled to reach the block
@@ -308,8 +357,6 @@ public class FlagSearcher {
 
 			// Turn back on the initial path
 			rc.turnBy(90, true);
-
-			// rc.travelDist(-(FRONT_SENSOR_DIST + 2), true);
 
 			try {
 				Thread.sleep(250);
@@ -323,6 +370,14 @@ public class FlagSearcher {
 		}
 	}
 
+	/**
+	 * Checks if an object detected at the specified distance is within the area
+	 * defined by searhZone.
+	 * 
+	 * @param distance the distance the object was detected at
+	 * @param searchZone the area to check the object is in
+	 * @return
+	 */
 	private boolean withinArea(float distance, int[][] searchZone) {
 		float usAngle = 90;
 		boolean result = false;
@@ -331,11 +386,13 @@ public class FlagSearcher {
 
 		data = odo.getXYT();
 
+		// Coordinates of the search zone
 		double URy = searchZone[2][1] * rc.TILE_SIZE;
 		double URx = searchZone[2][0] * rc.TILE_SIZE;
 		double LLx = searchZone[0][0] * rc.TILE_SIZE;
 		double LLy = searchZone[0][1] * rc.TILE_SIZE;
 
+		// Compute the approximate position of the object based on the angle of the ultrasonic sensor
 		absAngle = data[2] - usAngle;
 
 		if (absAngle < 0)
@@ -377,6 +434,7 @@ public class FlagSearcher {
 		xPos = (int) xPos;
 		yPos = (int) yPos;
 
+		// Check if the object is inside the search zone
 		if (xPos > LLx && xPos < URx && yPos > LLy && yPos < URy) {
 			result = true;
 		}

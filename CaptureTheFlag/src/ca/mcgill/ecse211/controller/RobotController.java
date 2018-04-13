@@ -168,12 +168,15 @@ public class RobotController {
 
 				// Correct if not searching
 				double currX = odo.getXYT()[0];
+				
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currX / TILE_SIZE) - Math.round(currX / TILE_SIZE));
+				
 				// Correct if close enough to a line
 				if(propCnst <= 0.1) {
 					odoCorrection.correct();
 				}
+				
 				setSpeeds(speed, speed);
 				moveForward();
 			}
@@ -204,12 +207,15 @@ public class RobotController {
 
 				// Correct if not searching
 				double currY = odo.getXYT()[1];
+				
 				// Proportionality constant between 0 and 0.5
 				double propCnst = Math.abs((currY / TILE_SIZE) - Math.round(currY / TILE_SIZE));
+				
 				// Correct if close enough to a line
 				if(propCnst <= 0.1) {
 					odoCorrection.correct();
 				}
+				
 				setSpeeds(speed, speed);
 				moveForward();
 			}
@@ -379,7 +385,7 @@ public class RobotController {
 	 * @param x1 X coordinate of first point
 	 * @param y1 Y coordinate of first point
 	 * @param x2 X coordinate of second point
-	 * @param y2 Y coordinate of secon point
+	 * @param y2 Y coordinate of second point
 	 * @return the distance between the two points
 	 */
 	public double euclideanDistance(double x1, double y1, double x2, double y2) {

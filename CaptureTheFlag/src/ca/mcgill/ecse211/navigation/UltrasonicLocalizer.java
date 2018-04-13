@@ -43,10 +43,8 @@ public class UltrasonicLocalizer {
 	static double secondTheta = 0;
 
 	/**
-	 * @param rc
-	 *            the robot controller to use
-	 * @param usCont
-	 *            the ultrasonic sensor controller to use
+	 * @param rc the robot controller to use
+	 * @param usCont the ultrasonic sensor controller to use
 	 */
 	public UltrasonicLocalizer(RobotController rc, UltrasonicSensorController usCont) {
 		this.ROTATE_SPEED = rc.ROTATE_SPEED;

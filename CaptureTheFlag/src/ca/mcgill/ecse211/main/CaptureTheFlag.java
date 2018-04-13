@@ -30,7 +30,32 @@ import lejos.robotics.filter.MeanFilter;
  * from classes in the middle layer (navigation layer). The main 
  * method of the class sequentially calls methods in the navigation
  * layer in order to execute the different high level tasks of the 
- * challenge.
+ * challenge. In terms of hardware, the CaptureTheFlag class instantiates
+ * the left motor, the right motor, the front sensor rotation motor, the 
+ * front ultrasonic sensor, the front light sensor, the left rear light 
+ * sensor, and the right rear light sensor. The class also instantiates
+ * all objects used by the hardware objects. This includes a regular 
+ * SampleProvider object and a mean filtered SampleProvider object for 
+ * the ultrasonic sensor, a SensorMode object for each light sensor, and
+ * a float array for each sensor to store the samples. The class also 
+ * initializes all constants, which include the wheel radius, track,
+ * rotation speed, forward speed, correction speed, search speed, 
+ * acceleration, tile size, rear light sensor offset, front ultrasonic/light 
+ * sensor offset, and an array storing the playzone coordinates. 
+ * Furthermore, the class instantiates all objects in the second and
+ * third layer of the hierarchy, including the Odometer, RobotController,
+ * UltrasonicSensorController, LightSensorController (for front sensor), 
+ * LightSensorController (for left rear sensor), LightSensorController (for
+ * right rear sensor), UltrasonicLocalizer, LightLocalizer, FlagSearcher,
+ * Navigator, OdometryCorection, WiFi, LCD, and ExitProgram. Finally, in the
+ * main method the class instantiates the Display, the odometry thread,
+ * the exit thread, and the odometry display thread. Then, the OdometryCorrection
+ * object is added to the RobotController, Navigator, and FlagSearcher. Next,
+ * the main method begins the challenge: it gets the team from the WiFi class,
+ * travels to the bridge/tunnel based on the team, travels through the bridge/tunnel,
+ * travels to the search zone, searches for the flag, travels to the tunnel/bridge,
+ * travels back through the tunnel/bridge, and returns to the starting position. The
+ * program then ends.
  * 
  * @author Bijan Sadeghi
  * @author Esa Khan
@@ -113,7 +138,8 @@ public class CaptureTheFlag {
 	private static OdometryCorrection odoCorrection = new OdometryCorrection(TILE_SIZE, REAR_SENSOR_DIST, CORRECTION_SPEED, rc, leftRearLsCont, rightRearLsCont);
 	
 	/**
-	 * First localizes the robot at its starting corner.
+	 * Executes the high-level tasks of the capture the flag
+	 * challenge. First localizes the robot at its starting corner.
 	 * Then navigates the robot through the tunnel/bridge.
 	 * Then searches for the flag in the opponent's search zone.
 	 * Then navigates the robot through the bridge/tunnel.
@@ -123,11 +149,6 @@ public class CaptureTheFlag {
 	 * @throws OdometerExceptions
 	 */
 	public static void main(String[] args) throws OdometerExceptions {
-
-		Sound.setVolume(Sound.VOL_MAX);
-		Sound.beep();
-		Sound.beep();
-		Sound.beep();
 		
 		// Display
 		Display odometryDisplay = new Display(LCD);
@@ -144,37 +165,24 @@ public class CaptureTheFlag {
 		Thread odoDisplayThread = new Thread(odometryDisplay);
 		odoDisplayThread.start();
 
-		// Timer thread
-		//Thread timerThread = new Thread(timer);
-		//timer.start();
-
 		// Add odoCorrection to the robot controller and navigator
 		rc.setOdoCorrection(odoCorrection);
 		navigator.setOdoCorrection(odoCorrection);
 		flagSearcher.setOdoCorrection(odoCorrection);
-
+		
+		
+		// ====================//
+		// Start the challenge //
+		// ====================//
 
 		// ====== Get the robot's team ======  //
-		Team team = wifi.getTeam();
-
-		
-		//Sound.playSample(new File("E:\\McGill\\ECSE 211\\Labs\\Project\\CaptureTheFlag\\battle.wav"));
-		//Sound.playSample(new File("battle.wav"), 100	);
-		 
+		Team team = wifi.getTeam();	 
 
 		// ====== Do ultrasonic localization in corner ======  //
 		usLocalizer.usLocalize();
 
 		// ====== Do initial light localization in corner ======  //
 		lightLocalizer.initialLightLocalize(wifi.getStartingCorner(wifi.getTeam()), PLAY_ZONE);
-
-		
-	
-		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
-
-		//rc.travelTo(1, 1, FORWARD_SPEED, false);
-		
-		//Sound.beepSequence();
 
 		if (team == Team.GREEN) {
 			// ====== Travel to the tunnel ====== //
@@ -191,10 +199,6 @@ public class CaptureTheFlag {
 			// ====== Travel through the bridge ====== //
 			navigator.travelThroughBridge();
 		}
-	
-
-		//odometer.setXYT(7 * TILE_SIZE, 1 * TILE_SIZE, 0);
-
 		
 		// ====== Travel to the search zone ====== //
 		navigator.travelToSearchZone();
@@ -223,36 +227,7 @@ public class CaptureTheFlag {
 		// ====== Returning to starting corner ====== //
 		navigator.returnToStart();
 		
-		
-		/*Sound.playTone(440, 100);
-		Sound.playTone(450, 100);
-		Sound.playTone(460, 100);
-		Sound.playTone(470, 100);
-		Sound.playTone(480, 100);
-		Sound.playTone(490, 100);
-		Sound.playTone(500, 100);
-		Sound.playTone(510, 100);
-		Sound.playTone(520, 100);
-		Sound.playTone(530, 100);
-		Sound.playTone(540, 100);
-		Sound.playTone(550, 100);
-		Sound.playTone(560, 100);
-		Sound.playTone(570, 100);
-		Sound.playTone(580, 100);
-		Sound.playTone(570, 100);
-		Sound.playTone(560, 100);
-		Sound.playTone(550, 100);
-		Sound.playTone(540, 100);
-		Sound.playTone(530, 100);
-		Sound.playTone(520, 100);
-		Sound.playTone(510, 100);
-		Sound.playTone(500, 100);
-		Sound.playTone(490, 100);
-		Sound.playTone(480, 100);
-		Sound.playTone(470, 100);
-		Sound.playTone(460, 100);
-		Sound.playTone(450, 100);
-		Sound.playTone(440, 100);*/
+		// End the program
 		System.exit(0);
 	}
 }

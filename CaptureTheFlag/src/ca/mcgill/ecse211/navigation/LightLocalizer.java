@@ -224,18 +224,6 @@ public class LightLocalizer {
 		rc.directTravelTo(corrX, corrY, FORWARD_SPEED, true);
 		rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
 
-		/*// Compute the correction
-		double dx = SENSOR_DIST * (Math.cos((angles[3] - angles[1]) / 2));
-		double dy = SENSOR_DIST * (Math.cos((angles[2] - angles[0]) / 2));
-
-		// Move to the origin
-		double absTheta = Math.toDegrees(Math.atan(dx / dy));
-		double dist = Math.hypot(dx, dy);
-		rc.turnTo(absTheta);
-		rc.travelDist(dist, true);*/
-		//rc.rotate(false, ROTATE_SPEED); // rotate the robot counterclockwise
-
-
 		// Set the angle to perfect 0
 		while (rc.isMoving()) {
 			// The robot is in the third quadrant, if the robot turns counter clockwise
@@ -251,8 +239,7 @@ public class LightLocalizer {
 				rc.rotate(true, ROTATE_SPEED); // rotate the robot clockwise
 			}
 		}
-
-
+		
 		rc.setSpeeds(FORWARD_SPEED, FORWARD_SPEED);
 
 		// Sleep for 1 second after localization

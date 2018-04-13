@@ -457,41 +457,6 @@ public class Navigator {
 	public void setOdoCorrection(OdometryCorrection odoCorrection) {
 		this.odoCorrection = odoCorrection;
 	}
-
-
-	/**
-	 * Gets the corrected angle of the robot given the odometer's theta reading
-	 * when the robot's intended path is vertical or horizontal.
-	 * 
-	 * @return the correct angle the robot's odometer must use to correct itself
-	 */
-	/*private double getCorrTheta() {
-		double corrTheta = 0;
-		double[] odoData = { 0, 0, 0 };
-
-		// Check which way robot is facing
-		try {
-			odoData = Odometer.getOdometer().getXYT();
-		} catch (OdometerExceptions e) {
-			// Do nothing
-			e.printStackTrace();
-		}
-
-		if (odoData[2] > 350 || odoData[2] < 10) {
-			corrTheta = 0;
-		} else if (odoData[2] > 80 && odoData[2] < 100) {
-			corrTheta = 90;
-		} else if (odoData[2] > 170 && odoData[2] < 190) {
-			corrTheta = 180;
-		} else if (odoData[2] > 260 && odoData[2] < 280) {
-			corrTheta = 270;
-		}
-
-		return corrTheta;
-	}
-*/
-	
-	
 	
 	/**
 	 * Travels to the corner of the search zone closest to the robot

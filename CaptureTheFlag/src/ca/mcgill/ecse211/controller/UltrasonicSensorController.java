@@ -10,7 +10,9 @@ import lejos.robotics.filter.MeanFilter;
  * This class is used by any class that needs access to
  * data read by an ultrasonic sensor. In particular, it is used
  * by UltrasonicLocalizer and FlagSearcher. The class can fetch the 
- * average distance read by the sensor.
+ * average distance read by the sensor, as well as rotate the
+ * motor the sensor is attached to in order to point it to different
+ * angles.
  * 
  * @author Bijan Sadeghi
  * @author Guillaume Richard
@@ -50,6 +52,11 @@ public class UltrasonicSensorController {
 		return (int) (usSample[0] * 100.0);
 	}
 	
+	/**
+	 * Rotates the front sensor's motor to the specified angle.
+	 * 
+	 * @param theta the angle to rotate the motor to
+	 */
 	public void rotateSensorTo(int theta) {
 		sensorMotor.rotateTo(theta);
 	}

@@ -22,17 +22,11 @@ import lejos.hardware.lcd.LCD;
  */
 public class WiFi {
 
+	// Server IP address
 	// ** Set these as appropriate for your team and current situation **
+	private static final String SERVER_IP = "192.168.2.3";
 
-	// ***Bijan's***
-	//private static final String SERVER_IP = "192.168.2.10";
-	// ***Esa's***
-	private static final String SERVER_IP = "192.168.2.20";
-	// ***Gui's***
-	//private static final String SERVER_IP = "192.168.2.44";
-	// ***TA's***
-	//private static final String SERVER_IP = "192.168.2.3";
-
+	// Team number
 	private static final int TEAM_NUMBER = 8;
 
 	// Enable/disable printing of debug info from the WiFi class
@@ -156,7 +150,7 @@ public class WiFi {
 		// Check which team we are
 		if (getTeam() == Team.RED) {
 			// Return the approriate color for the number
-			switch (((Long) data.get("OR")).intValue()) {
+			switch (((Long) data.get("OG")).intValue()) {
 			case 1:
 				return Flag.RED;
 			case 2:
@@ -168,7 +162,7 @@ public class WiFi {
 			}
 		} else if (getTeam() == Team.GREEN) {
 			// Return the approriate color for the number
-			switch (((Long) data.get("OG")).intValue()) {
+			switch (((Long) data.get("OR")).intValue()) {
 			case 1:
 				return Flag.RED;
 			case 2:
@@ -327,14 +321,14 @@ public class WiFi {
 	 * @return whether or not the bridge/tunnel are placed vertically in the playzone
 	 */
 	public boolean isCrossingVert() {
+		// Get the coordinates of the tunnel
 		int[][] tunnelZone = getTunnelZone();
-		int[][] greenZone = getGreenZone();
-		// Crossing is vertical if the difference between tunnel's lower-left x
-		// and lower-right x is 1
-		/*if (tunnelZone[1][0] - tunnelZone[0][0] == 1)
-			return true;
-		return false;*/
 		
+		// Get the coordinates of the green zone
+		int[][] greenZone = getGreenZone();
+		
+		// Booleans to denote whether a corner of the tunnel touches the green zone.
+		// Two adjacent corners touching the green zone is used to determine the orientation of the crossings.
 		boolean bottomLeft = false;
 		boolean bottomRight = false;
 		boolean upperRight = false;
