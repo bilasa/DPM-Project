@@ -151,3 +151,11 @@ By Bijan Sadeghi, Esa Khan & Guillaume Richard
 * Fixed FlagSearch as much as possible
 
 By Esa Khan & Guillaume Richard
+
+## 3.1.1
+### Final Version (clean code and comments) (18/04/12)
+* Removed commented code
+* Added appropriate spacing
+* Polished the Javadoc
+
+By Bijan Sadeghi
